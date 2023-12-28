@@ -8,13 +8,15 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AdminLogin from './admin-sign-in/adminLogin'
 import Load from './beep-load/Load'
 import Dashboard from './user_dashboard/Dashboard';
+import TapIn from './tap-in/Tap-In'
+
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <Dashboard />
+    <TapIn />
   </React.StrictMode>
 );
 
