@@ -5,9 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Ticket from './ticket_system/ticket_interface'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import AdminLogin from './admin-sign-in/adminLogin'
-import Load from './beep-load/Load'
-import Dashboard from './user_dashboard/Dashboard';
+import Dashboard from './user-dashboard/Dashboard';
 import TapIn from './tap-in/Tap-In'
 
 
@@ -16,7 +14,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <TapIn />
+    <App />
   </React.StrictMode>
 );
 

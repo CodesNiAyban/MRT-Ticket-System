@@ -18,8 +18,26 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems } from './listItems';
+import { Routes, Route, NavLink, createBrowserRouter, createRoutesFromElements, RouterProvider, Outlet } from 'react-router-dom';
 import Deposits from './Deposits';
 import Orders from './Orders';
+import Load from './beep-load/Load'
+// import AdminLogin from './admin-sign-in/adminLogin'
+// import Load from './beep-load/Load'
+// import TapIn from './tap-in/Tap-In'
+// import TapOut from './tap-out/Tap-Out'
+// import Ticket from './ticket_system/ticket_interface'
+// import UserDashboard from './user-dashboard/Dashboard'
+// import AdminDashboard from './admin-dashboard/Dashboard'
+
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<Dashboard />}>
+          <Route path = "/" element={< Load/>} />
+        </Route>
+  )
+)
 
 function Copyright(props: any) {
   return (
@@ -95,6 +113,7 @@ export default function Dashboard() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
+      <RouterProvider router={router} />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <AppBar position="absolute" open={open}>

@@ -8,12 +8,15 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Dashboard from '../user_dashboard/Dashboard';
+import AdminDashboard from '../admin-dashboard/Dashboard';
+import { Routes, Route, Link, NavLink, createBrowserRouter, createRoutesFromElements, RouterProvider, useNavigate } from 'react-router-dom';
+
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export default function SignIn() {
+export default function AdminLogin() {
+  const navigate = useNavigate();
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -63,10 +66,11 @@ export default function SignIn() {
               autoComplete="current-password"
             />
             <Button  
-              onClick={Dashboard}
+             to={'/AdminDashboard'} component={Link}
               type="submit"
               fullWidth
               variant="contained"
+              // onClick={() => navigate("Dashboard")}
               sx={{ mt: 3, mb: 2 }}
             >
               Sign In
