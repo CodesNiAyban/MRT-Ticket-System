@@ -3,18 +3,33 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import Ticket from './ticket_system/ticket_interface'
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Dashboard from './user-dashboard/Dashboard';
+import { Routes, Route, Link, NavLink, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom';
+import AdminLogin from './admin-sign-in/adminLogin';
 import TapIn from './tap-in/Tap-In'
-
+import TapOut from './tap-out/Tap-Out'
+import Ticket from './ticket_system/ticket_interface'
+import UserDashboard from './user-dashboard/Dashboard'
+import AdminDashboard from './admin-dashboard/Dashboard'
+import Load from './user-dashboard/Load'
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route>
+          <Route path = "/" element={<UserDashboard />} />
+          <Route path = "AdminLogin" element={<AdminLogin />} />
+          <Route path = "AdminDashboard" element={<AdminDashboard />} />
+          <Route path = "TapOut" element={<TapOut />} />
+          <Route path = "TapIn" element={<TapIn />} />
+          <Route path = "Load" element={<Load />} />
+        </Route>
+  )
+)
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
 

@@ -8,37 +8,47 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LayersIcon from '@mui/icons-material/Layers';
-import AssignmentIcon from '@mui/icons-material/Assignment';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import DirectionsSubwayIcon from '@mui/icons-material/DirectionsSubway';
+import StyleIcon from '@mui/icons-material/Style';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import LogoutIcon from '@mui/icons-material/Logout';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
 export const mainListItems = (
   <React.Fragment>
     <ListItemButton>
       <ListItemIcon>
-        <DashboardIcon />
-      </ListItemIcon>
-      <ListItemText primary="Dashboard" />
-    </ListItemButton>
-    <ListItemButton>
-      <ListItemIcon>
-        <ShoppingCartIcon />
+        <DirectionsSubwayIcon />
       </ListItemIcon>
       <ListItemText primary="Fare and Stations" />
     </ListItemButton>
     <ListItemButton>
       <ListItemIcon>
-        <PeopleIcon />
+        <CreditCardIcon />
       </ListItemIcon>
       <ListItemText primary="Beep Cards" />
     </ListItemButton>
     <ListItemButton>
       <ListItemIcon>
-        <BarChartIcon />
+        <ReceiptIcon />
       </ListItemIcon>
-      <ListItemText primary="Check Total Balance" />
+      <ListItemText primary="Transaction Logs" />
     </ListItemButton>
     <ListItemButton>
       <ListItemIcon>
-        <LayersIcon />
+        <AccountBalanceWalletIcon />
+      </ListItemIcon>
+      <ListItemText primary="Check Total Balance" />
+    </ListItemButton>
+  </React.Fragment>
+);
+
+export const secondaryListItems = (
+  <React.Fragment>
+    <ListItemButton>
+      <ListItemIcon>
+        <LogoutIcon />
       </ListItemIcon>
       <ListItemText primary="Logout" />
     </ListItemButton>

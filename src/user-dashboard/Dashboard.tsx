@@ -2,6 +2,7 @@ import * as React from 'react';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiDrawer from '@mui/material/Drawer';
+import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -17,39 +18,28 @@ import Link from '@mui/material/Link';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { mainListItems } from './listItems';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import { mainListItems } from './UserIcons';
 import { Routes, Route, NavLink, createBrowserRouter, createRoutesFromElements, RouterProvider, Outlet } from 'react-router-dom';
-import Deposits from './Deposits';
-import Orders from './Orders';
-import Load from './beep-load/Load'
-// import AdminLogin from './admin-sign-in/adminLogin'
-// import Load from './beep-load/Load'
-// import TapIn from './tap-in/Tap-In'
-// import TapOut from './tap-out/Tap-Out'
-// import Ticket from './ticket_system/ticket_interface'
-// import UserDashboard from './user-dashboard/Dashboard'
-// import AdminDashboard from './admin-dashboard/Dashboard'
+import Check from './Check';
+import Payment from './Payment';
+import Review from './Review';
 
+const steps = ['Check UUID', 'Topup Value', 'Review your topup'];
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path="/" element={<Dashboard />}>
-          <Route path = "/" element={< Load/>} />
-        </Route>
-  )
-)
-
-function Copyright(props: any) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
+function getStepContent(step: number) {
+  switch (step) {
+    case 0:
+      return <Check />;
+    case 1:
+      return <Payment/>;
+    case 2:
+      return <Review />;
+    default:
+      throw new Error('Unknown step');
+  }
 }
 
 const drawerWidth: number = 240;
@@ -106,6 +96,17 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 const defaultTheme = createTheme();
 
 export default function Dashboard() {
+  const [activeStep, setActiveStep] = React.useState(0);
+
+  const handleNext = () => {
+    setActiveStep(activeStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep(activeStep - 1);
+  };
+
+
   const [open, setOpen] = React.useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
@@ -113,7 +114,6 @@ export default function Dashboard() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <RouterProvider router={router} />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <AppBar position="absolute" open={open}>
@@ -122,102 +122,48 @@ export default function Dashboard() {
               pr: '2px', // keep right padding when drawer closed
             }}
           >
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleDrawer}
-              sx={{
-                marginRight: '36px',
-                ...(open && { display: 'none' }),
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              sx={{ flexGrow: 1 }}
-            >
-              Welcome Admin!
-            </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            onClick={toggleDrawer}
+            sx={{
+              marginRight: '40px',
+              ...(open && { display: 'none' }),
+            }}
+          >
+          <MenuIcon />
+          </IconButton>
+          <Typography
+            component="h1"
+            variant="h6"
+            color="inherit"
+            noWrap
+            sx={{ flexGrow: 1 }}
+          >
+          Welcome Passenger!
+          </Typography>
           </Toolbar>
-        </AppBar>
-        <Drawer variant="permanent" open={open}>
-          <Toolbar
+          </AppBar>
+          <Drawer variant="permanent" open={open}>
+            <Toolbar
             sx={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
               px: [1],
             }}
-          >
-            <IconButton onClick={toggleDrawer}>
-              <ChevronLeftIcon />
-            </IconButton>
+            >
+          <IconButton onClick={toggleDrawer}>
+            <ChevronLeftIcon />
+          </IconButton>
           </Toolbar>
           <Divider />
           <List component="nav">
-            {mainListItems}
+          {mainListItems}
+          <Divider sx={{ my: 100 }} />
           </List>
         </Drawer>
-        <Box
-          component="main"
-          sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
-            flexGrow: 1,
-            height: '100vh',
-            overflow: 'auto',
-          }}
-        >
-          <Toolbar />
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Grid container spacing={3}>
-              {/* Chart */}
-              <Grid item xs={12} md={8} lg={9}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: 240,
-                  }}
-                >
-                </Paper>
-              </Grid>
-              {/* Recent Deposits */}
-              <Grid item xs={12} md={4} lg={3}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: 240,
-                  }}
-                >
-                  <Deposits />
-                </Paper>
-              </Grid>
-              {/* Recent Orders */}
-              <Grid item xs={12}>
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <Orders />
-                </Paper>
-              </Grid>
-            </Grid>
-            <Copyright sx={{ pt: 4 }} />
-          </Container>
-        </Box>
       </Box>
     </ThemeProvider>
   );
