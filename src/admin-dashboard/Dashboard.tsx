@@ -157,12 +157,22 @@ export default function Dashboard() {
           <IconButton onClick={toggleDrawer}>
             <ChevronLeftIcon />
           </IconButton>
+          <Typography
+            component="h2"
+            variant="h6"
+            color="inherit"
+            
+            sx={{ flexGrow: 10 }}
+          >
+          Menu 
+          </Typography>
           </Toolbar>
           <Divider />
           <List component="nav">
           {mainListItems}
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 1 }} />
           {secondaryListItems}
+          <Divider sx={{ my: 60 }} />
           </List>
         </Drawer>
       </Box>

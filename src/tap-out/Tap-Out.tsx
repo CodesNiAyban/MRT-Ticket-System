@@ -100,5 +100,6 @@ export default function Checkout() {
         </Paper>
       </Container>
     </React.Fragment>
+    
   );
 }

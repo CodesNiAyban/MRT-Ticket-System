@@ -9,22 +9,9 @@ import AdminDashboard from './admin-dashboard/Dashboard'
 
 import React from 'react';
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route>
-          <Route path = "/" element={<UserDashboard />} />
-          <Route path = "AdminLogin" element={<AdminLogin />} />
-          <Route path = "AdminDashboard" element={<AdminDashboard />} />
-          <Route path = "TapOut" element={<TapOut />} />
-          <Route path = "TapIn" element={<TapIn />} />
-        </Route>
-  )
-)
-
 const App: React.FC = () => {
   return (
       <div>
-        <RouterProvider router={router} />
       </div>
 
   );

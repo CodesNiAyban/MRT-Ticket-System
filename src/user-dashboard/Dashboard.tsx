@@ -113,6 +113,7 @@ export default function Dashboard() {
   };
 
   return (
+    <header>
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
@@ -164,7 +165,11 @@ export default function Dashboard() {
           <Divider sx={{ my: 100 }} />
           </List>
         </Drawer>
+        <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
+          <Outlet/>
+          </Container>
       </Box>
     </ThemeProvider>
+    </header>
   );
 }

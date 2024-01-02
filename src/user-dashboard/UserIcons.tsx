@@ -15,6 +15,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import { Routes, Route, Link, NavLink, createBrowserRouter, createRoutesFromElements, RouterProvider, Outlet } from 'react-router-dom';
 
 export const mainListItems = (
   <React.Fragment>
@@ -24,7 +25,10 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Routes and Fare" />
     </ListItemButton>
-    <ListItemButton>
+    <ListItemButton
+    key={"Load"}
+    component={Link}
+    to={"\Load"}>
       <ListItemIcon>
         <AccountBalanceWalletIcon />
       </ListItemIcon>
@@ -40,7 +44,8 @@ export const mainListItems = (
       <ListItemIcon>
         <ReceiptIcon />
       </ListItemIcon>
-      <ListItemText primary="Receipt" />
+      <ListItemText primary="User logs" />
+      
     </ListItemButton>
   </React.Fragment>
 );
