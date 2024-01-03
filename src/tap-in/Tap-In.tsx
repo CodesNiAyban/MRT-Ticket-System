@@ -9,11 +9,14 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Button from '@mui/material/Button';
-import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
 import Check from './Check';
 import Review from './Review';
-
+import { MapContainer, TileLayer, useMap, Marker } from 'react-leaflet'
+import { Popup } from 'leaflet';
+import Map from '../Map/Map';
+import "leaflet/dist/leaflet.css"
 const steps = ['Check UUID', 'Review your transaction'];
 
 function getStepContent(step: number) {
@@ -39,7 +42,26 @@ export default function Checkout() {
   };
 
   return (
-    <React.Fragment>
+    <>
+      <Grid container component="main" sx={{ height: '80vh', marginTop: 10 }}>
+        <CssBaseline />
+        <Grid
+          item
+          xs={false}
+          sm={4}
+          md={7}
+          sx={{
+            backgroundImage: 'url(https://source.unsplash.com/random?wallpapers)',
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: (t) =>
+              t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        />
+        <Map/>
+        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+        <React.Fragment>
       <CssBaseline />
       <AppBar
         position="absolute"
@@ -47,7 +69,7 @@ export default function Checkout() {
         elevation={0}
         sx={{
           position: 'relative',
-          borderBottom: (t) => `1px solid ${t.palette.divider}`,
+          borderBottom: (t: { palette: { divider: any; }; }) => `1px solid ${t.palette.divider}`,
         }}
       >
         <Toolbar>
@@ -55,8 +77,8 @@ export default function Checkout() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
-        <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
+      <Container component="main" maxWidth="xl" sx={{ mb: 4 }}>
+        <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, height: '300%'}}>
           <Typography component="h1" variant="h4" align="center">
             Ayala Beep Tap-in
           </Typography>
@@ -70,19 +92,19 @@ export default function Checkout() {
           {activeStep === steps.length ? (
             <React.Fragment>
               <Typography variant="h5" gutterBottom>
-                Thank you for your order.
+                Thank you for using MRT!
               </Typography>
               <Typography variant="subtitle1">
-                Your order number is #2001539. We have emailed your order
-                confirmation, and will send you an update when your order has
-                shipped.
+                We appreciate your commitment to a seamless and efficient travel experience. 
+                Should you need any assistance or information, our staff is here to help. 
+                Have a safe and pleasant commute!
               </Typography>
             </React.Fragment>
           ) : (
             <React.Fragment>
               {getStepContent(activeStep)}
               <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {activeStep !== 0 && (
+                {activeStep > 0 && (
                   <Button onClick={handleBack} sx={{ mt: 3, ml: 1 }}>
                     Back
                   </Button>
@@ -92,7 +114,7 @@ export default function Checkout() {
                   onClick={handleNext}
                   sx={{ mt: 3, ml: 1 }}
                 >
-                  {activeStep === steps.length - 1 ? 'Tap-In' : 'Next'}
+                  {activeStep === steps.length - 1 ? 'Confirm' : 'Next'}
                 </Button>
               </Box>
             </React.Fragment>
@@ -100,5 +122,18 @@ export default function Checkout() {
         </Paper>
       </Container>
     </React.Fragment>
+          <Box
+            sx={{
+              my: 8,
+              mx: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            </Box>
+        </Grid>
+      </Grid>
+    </>
   );
 }

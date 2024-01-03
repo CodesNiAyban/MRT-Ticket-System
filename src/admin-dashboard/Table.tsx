@@ -12,17 +12,9 @@ import {
 } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Toolbar from '@mui/material/Toolbar';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
-import Check from './Check';
-import Payment from './Payment';
-import Review from './Review';
 
 const CrudTable = () => {
   const [data, setData] = useState([

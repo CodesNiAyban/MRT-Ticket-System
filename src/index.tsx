@@ -1,36 +1,33 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { Routes, Route, Link, NavLink, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom';
+import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom';
 import AdminLogin from './admin-sign-in/adminLogin';
 import TapIn from './tap-in/Tap-In'
 import TapOut from './tap-out/Tap-Out'
-import Ticket from './ticket_system/ticket_interface'
-import UserDashboard from './user-dashboard/Dashboard'
+import TapNavBar from './tap-nav-bar/TapNavBar'
 import AdminDashboard from './admin-dashboard/Dashboard'
-import Load from './user-dashboard/Load'
 import Table from './admin-dashboard/Table'
 import TransactionLogs from './admin-dashboard/TransactionLogs';
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-    <Route path="/" element={<UserDashboard/>}>
-       <Route index element={<Load/>} />
-       <Route path="Load" element={<Load />} />
-    </Route>
-    
     <Route path="AdminLogin" element={<AdminLogin />} />
-    <Route path="Tap-In" element={<TapIn />} />
-    <Route path="Tap-Out" element={<TapOut />} />
 
     <Route path="AdminDashboard" element={<AdminDashboard />}>
     <Route index element={<TransactionLogs/>} />
-    <Route path="Load" element={<Load />} />
+    <Route path="Load" element={<Table />} />
     <Route path="Table" element={<Table />} />
     <Route path="TransactionLogs" element={<TransactionLogs />} />
+    </Route>
+
+    <Route path="/" element={<TapNavBar/>}>
+    <Route index element={<TapIn/>} />
+    <Route path="Tap-Out" element={<TapOut />} />
+    <Route path="Tap-In" element={<TapIn />} />
     </Route>
     </>
     
