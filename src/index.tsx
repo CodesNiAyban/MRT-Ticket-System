@@ -11,6 +11,8 @@ import Ticket from './ticket_system/ticket_interface'
 import UserDashboard from './user-dashboard/Dashboard'
 import AdminDashboard from './admin-dashboard/Dashboard'
 import Load from './user-dashboard/Load'
+import Table from './admin-dashboard/Table'
+import TransactionLogs from './admin-dashboard/TransactionLogs';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -21,7 +23,15 @@ const router = createBrowserRouter(
     </Route>
     
     <Route path="AdminLogin" element={<AdminLogin />} />
-    <Route path="AdminDashboard" element={<AdminDashboard />} />
+    <Route path="Tap-In" element={<TapIn />} />
+    <Route path="Tap-Out" element={<TapOut />} />
+
+    <Route path="AdminDashboard" element={<AdminDashboard />}>
+    <Route index element={<TransactionLogs/>} />
+    <Route path="Load" element={<Load />} />
+    <Route path="Table" element={<Table />} />
+    <Route path="TransactionLogs" element={<TransactionLogs />} />
+    </Route>
     </>
     
   )

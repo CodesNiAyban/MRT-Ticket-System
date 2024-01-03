@@ -175,6 +175,9 @@ export default function Dashboard() {
           <Divider sx={{ my: 60 }} />
           </List>
         </Drawer>
+        <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
+          <Outlet/>
+        </Container>
       </Box>
     </ThemeProvider>
   );
