@@ -11,12 +11,14 @@ import StepLabel from '@mui/material/StepLabel';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
+import { Hidden, Stack } from '@mui/material';
 import Check from './Check';
 import Review from './Review';
 import { MapContainer, TileLayer, useMap, Marker } from 'react-leaflet'
 import { Popup } from 'leaflet';
-import Map from '../Map/Map';
+import Map from '../map/Map';
 import "leaflet/dist/leaflet.css"
+import zIndex from '@mui/material/styles/zIndex';
 const steps = ['Check UUID', 'Review your transaction'];
 
 function getStepContent(step: number) {
@@ -43,42 +45,8 @@ export default function Checkout() {
 
   return (
     <>
-      <Grid container component="main" sx={{ height: '80vh', marginTop: 10 }}>
-        <CssBaseline />
-        <Grid
-          item
-          xs={false}
-          sm={4}
-          md={7}
-          sx={{
-            backgroundImage: 'url(https://source.unsplash.com/random?wallpapers)',
-            backgroundRepeat: 'no-repeat',
-            backgroundColor: (t) =>
-              t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
-        <Map/>
-        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-        <React.Fragment>
-      <CssBaseline />
-      <AppBar
-        position="absolute"
-        color="default"
-        elevation={0}
-        sx={{
-          position: 'relative',
-          borderBottom: (t: { palette: { divider: any; }; }) => `1px solid ${t.palette.divider}`,
-        }}
-      >
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Container component="main" maxWidth="xl" sx={{ mb: 4 }}>
-        <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, height: '300%'}}>
+      <Stack direction="row" justifyContent="end" marginTop={3} overflow={'Hidden'}>
+        <Paper variant="outlined"  sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, height: '100vh', overflow:'hidden'}}>
           <Typography component="h1" variant="h4" align="center">
             Ayala Beep Tap-in
           </Typography>
@@ -120,20 +88,7 @@ export default function Checkout() {
             </React.Fragment>
           )}
         </Paper>
-      </Container>
-    </React.Fragment>
-          <Box
-            sx={{
-              my: 8,
-              mx: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            </Box>
-        </Grid>
-      </Grid>
+      </Stack>
     </>
   );
 }
