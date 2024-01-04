@@ -6,9 +6,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Outlet } from 'react-router-dom';
-import Map from '../map/Map';
-import Grid from '@mui/material/Grid'; // Grid version 1
-import { Hidden } from '@mui/material';
+
 
 const drawerWidth: number = 240;
 
@@ -42,7 +40,7 @@ export default function Dashboard() {
   return (
     <header>
     <ThemeProvider theme={defaultTheme}>
-      <Box sx={{ display: 'flex' , overflow: 'Hidden'}}>
+      <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <AppBar position="absolute">
           <Toolbar
@@ -61,14 +59,9 @@ export default function Dashboard() {
           </Typography>
           </Toolbar>
           </AppBar>
-          <Grid container spacing={2}>
-            <Grid xs={8} marginTop={2} >
-              <Map/>
-            </Grid>
-            <Grid xs={4} height={'80vh'} zIndex={1}>
-              <Outlet/>
-            </Grid>
-          </Grid>
+            <Container component="main" maxWidth="xl" sx={{ mb: 4, width: 1000, height: "200%" }}>
+          <Outlet/>
+          </Container>
       </Box>
     </ThemeProvider>
     </header>

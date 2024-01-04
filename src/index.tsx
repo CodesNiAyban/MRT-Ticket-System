@@ -18,16 +18,16 @@ const router = createBrowserRouter(
     <Route path="AdminLogin" element={<AdminLogin />} />
 
     <Route path="AdminDashboard" element={<AdminDashboard />}>
-      <Route index element={<TransactionLogs/>} />
-      <Route path="Load" element={<Table />} />
-      <Route path="Table" element={<Table />} />
-      <Route path="TransactionLogs" element={<TransactionLogs />} />
+    <Route index element={<TransactionLogs/>} />
+    <Route path="Load" element={<Table />} />
+    <Route path="Table" element={<Table />} />
+    <Route path="TransactionLogs" element={<TransactionLogs />} />
     </Route>
 
     <Route path="/" element={<TapNavBar/>}>
-      <Route index element={<TapIn/>} />
-      <Route path="Tap-Out" element={<TapOut />} />
-      <Route path="Tap-In" element={<TapIn />} />
+    <Route index element={<TapIn/>} />
+    <Route path="Tap-Out" element={<TapOut />} />
+    <Route path="Tap-In" element={<TapIn />} />
     </Route>
     </>
     
