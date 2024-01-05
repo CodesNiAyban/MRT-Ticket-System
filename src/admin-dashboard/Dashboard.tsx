@@ -11,6 +11,7 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Container from '@mui/material/Container';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Grid, Paper  } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { mainListItems, secondaryListItems } from './AdminIcons';
 import {Outlet} from 'react-router-dom';
@@ -117,6 +118,7 @@ export default function Dashboard() {
           Welcome Admin!
           </Typography>
           </Toolbar>
+          <Outlet/>
           </AppBar>
           <Drawer variant="permanent" open={open}>
             <Toolbar
@@ -145,13 +147,11 @@ export default function Dashboard() {
           {mainListItems}
           <Divider sx={{ my: 1 }} />
           {secondaryListItems}
-          <Divider sx={{ my: 60 }} />
+          <Divider sx={{ my: 1 }} />
           </List>
         </Drawer>
-        <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
-          <Outlet/>
-        </Container>
       </Box>
     </ThemeProvider>
   );
 }
+

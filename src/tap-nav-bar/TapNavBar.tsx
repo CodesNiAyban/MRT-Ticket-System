@@ -1,12 +1,19 @@
+import * as React from 'react';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
+import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
 import Container from '@mui/material/Container';
-import { Outlet } from 'react-router-dom';
-
+import MenuIcon from '@mui/icons-material/Menu';
+import { Grid, Paper  } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import {Outlet} from 'react-router-dom';
 
 const drawerWidth: number = 240;
 
@@ -36,16 +43,15 @@ const AppBar = styled(MuiAppBar, {
 const defaultTheme = createTheme();
 
 export default function Dashboard() {
-
   return (
-    <header>
-    <ThemeProvider theme={defaultTheme}>
+    // <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <AppBar position="absolute">
           <Toolbar
             sx={{
-              pr: '0px', // keep right padding when drawer closed
+              pr: '2px', // keep right padding when drawer closed
+              justifyContent: 'flex-end',
             }}
           >
           <Typography
@@ -55,15 +61,13 @@ export default function Dashboard() {
             noWrap
             sx={{ flexGrow: 1 }}
           >
-          Welcome Passenger!
+          asdadasd
           </Typography>
           </Toolbar>
-          </AppBar>
-            <Container component="main" maxWidth="xl" sx={{ mb: 4, width: 1000, height: "200%" }}>
+          </AppBar >
           <Outlet/>
-          </Container>
       </Box>
-    </ThemeProvider>
-    </header>
+    // </ThemeProvider>
   );
 }
+
