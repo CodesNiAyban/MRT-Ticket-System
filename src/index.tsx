@@ -8,7 +8,7 @@ import TapIn from './tap-in/Tap-In'
 import TapOut from './tap-out/Tap-Out'
 import TapNavBar from './tap-nav-bar/TapNavBar'
 import AdminDashboard from './admin-dashboard/Dashboard'
-import Table from './admin-dashboard/Table'
+import Table from './admin-dashboard/BeepCardCRUD'
 import TransactionLogs from './admin-dashboard/TransactionLogs';
 
 

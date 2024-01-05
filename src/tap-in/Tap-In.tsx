@@ -15,7 +15,7 @@ import Check from './Check';
 import Review from './Review';
 import { MapContainer, TileLayer, useMap, Marker } from 'react-leaflet'
 import { Popup } from 'leaflet';
-import Map from '../Map/Map';
+import Map from '../map/Map';
 import "leaflet/dist/leaflet.css"
 const steps = ['Check UUID', 'Review your transaction'];
 

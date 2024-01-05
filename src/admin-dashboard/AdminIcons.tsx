@@ -45,7 +45,7 @@ export const mainListItems = (
 export const secondaryListItems = (
   <React.Fragment>
     <ListItemButton
-     key={".\AdminLogin"}
+     key={"..\AdminLogin"}
      component={Link}
      to={"..\AdminLogin"}
     >
