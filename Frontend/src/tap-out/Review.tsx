@@ -13,7 +13,7 @@ const payments = [
   { name: 'Fee', detail: '₱25' },
   { name: 'NewBal', detail: '₱22' },
   { name: 'SlipNum', detail: '124186' },
- 
+
 ];
 
 export default function Review() {
@@ -26,7 +26,7 @@ export default function Review() {
         <ListItem sx={{ py: 1, px: 0 }}>
           <ListItemText primary="Total" />
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          ₱25
+            ₱25
           </Typography>
         </ListItem>
       </List>

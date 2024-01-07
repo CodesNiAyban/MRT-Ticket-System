@@ -11,7 +11,7 @@ const payments = [
   { name: 'Time', detail: '20:34:40' },
   { name: 'OldBal', detail: '₱47' },
   { name: 'SlipNum', detail: '124186' },
- 
+
 ];
 
 export default function Review() {

@@ -11,9 +11,9 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Container from '@mui/material/Container';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Grid, Paper  } from '@mui/material';
+import { Grid, Paper } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import {Outlet} from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
 const drawerWidth: number = 240;
 
@@ -45,15 +45,15 @@ const defaultTheme = createTheme();
 export default function Dashboard() {
   return (
     // <ThemeProvider theme={defaultTheme}>
-      <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
-        <AppBar position="absolute">
-          <Toolbar
-            sx={{
-              pr: '2px', // keep right padding when drawer closed
-              justifyContent: 'flex-end',
-            }}
-          >
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AppBar position="absolute">
+        <Toolbar
+          sx={{
+            pr: '2px', // keep right padding when drawer closed
+            justifyContent: 'flex-end',
+          }}
+        >
           <Typography
             component="h1"
             variant="h6"
@@ -61,12 +61,12 @@ export default function Dashboard() {
             noWrap
             sx={{ flexGrow: 1 }}
           >
-          asdadasd
+            asdadasd
           </Typography>
-          </Toolbar>
-          </AppBar >
-          <Outlet/>
-      </Box>
+        </Toolbar>
+      </AppBar >
+      <Outlet />
+    </Box>
     // </ThemeProvider>
   );
 }

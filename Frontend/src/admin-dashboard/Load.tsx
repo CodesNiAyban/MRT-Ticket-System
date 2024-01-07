@@ -22,7 +22,7 @@ function getStepContent(step: number) {
     case 0:
       return <Check />;
     case 1:
-      return <Payment/>;
+      return <Payment />;
     case 2:
       return <Review />;
     default:

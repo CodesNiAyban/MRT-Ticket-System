@@ -12,7 +12,7 @@ export default function AddressForm() {
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <TextField
-            InputProps={{disableUnderline: true}}
+            InputProps={{ disableUnderline: true }}
             id="UUID"
             name="UUID"
             label="UUID"

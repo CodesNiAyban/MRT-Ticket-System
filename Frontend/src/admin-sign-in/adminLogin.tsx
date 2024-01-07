@@ -65,8 +65,8 @@ export default function AdminLogin() {
               id="password"
               autoComplete="current-password"
             />
-            <Button  
-             to={'/AdminDashboard'} component={Link}
+            <Button
+              to={'/AdminDashboard'} component={Link}
               type="submit"
               fullWidth
               variant="contained"

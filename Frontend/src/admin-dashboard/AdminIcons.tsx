@@ -6,7 +6,7 @@ import CreditCardIcon from '@mui/icons-material/CreditCard';
 import DirectionsSubwayIcon from '@mui/icons-material/DirectionsSubway';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 
 export const mainListItems = (
@@ -45,9 +45,9 @@ export const mainListItems = (
 export const secondaryListItems = (
   <React.Fragment>
     <ListItemButton
-     key={"..\AdminLogin"}
-     component={Link}
-     to={"..\AdminLogin"}
+      key={"..\AdminLogin"}
+      component={Link}
+      to={"..\AdminLogin"}
     >
       <ListItemIcon>
         <LogoutIcon />

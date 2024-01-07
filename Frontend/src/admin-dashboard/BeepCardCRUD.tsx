@@ -125,9 +125,9 @@ const Example = () => {
     getRowId: (row) => row.UUIC,
     muiToolbarAlertBannerProps: isLoadingBeepCardsError
       ? {
-          color: 'error',
-          children: 'Error loading data',
-        }
+        color: 'error',
+        children: 'Error loading data',
+      }
       : undefined,
     muiTableContainerProps: {
       sx: {

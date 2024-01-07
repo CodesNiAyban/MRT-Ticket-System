@@ -21,7 +21,7 @@ function getStepContent(step: number) {
     case 0:
       return <Check />;
     case 1:
-      return <Review />;  
+      return <Review />;
     default:
       throw new Error('Unknown step');
   }
@@ -100,6 +100,6 @@ export default function Checkout() {
         </Paper>
       </Container>
     </React.Fragment>
-    
+
   );
 }

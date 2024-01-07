@@ -24,7 +24,7 @@ function getStepContent(step: number) {
     case 0:
       return <Check />;
     case 1:
-      return <Review />;  
+      return <Review />;
     default:
       throw new Error('Unknown step');
   }
@@ -43,71 +43,71 @@ export default function Checkout() {
 
   return (
     <>
-      <Grid container component="main" sx={{ height: '100vh'}}>
+      <Grid container component="main" sx={{ height: '100vh' }}>
         <CssBaseline />
-        <Map/>
+        <Map />
         <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-        <React.Fragment>
-      <CssBaseline />
-      <AppBar
-        position="absolute"
-        color="default"
-        elevation={0}
-        sx={{
-          position: 'relative',
-          borderBottom: (t: { palette: { divider: any; }; }) => `1px solid ${t.palette.divider}`,
-        }}
-      >
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Container component="main" maxWidth="xl" sx={{ mb: 4 }}>
-        <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, height: '300%'}}>
-          <Typography component="h1" variant="h4" align="center">
-            Ayala Beep Tap-in
-          </Typography>
-          <Stepper activeStep={activeStep} sx={{ pt: 3, pb: 5 }}>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-          {activeStep === steps.length ? (
-            <React.Fragment>
-              <Typography variant="h5" gutterBottom>
-                Thank you for using MRT!
-              </Typography>
-              <Typography variant="subtitle1">
-                We appreciate your commitment to a seamless and efficient travel experience. 
-                Should you need any assistance or information, our staff is here to help. 
-                Have a safe and pleasant commute!
-              </Typography>
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              {getStepContent(activeStep)}
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {activeStep > 0 && (
-                  <Button onClick={handleBack} sx={{ mt: 3, ml: 1 }}>
-                    Back
-                  </Button>
+          <React.Fragment>
+            <CssBaseline />
+            <AppBar
+              position="absolute"
+              color="default"
+              elevation={0}
+              sx={{
+                position: 'relative',
+                borderBottom: (t: { palette: { divider: any; }; }) => `1px solid ${t.palette.divider}`,
+              }}
+            >
+              <Toolbar>
+                <Typography variant="h6" color="inherit" noWrap>
+                </Typography>
+              </Toolbar>
+            </AppBar>
+            <Container component="main" maxWidth="xl" sx={{ mb: 4 }}>
+              <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, height: '300%' }}>
+                <Typography component="h1" variant="h4" align="center">
+                  Ayala Beep Tap-in
+                </Typography>
+                <Stepper activeStep={activeStep} sx={{ pt: 3, pb: 5 }}>
+                  {steps.map((label) => (
+                    <Step key={label}>
+                      <StepLabel>{label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+                {activeStep === steps.length ? (
+                  <React.Fragment>
+                    <Typography variant="h5" gutterBottom>
+                      Thank you for using MRT!
+                    </Typography>
+                    <Typography variant="subtitle1">
+                      We appreciate your commitment to a seamless and efficient travel experience.
+                      Should you need any assistance or information, our staff is here to help.
+                      Have a safe and pleasant commute!
+                    </Typography>
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>
+                    {getStepContent(activeStep)}
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      {activeStep > 0 && (
+                        <Button onClick={handleBack} sx={{ mt: 3, ml: 1 }}>
+                          Back
+                        </Button>
+                      )}
+                      <Button
+                        variant="contained"
+                        onClick={handleNext}
+                        sx={{ mt: 3, ml: 1 }}
+                      >
+                        {activeStep === steps.length - 1 ? 'Confirm' : 'Next'}
+                      </Button>
+                    </Box>
+                  </React.Fragment>
                 )}
-                <Button
-                  variant="contained"
-                  onClick={handleNext}
-                  sx={{ mt: 3, ml: 1 }}
-                >
-                  {activeStep === steps.length - 1 ? 'Confirm' : 'Next'}
-                </Button>
-              </Box>
-            </React.Fragment>
-          )}
-        </Paper>
-      </Container>
-    </React.Fragment>
+              </Paper>
+            </Container>
+          </React.Fragment>
           <Box
             sx={{
               my: 8,
@@ -117,7 +117,7 @@ export default function Checkout() {
               alignItems: 'center',
             }}
           >
-            </Box>
+          </Box>
         </Grid>
       </Grid>
     </>

@@ -1,9 +1,9 @@
 export type BeepCard = {
     UUIC: string;
     Bal: number;
-  };
-  
-  export const Data: BeepCard[] = [
+};
+
+export const Data: BeepCard[] = [
     {
         UUIC: "6378052438501717",
         Bal: 100,
@@ -20,4 +20,4 @@ export type BeepCard = {
         UUIC: "6378051047364857",
         Bal: 250,
     }
-  ];
+];
