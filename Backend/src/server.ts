@@ -1,27 +1,14 @@
-import express from "express";
-import * as dotenv from "dotenv";
+import app from "./app";
 import env from "./util/validateENV";
-import stationRoute from "./routes/stationsRoute";
+import mongoose from "mongoose";
 
-dotenv.config();
+const PORT = env.PORT || 5000;
 
-const PORT = env.PORT || 4000;
-
-const startServer = (app: express.Express) => {
-
-	app.use("/api/stations", stationRoute);
-
-	app.use(express.json());
-
-	// Error handling middleware
-	app.use((req, res, next) => {
-		next(Error("Endpoint not found."));
-	});
-	
-	// Listen to the app and run it on PORT
-	app.listen(PORT, async () => {
-		console.log(`Listening on port ${PORT}`);
-	});
-};
-
-export default startServer;
+mongoose.connect(env.MONGO_CONNECTION_STRING)
+	.then(() => {
+		console.log("Mongoose connected");
+		app.listen(PORT, () => {
+			console.log("Server running on port: " + PORT);
+		});
+	})
+	.catch(console.error);
