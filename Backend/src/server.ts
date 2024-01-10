@@ -1,8 +1,10 @@
 import app from "./app";
-import env from "./util/validateENV";
+import env from "./utils/validateENV";
 import mongoose from "mongoose";
 
-const PORT = env.PORT || 5000;
+const PORT = env.PORT;
+
+mongoose.Promise = Promise;
 
 mongoose.connect(env.MONGO_CONNECTION_STRING)
 	.then(() => {
@@ -12,3 +14,5 @@ mongoose.connect(env.MONGO_CONNECTION_STRING)
 		});
 	})
 	.catch(console.error);
+
+mongoose.connection.on("error", (error: Error) => { console.log(error); });
