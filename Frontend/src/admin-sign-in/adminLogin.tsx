@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-redeclare */
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -20,6 +22,12 @@ export default function AdminLogin() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+    const [email, setEmail] = data.get('email');
+    const [password, setPasswordl] = data.get('password');
+
+    if({email: data.get('email')?.has"email":})
+    if({{password: data.get('password')?}.has"password"})
+
     console.log({
       email: data.get('email'),
       password: data.get('password'),

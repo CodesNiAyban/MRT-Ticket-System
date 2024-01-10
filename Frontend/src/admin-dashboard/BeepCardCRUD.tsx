@@ -29,7 +29,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const Example = () => {
-  const [valUUICationErrors, setValUUICationErrors] = useState<
+  const [validationErrors, setvalidationErrors] = useState<
     Record<string, string | undefined>
   >({});
 
@@ -42,24 +42,24 @@ const Example = () => {
         size: 80,
       },
       {
-        accessorKey: 'Bal',
+        accessorKey: 'balance',
         header: 'Balance',
         muiEditTextFieldProps: {
           type: 'email',
           required: true,
-          error: !!valUUICationErrors?.firstName,
-          helperText: valUUICationErrors?.firstName,
+          error: !!validationErrors?.firstName,
+          helperText: validationErrors?.firstName,
           //remove any previous valUUICation errors when BeepCard focuses on the input
           onFocus: () =>
-            setValUUICationErrors({
-              ...valUUICationErrors,
+            setvalidationErrors({
+              ...validationErrors,
               firstName: undefined,
             }),
           //optionally add valUUICation checking for onBlur or onChange
         },
       },
     ],
-    [valUUICationErrors],
+    [validationErrors],
   );
 
   //call CREATE hook
@@ -84,12 +84,12 @@ const Example = () => {
     values,
     table,
   }) => {
-    const newValUUICationErrors = valUUICateBeepCard(values);
-    if (Object.values(newValUUICationErrors).some((error) => error)) {
-      setValUUICationErrors(newValUUICationErrors);
+    const newvalidationErrors = valUUICateBeepCard(values);
+    if (Object.values(newvalidationErrors).some((error) => error)) {
+      setvalidationErrors(newvalidationErrors);
       return;
     }
-    setValUUICationErrors({});
+    setvalidationErrors({});
     await createBeepCard(values);
     table.setCreatingRow(null); //exit creating mode
   };
@@ -99,12 +99,12 @@ const Example = () => {
     values,
     table,
   }) => {
-    const newValUUICationErrors = valUUICateBeepCard(values);
-    if (Object.values(newValUUICationErrors).some((error) => error)) {
-      setValUUICationErrors(newValUUICationErrors);
+    const newvalidationErrors = valUUICateBeepCard(values);
+    if (Object.values(newvalidationErrors).some((error) => error)) {
+      setvalidationErrors(newvalidationErrors);
       return;
     }
-    setValUUICationErrors({});
+    setvalidationErrors({});
     await updateBeepCard(values);
     table.setEditingRow(null); //exit editing mode
   };
@@ -134,9 +134,9 @@ const Example = () => {
         minHeight: '500px',
       },
     },
-    onCreatingRowCancel: () => setValUUICationErrors({}),
+    onCreatingRowCancel: () => setvalidationErrors({}),
     onCreatingRowSave: handleCreateBeepCard,
-    onEditingRowCancel: () => setValUUICationErrors({}),
+    onEditingRowCancel: () => setvalidationErrors({}),
     onEditingRowSave: handleSaveBeepCard,
     //optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
@@ -314,7 +314,7 @@ const valUUICateRequired = (value: number) => value;
 
 function valUUICateBeepCard(BeepCard: BeepCard) {
   return {
-    firstName: !valUUICateRequired(BeepCard.Bal)
+    firstName: !valUUICateRequired(BeepCard.balance)
       ? 'Please Fill Up Balance.'
       : '',
   };
