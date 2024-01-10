@@ -5,8 +5,7 @@ module.exports = {
 	},
 	"extends": [
 		"eslint:recommended",
-		"plugin:@typescript-eslint/recommended",
-		"plugin:react/recommended"
+		"plugin:@typescript-eslint/recommended"
 	],
 	"overrides": [
 		{
@@ -23,11 +22,11 @@ module.exports = {
 	],
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
-		"ecmaVersion": "latest"
+		"ecmaVersion": "latest",
+		"sourceType": "module"
 	},
 	"plugins": [
-		"@typescript-eslint",
-		"react"
+		"@typescript-eslint"
 	],
 	"rules": {
 		"indent": [

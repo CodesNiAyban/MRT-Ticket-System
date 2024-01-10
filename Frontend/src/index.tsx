@@ -10,7 +10,6 @@ import TapNavBar from './tap-nav-bar/TapNavBar'
 import AdminDashboard from './admin-dashboard/Dashboard'
 import Table from './admin-dashboard/BeepCardCRUD'
 import TransactionLogs from './admin-dashboard/TransactionLogs';
-import test from './testLogin'
 
 
 const router = createBrowserRouter(
@@ -31,6 +30,7 @@ const router = createBrowserRouter(
     <Route path="Tap-In" element={<TapIn />} />
     </Route>
     </>
+    
   )
 )
 

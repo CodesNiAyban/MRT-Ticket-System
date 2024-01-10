@@ -2,7 +2,8 @@
     "BeepCards": [
         {
             "UID": "1",
-            "Balance": 2300
+            "Balance": 2300,
+            "ExpDate": "2027/01/01",
         }
     ]
 }
