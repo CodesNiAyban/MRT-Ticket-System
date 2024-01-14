@@ -1,6 +1,5 @@
 import express from "express";
 import * as BeepCardsController from "../controllers/beepCardsController";
-import { isAuthenticated, isOwner } from "../middlewares/adminMiddleware";
 
 const router = express.Router();
 
@@ -12,6 +11,6 @@ router.post("/", BeepCardsController.createBeepCard);
 
 router.patch("/:beepCardId", BeepCardsController.updateBeepCard);
 
-router.delete("/:beepCardId", isAuthenticated, isOwner, BeepCardsController.deleteBeepCard);
+router.delete("/:beepCardId", BeepCardsController.deleteBeepCard);
 
 export default router;

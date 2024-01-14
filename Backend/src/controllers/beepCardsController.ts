@@ -3,7 +3,6 @@ import beepCardsModel from "../models/beepCardModel";
 import * as beepCardinterface from "../interfaces/beepCardInterface";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
-import express from "express";
 
 export const getBeepCards: RequestHandler = async (req, res, next) => {
 	try {
@@ -31,7 +30,7 @@ export const getBeepCard: RequestHandler = async (req, res, next) => {
 	}
 };
 
-export const createBeepCard: RequestHandler<unknown, unknown, beepCardinterface.CreatebeepCardsBody, unknown> = async (req, res, next) => {
+export const createBeepCard: RequestHandler<unknown, unknown, beepCardinterface.CreateBeepCardsBody, unknown> = async (req, res, next) => {
 	const UUIC = req.body.UUIC;
 	const balance = req.body.balance;
 
@@ -50,7 +49,7 @@ export const createBeepCard: RequestHandler<unknown, unknown, beepCardinterface.
 	}
 };
 
-export const updateBeepCard = async (req: express.Request, res: express.Response) => {
+export const updateBeepCard: RequestHandler<beepCardinterface.UpdateBeepCardsParams, unknown, beepCardinterface.UpdateBeepCardsBody, unknown> = async (req, res, next) => {
 	const beepCardId = req.params.beepCardId;
 	const newUUIC = req.body.UUIC;
 	const newBalance = req.body.balance;
@@ -72,8 +71,7 @@ export const updateBeepCard = async (req: express.Request, res: express.Response
 
 		res.status(200).json(updateBeepCards);
 	} catch (error) {
-		console.log(error);
-		return res.sendStatus(400);
+		next(error);
 
 	}
 };

@@ -1,85 +1,96 @@
-import express from "express";
-import { getAdminByEmail, createAdmin } from "../models/adminModel";
-import { authentication, random } from "../helpers/jwtAdmin";
-import { deleteAdminById, getAdmins, getAdminById } from "../models/adminModel";
-import dotenv from "dotenv";
+import { RequestHandler } from "express";
+import adminModel from "../models/adminModel";
+import * as adminInterface from "../interfaces/adminInterface";
+import * as authInterface from "../interfaces/authInterface";
+import createHttpError from "http-errors";
+import bcrypt from "bcrypt";
 
-dotenv.config();
+export const getAuthenticatedAdmin: RequestHandler = async (req, res, next) => {
+	const authenticatedAdminId = req.session.adminId;
 
-
-export const register = async (req: express.Request, res: express.Response) => {
 	try {
-		const { email, password, adminname } = req.body;
+		if(!authenticatedAdminId)
+			throw createHttpError(401, "Admin not authenticated");
 
-		if (!email || !password || !adminname) {
-			return res.sendStatus(400);
+		const admin = await adminModel.findById(authenticatedAdminId).select("+email").exec();
+		
+		res.status(200).json(admin);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const createAdmin: RequestHandler<unknown, unknown, adminInterface.CreateAdminBody, unknown> = async (req, res, next) => {
+	const username = req.body.username;
+	const email = req.body.username;
+	const password = req.body.password;
+
+	try {
+		if (!username) { throw createHttpError(400, "admins must have a username"); }
+		if (!email) { throw createHttpError(400, "admins must have a email"); }
+		if (!password) { throw createHttpError(400, "admins must have a password"); }
+
+		const existingUsername = await adminModel.findOne({ username: username }).exec();
+
+		if(existingUsername){
+			throw createHttpError(409, "Username already taken. Please choose a different one or log in instead.");
 		}
 
-		const existingAdmin = await getAdminByEmail(email);
+		const existingEmail = await adminModel.findOne({ email: email }).exec();
 
-		if (existingAdmin) {
-			res.sendStatus(400);
+		if(existingEmail){
+			throw createHttpError(409, "Email already taken. Please choose a different one or log in instead.");
 		}
 
-		const salt = random();
-		const admin = await createAdmin({
-			email,
-			adminname,
-			authentication: {
-				salt,
-				password: authentication(salt, password),
-			},
+		const passwordHashed = await bcrypt.hash(password, 10); // 2nd argument is salting
+
+		const newAdmin = await adminModel.create({
+			username: username,
+			email: email,
+			password: passwordHashed
 		});
 
-		res.status(200).json(admin).end();
+		req.session.adminId = newAdmin._id;
+
+		res.status(201).json(newAdmin);
 	} catch (error) {
-		console.log(error);
+		next(error);
 	}
 };
 
-export const getAllAdmins = async (req: express.Request, res: express.Response) => {
+export const login: RequestHandler<unknown, unknown, authInterface.LoginBody, unknown> = async (req, res, next) => {
+	const username = req.body.username;
+	const password = req.body.password;
+
 	try {
-		const admins = await getAdmins();
+		if (!username || !password) { throw createHttpError(400, "Parameters Missing"); }
 
-		return res.status(200).json(admins);
-	} catch (error) {
-		console.log(error);
-		return res.sendStatus(400);
-	}
-};
+		const admin = await adminModel.findOne({ username: username }).select("+password +email").exec();
 
-export const deleteAdmin = async (req: express.Request, res: express.Response) => {
-	try {
-		const { id } = req.params;
-
-		const deletedAdmin = await deleteAdminById(id);
-
-		return res.json(deletedAdmin);
-	} catch (error) {
-		console.log(error);
-		return res.sendStatus(400);
-	}
-};
-
-export const updateAdmin = async (req: express.Request, res: express.Response) => {
-	try {
-		const { id } = req.params;
-		const { adminname } = req.body;
-
-		if (!adminname) {
-			return res.sendStatus(400);
+		if(!admin){
+			throw createHttpError(401, "Invalid Credentials.");
 		}
 
-		const admin = await getAdminById(id);
+		const passwordMatch = await bcrypt.compare(password, admin.password);
 
-		admin!.adminname = adminname;
-		await admin!.save();
+		if(!passwordMatch){
+			throw createHttpError(401, "Invalid Credentials.");
+		}
 
-		return res.status(200).json(admin).end();
+		req.session.adminId = admin._id;
+
+		res.status(201).json(admin);
 	} catch (error) {
-		console.log(error);
-		return res.sendStatus(400);
+		next(error);
 	}
 };
 
-export { createAdmin };
+export const logout: RequestHandler = (req, res, next) => {
+	req.session.destroy(error => {
+		if (error) {
+			next (error);
+		} else {
+			res.sendStatus(200);
+		}
+	});
+};

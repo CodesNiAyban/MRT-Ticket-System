@@ -1,13 +1,13 @@
-export interface CreatebeepCardsBody {
+export interface CreateBeepCardsBody {
 	UUIC?: number,
 	balance?: number,
 }
 
-export interface UpdatebeepCardsParams {
+export interface UpdateBeepCardsParams {
 	beepCardId: string,
 }
 
-export interface UpdatebeepCardsBody {
+export interface UpdateBeepCardsBody {
 	UUIC?: number,
 	balance?: number,
 }
