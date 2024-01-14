@@ -56,7 +56,7 @@ function App() {
             station={station}
             className={styles.station}
             onStationClicked={setStationToEdit}
-            onDeleteNoteClicked={deleteStation}
+            onDeleteStationClicked={deleteStation}
           />
         </Col>
       ))}
@@ -66,7 +66,7 @@ function App() {
     <>
       <Container className={styles.stationPage}>
         <Button
-          className={`mb-4 ${styleUtils.blockCenter} ${styleUtils.deleteIconFix}`}
+          className={`mb-4 ${styleUtils.blockCenter} ${styleUtils.flexCenter}`}
           onClick={() => setShowAddStationDialog(true)}>
           <FaPlus />
           Add new station

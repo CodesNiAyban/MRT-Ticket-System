@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form"
 import { Stations } from "../model/stationsModel";
 import { StationInput } from "../network/stationsAPI";
 import * as StationsApi from "../network/stationsAPI"
-// import TextInputField from "./form/textInputField";
 
 interface AddEditStationDialogProps {
     stationToEdit?: Stations,
@@ -11,14 +10,13 @@ interface AddEditStationDialogProps {
     onStationSaved: (station: Stations) => void,
 }
 
-const addEditStationDialog = ({ stationToEdit, onDismiss, onStationSaved }: AddEditStationDialogProps) => {
+const AddEditStationDialog = ({ stationToEdit, onDismiss, onStationSaved }: AddEditStationDialogProps) => {
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<StationInput>({
         defaultValues: {
-            stationName: stationToEdit?.stationName || "",
-            connectedTo: stationToEdit?.connectedTo || [],
-            coords: stationToEdit?.coords || [],
+            stationName: stationToEdit?.stationName,
+            coords: stationToEdit?.coords,
+            connectedTo: stationToEdit?.connectedTo,
         }
     });
 
@@ -26,11 +24,10 @@ const addEditStationDialog = ({ stationToEdit, onDismiss, onStationSaved }: AddE
         try {
             let stationResponse: Stations;
             if (stationToEdit) {
-                stationResponse = await StationsApi.updateStation(stationToEdit._id, input)
-            }else{
-                stationResponse = await StationsApi.createStation(input)
+                stationResponse = await StationsApi.updateStation(stationToEdit._id, input);
+            } else {
+                stationResponse = await StationsApi.createStation(input);
             }
-
             onStationSaved(stationResponse);
         } catch (error) {
             console.error(error);
@@ -42,24 +39,13 @@ const addEditStationDialog = ({ stationToEdit, onDismiss, onStationSaved }: AddE
         <Modal show onHide={onDismiss}>
             <Modal.Header closeButton>
                 <Modal.Title>
-                    {stationToEdit ? "Edit Station" : "Add Station"}
+                   {stationToEdit ? "Edit station" : "Add station"}
                 </Modal.Title>
             </Modal.Header>
+
             <Modal.Body>
                 <Form id="addEditStationForm" onSubmit={handleSubmit(onSubmit)}>
-                    {/* <TextInputField 
-                        name="title"
-                        label="Title"
-                        type="array"
-                        placeholder="Title"
-                        register={register}
-                        registerOptions={{ required: "Required"}}
-                        stationNameError={errors.stationName}
-                        coordsError={errors.coords}
-                        connectedToError={errors.connectedTo}
-                    /> */}
-
-                    <Form.Group className="mb-3">
+                <Form.Group className="mb-3">
                         <Form.Label>Station Name</Form.Label>
                         <Form.Control
                             type="text"
@@ -98,21 +84,20 @@ const addEditStationDialog = ({ stationToEdit, onDismiss, onStationSaved }: AddE
                             {errors.connectedTo?.message}
                         </Form.Control.Feedback>
                     </Form.Group>
-
-                    <Modal.Footer>
-                        <Button
-                            type="submit"
-                            form="addEditStationForm"
-                            disabled={isSubmitting}
-                        >
-                            Save
-                        </Button>
-                    </Modal.Footer>
                 </Form>
             </Modal.Body>
-        </Modal>
 
+            <Modal.Footer>
+                <Button
+                    type="submit"
+                    form="addEditStationForm"
+                    disabled={isSubmitting}
+                >
+                    Save
+                </Button>
+            </Modal.Footer>
+        </Modal>
     );
 }
 
-export default addEditStationDialog;
+export default AddEditStationDialog;

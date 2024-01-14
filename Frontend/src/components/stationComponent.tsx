@@ -7,11 +7,11 @@ import { MdDelete } from "react-icons/md"
 interface StationProps {
     station: StationsModel,
     onStationClicked: (stations: StationsModel) => void,
-    onDeleteNoteClicked: (stations: StationsModel) => void,
+    onDeleteStationClicked: (stations: StationsModel) => void,
     className?: string,
 }
 
-const Stations = ({ station, onStationClicked, onDeleteNoteClicked, className }: StationProps) => {
+const Stations = ({ station, onStationClicked, onDeleteStationClicked, className }: StationProps) => {
     const {
         stationName,
         coords,
@@ -19,28 +19,28 @@ const Stations = ({ station, onStationClicked, onDeleteNoteClicked, className }:
     } = station;
 
     return (
-        <Card 
+        <Card
         className={`${styles.stationCard} ${className}`}
         onClick={() => onStationClicked(station)}>
-            <Card.Body className={styles.cardBody}>
-                <Card.Title className={styleUtils.deleteIconFix}>
-                    {stationName}
-                    <MdDelete
-                        className="text-muted ms-auto"
-                        onClick={(e) => {
-                            onDeleteNoteClicked(station);
-                            e.stopPropagation();
-                        }}
-                    />
-                </Card.Title>
-                <Card.Text>
-                    {connectedTo}
-                </Card.Text>
-            </Card.Body>
-            <Card.Footer className="text-muted">
-                {coords}
-            </Card.Footer>
-        </Card>
+        <Card.Body className={styles.cardBody}>
+            <Card.Title className={styleUtils.flexCenter}>
+                {stationName}
+                <MdDelete
+                    className="text-muted ms-auto"
+                    onClick={(e) => {
+                        onDeleteStationClicked(station);
+                        e.stopPropagation();
+                    }}
+                />
+            </Card.Title>
+            <Card.Text className={styles.cardText}>
+                {connectedTo}
+            </Card.Text>
+        </Card.Body>
+        <Card.Footer className="text-muted">
+            {coords}
+        </Card.Footer>
+    </Card>
     )
 }
 

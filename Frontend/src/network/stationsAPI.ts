@@ -21,18 +21,20 @@ export async function createStation(station: StationInput): Promise<Stations> {
             },
             body: JSON.stringify(station),
         });
+    alert("Station" + station.stationName + " Created")
     return response.json();
 }
 
-export async function updateStation(stationId: string, stations: StationInput): Promise<Stations> {
-    const response = await fetchData("/api/stations" + stationId,
+export async function updateStation(stationId: string, station: StationInput): Promise<Stations> {
+    const response = await fetchData("/api/stations/" + stationId,
         {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(stations),
+            body: JSON.stringify(station),
         });
+    alert("Station" + station.stationName + " Updated")
     return response.json();
 }
 
