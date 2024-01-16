@@ -1,6 +1,7 @@
 import { Button, Navbar } from "react-bootstrap";
 import { Admin } from "../model/adminModel";
 import * as AdminApi from "../network/adminAPI";
+import styleUtils from "../styles/utils.module.css"
 
 interface NavBarLoggedInViewProps {
     user: Admin,
@@ -21,10 +22,10 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProp
 
     return (
         <>
-            <Navbar.Text className="me-2">
+            <Navbar.Text className="me-3">
                 Signed in as: {user.username}
             </Navbar.Text>
-            <Button onClick={logout}>Log out</Button>
+            <Button onClick={logout} className={`mb-1`}>Log out</Button>
         </>
     );
 }

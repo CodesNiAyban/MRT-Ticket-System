@@ -1,0 +1,10 @@
+.navbar-nav .nav-link {
+    padding: 20px 15px; /* Adjust the padding values as needed */
+    color: white; /* Text color */
+    font-weight: bold; /* Font weight */
+    text-decoration: none; /* Remove underline */
+  }
+  
+  .navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Background color on hover */
+  }

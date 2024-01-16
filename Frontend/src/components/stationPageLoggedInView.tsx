@@ -66,7 +66,7 @@ const AdminDashboardPageLoggedInView = () => {
                 <FaPlus />
                 Add new station
             </Button>
-            {stationsLoading && <Spinner animation='border' variant='primary' />}
+            {stationsLoading &&  <Spinner animation="border" />}
             {showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
             {!stationsLoading && !showStationsLoadingError &&
                 <>

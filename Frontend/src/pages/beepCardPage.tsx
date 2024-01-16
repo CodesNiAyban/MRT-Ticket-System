@@ -1,7 +1,7 @@
 const beepCardPage = () => {
     return (  
         <div>
-            
+            PEPEPEPEPEPEEP
         </div>
     );
 }

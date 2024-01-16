@@ -5,6 +5,7 @@ import * as AdminApi from "../network/adminAPI";
 import { Button, Form, Modal } from "react-bootstrap";
 import AdminInputField from "./form/adminInputFields";
 import styleUtils from "../styles/utils.module.css";
+import { useNavigate } from "react-router-dom";
 
 interface LoginModalProps {
     onDismiss: () => void,
@@ -15,10 +16,13 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginCredentials>();
 
+    const navigate = useNavigate();
+
     async function onSubmit(credentials: LoginCredentials) {
         try {
             const admin = await AdminApi.adminLogin(credentials);
             onLoginSuccessful(admin);
+            navigate("/stations");
         } catch (error) {
             console.error(error);
             alert(error);
