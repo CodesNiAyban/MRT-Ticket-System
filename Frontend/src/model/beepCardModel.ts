@@ -1,5 +1,7 @@
-export interface Stations {
+export interface BeepCard {
     _id: string,
     UUIC: string,
-    balance: number[],
+    balance: number,
+    createdAt: string,
+    updatedAt: string,
 }

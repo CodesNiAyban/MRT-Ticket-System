@@ -1,6 +1,6 @@
 import { Button, Navbar } from "react-bootstrap";
-import { Admin } from "../model/adminModel";
-import * as AdminApi from "../network/adminAPI";
+import { Admin } from "../../model/adminModel";
+import * as AdminApi from "../../network/adminAPI";
 import styleUtils from "../styles/utils.module.css"
 
 interface NavBarLoggedInViewProps {

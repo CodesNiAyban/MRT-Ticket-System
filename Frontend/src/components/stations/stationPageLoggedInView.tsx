@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Button, Col, Row, Spinner } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
-import { Stations as StationsModel } from '../model/stationsModel';
-import * as StationApi from "../network/stationsAPI";
-import styles from "../styles/stationPage.module.css";
-import styleUtils from "../styles/utils.module.css";
+import { Stations as StationsModel } from '../../model/stationsModel';
+import * as StationApi from "../../network/stationsAPI";
+import styles from "../../styles/stationPage.module.css";
+import styleUtils from "../../styles/utils.module.css";
 import AddEditStationDialog from "./addEditStationDialog";
 import Stations from './stationComponent';
 

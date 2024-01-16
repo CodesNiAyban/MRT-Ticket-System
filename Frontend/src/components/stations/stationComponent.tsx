@@ -1,7 +1,7 @@
-import styles from "../styles/station.module.css"
-import styleUtils from "../styles/utils.module.css"
+import styles from "../../styles/station.module.css"
+import styleUtils from "../../styles/utils.module.css"
 import { Card } from "react-bootstrap";
-import { Stations as StationsModel } from "../model/stationsModel"
+import { Stations as StationsModel } from "../../model/stationsModel"
 import { MdDelete } from "react-icons/md"
 
 interface StationProps {

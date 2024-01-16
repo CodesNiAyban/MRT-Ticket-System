@@ -1,9 +1,9 @@
 import { Container, Nav, Navbar } from "react-bootstrap";
-import { Admin } from "../model/adminModel";
+import { Admin } from "../../model/adminModel";
 import NavBarLoggedInView from "./NavBarLoggedInView";
 import NavBarLoggedOutView from "./NavBarLoggedOutView";
 import { Link } from "react-router-dom";
-import { adminLogin } from "../network/adminAPI";
+import { adminLogin } from "../../network/adminAPI";
 
 interface NavBarProps {
     loggedInAdmin: Admin | null,

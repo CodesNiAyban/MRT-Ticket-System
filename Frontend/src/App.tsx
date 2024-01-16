@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import NavBar from './components/NavBar';
+import NavBar from './components/navbar/NavBar';
 import LoginModal from './components/adminLogin';
 import { Admin } from './model/adminModel';
 import * as adminApi from "./network/adminAPI";

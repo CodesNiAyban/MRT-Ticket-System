@@ -41,7 +41,3 @@ export async function updateStation(stationId: string, station: StationInput): P
 export async function deleteStation(stationsId: string) {
     await fetchData("api/stations/" + stationsId, { method: "DELETE" });
 }
-
-export function getLoggedInAdmin() {
-	throw new Error('Function not implemented.');
-}

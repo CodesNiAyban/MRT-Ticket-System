@@ -1,9 +1,9 @@
 import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form"
-import { Stations } from "../model/stationsModel";
-import { StationInput } from "../network/stationsAPI";
-import * as StationsApi from "../network/stationsAPI";
-import TextInputField from "./form/textInputFields";
+import { Stations } from "../../model/stationsModel";
+import { StationInput } from "../../network/stationsAPI";
+import * as StationsApi from "../../network/stationsAPI";
+import TextInputField from "../form/textInputFields";
 
 interface AddEditStationDialogProps {
     stationToEdit?: Stations,

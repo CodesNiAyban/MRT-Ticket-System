@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap";
-import StationPageLoggedInView from "../components/stationPageLoggedInView";
-import StationPageLoggedOutView from "../components/stationPageLoggedOutView";
+import StationPageLoggedInView from "../components/stations/stationPageLoggedInView";
+import StationPageLoggedOutView from "../components/stations/stationPageLoggedOutView";
 import { Admin } from "../model/adminModel";
 import styles from "../styles/stationPage.module.css";
 
