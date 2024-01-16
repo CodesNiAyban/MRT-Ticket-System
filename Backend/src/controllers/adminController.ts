@@ -22,7 +22,7 @@ export const getAuthenticatedAdmin: RequestHandler = async (req, res, next) => {
 
 export const createAdmin: RequestHandler<unknown, unknown, adminInterface.CreateAdminBody, unknown> = async (req, res, next) => {
 	const username = req.body.username;
-	const email = req.body.username;
+	const email = req.body.email;
 	const password = req.body.password;
 
 	try {
@@ -61,6 +61,8 @@ export const createAdmin: RequestHandler<unknown, unknown, adminInterface.Create
 export const login: RequestHandler<unknown, unknown, authInterface.LoginBody, unknown> = async (req, res, next) => {
 	const username = req.body.username;
 	const password = req.body.password;
+
+	console.log(req.body);
 
 	try {
 		if (!username || !password) { throw createHttpError(400, "Parameters Missing"); }

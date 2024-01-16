@@ -1,25 +1,20 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/global.css';
+import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom';
-import App from './App';
-// import AdminLogin from './admin-sign-in/adminLogin';
-// import TapIn from './tap-in/Tap-In'
-// import TapOut from './tap-out/Tap-Out'
-// import TapNavBar from './tap-nav-bar/TapNavBar'
-// import AdminDashboard from './admin-dashboard/Dashboard'
-// import Table from './admin-dashboard/BeepCardCRUD'
-// import TransactionLogs from './admin-dashboard/TransactionLogs';
-// import test from './testLogin'
-
+import AdminLogin from './pages/adminLogin';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<App />} />
+    <Route path="/AdminLogin" element={<AdminLogin />} />
 
-      {/* <Route path="AdminDashboard" element={<AdminDashboard />}>
+    <Route path="/" element={<App />} />
+
+    {/* <Route path="AdminDashboard" element={<AdminDashboard />}>
     <Route index element={<TransactionLogs/>} />
     <Route path="Load" element={<Table />} />
     <Route path="Table" element={<Table />} />
@@ -43,7 +38,6 @@ root.render(
     <RouterProvider router={router} />
   </React.StrictMode>
 );
-
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

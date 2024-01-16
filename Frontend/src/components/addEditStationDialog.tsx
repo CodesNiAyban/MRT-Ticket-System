@@ -2,7 +2,8 @@ import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form"
 import { Stations } from "../model/stationsModel";
 import { StationInput } from "../network/stationsAPI";
-import * as StationsApi from "../network/stationsAPI"
+import * as StationsApi from "../network/stationsAPI";
+import TextInputField from "./form/textInputFields";
 
 interface AddEditStationDialogProps {
     stationToEdit?: Stations,
@@ -39,24 +40,22 @@ const AddEditStationDialog = ({ stationToEdit, onDismiss, onStationSaved }: AddE
         <Modal show onHide={onDismiss}>
             <Modal.Header closeButton>
                 <Modal.Title>
-                   {stationToEdit ? "Edit station" : "Add station"}
+                    {stationToEdit ? "Edit station" : "Add station"}
                 </Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
                 <Form id="addEditStationForm" onSubmit={handleSubmit(onSubmit)}>
-                <Form.Group className="mb-3">
-                        <Form.Label>Station Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Put Station Name Here"
-                            isInvalid={!!errors.coords}
-                            {...register("stationName", { required: "Required" })}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {errors.stationName?.message}
-                        </Form.Control.Feedback>
-                    </Form.Group>
+                    <TextInputField
+                        name="stationName"
+                        label="Station Name"
+                        type="text"
+                        placeholder="title"
+                        register={register}
+                        registerOptions={{ required: "Required " }}
+                        error={errors.stationName}
+                    />
+
 
                     <Form.Group className="mb-3">
                         <Form.Label>Coordinates</Form.Label>
@@ -71,7 +70,6 @@ const AddEditStationDialog = ({ stationToEdit, onDismiss, onStationSaved }: AddE
                         </Form.Control.Feedback>
                     </Form.Group>
 
-
                     <Form.Group className="mb-3">
                         <Form.Label>Connect Stations</Form.Label>
                         <Form.Control
@@ -84,9 +82,9 @@ const AddEditStationDialog = ({ stationToEdit, onDismiss, onStationSaved }: AddE
                             {errors.connectedTo?.message}
                         </Form.Control.Feedback>
                     </Form.Group>
+
                 </Form>
             </Modal.Body>
-
             <Modal.Footer>
                 <Button
                     type="submit"

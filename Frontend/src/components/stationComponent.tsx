@@ -20,27 +20,27 @@ const Stations = ({ station, onStationClicked, onDeleteStationClicked, className
 
     return (
         <Card
-        className={`${styles.stationCard} ${className}`}
-        onClick={() => onStationClicked(station)}>
-        <Card.Body className={styles.cardBody}>
-            <Card.Title className={styleUtils.flexCenter}>
-                {stationName}
-                <MdDelete
-                    className="text-muted ms-auto"
-                    onClick={(e) => {
-                        onDeleteStationClicked(station);
-                        e.stopPropagation();
-                    }}
-                />
-            </Card.Title>
-            <Card.Text className={styles.cardText}>
-                {connectedTo}
-            </Card.Text>
-        </Card.Body>
-        <Card.Footer className="text-muted">
-            {coords}
-        </Card.Footer>
-    </Card>
+            className={`${styles.stationCard} ${className}`}
+            onClick={() => onStationClicked(station)}>
+            <Card.Body className={styles.cardBody}>
+                <Card.Title className={styleUtils.flexCenter}>
+                    {stationName}
+                    <MdDelete
+                        className="text-muted ms-auto"
+                        onClick={(e) => {
+                            onDeleteStationClicked(station);
+                            e.stopPropagation();
+                        }}
+                    />
+                </Card.Title>
+                <Card.Text className={styles.cardText}>
+                    {connectedTo}
+                </Card.Text>
+            </Card.Body>
+            <Card.Footer className="text-muted">
+                {coords}
+            </Card.Footer>
+        </Card>
     )
 }
 
