@@ -42,7 +42,7 @@ function App() {
 						/>
 						<Route
 							path='/beepcards'
-							element={<BeepCardPage />}
+							element={<BeepCardPage loggedInAdmin={loggedInAdmin}/>}
 						/>
 						<Route
 							path='/*'

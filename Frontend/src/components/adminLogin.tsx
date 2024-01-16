@@ -2,10 +2,12 @@ import { useForm } from "react-hook-form";
 import { Admin } from "../model/adminModel";
 import { LoginCredentials } from "../model/loginModel"
 import * as AdminApi from "../network/adminAPI";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Alert, Button, Form, Modal } from "react-bootstrap";
 import AdminInputField from "./form/adminInputFields";
 import styleUtils from "../styles/utils.module.css";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { UnauthorizedError } from "../errors/httpErrors";
 
 interface LoginModalProps {
     onDismiss: () => void,
@@ -13,6 +15,8 @@ interface LoginModalProps {
 }
 
 const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
+
+    const [errorText, setErrorText] = useState<string | null>(null);
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginCredentials>();
 
@@ -24,8 +28,12 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
             onLoginSuccessful(admin);
             navigate("/stations");
         } catch (error) {
+            if(error instanceof UnauthorizedError) {
+                setErrorText(error.message)
+            } else {
+                alert(error);
+            }
             console.error(error);
-            alert(error);
         }
     }
 
@@ -38,6 +46,11 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
             </Modal.Header>
 
             <Modal.Body>
+                {errorText && 
+                    <Alert variant="danger">
+                        {errorText}
+                    </Alert>
+                }
                 <Form onSubmit={handleSubmit(onSubmit)}>
                     <AdminInputField
                         name="username"
