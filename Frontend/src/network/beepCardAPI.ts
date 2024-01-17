@@ -20,7 +20,6 @@ export async function createBeepCard(beepCard: BeepCardInput): Promise<BeepCard>
             },
             body: JSON.stringify(beepCard),
         });
-    alert("BeepCard with " + beepCard.UUIC + " Created")
     return response.json();
 }
 
@@ -33,11 +32,9 @@ export async function updateBeepCard(beepCardId: string, beepCard: BeepCardInput
             },
             body: JSON.stringify(beepCard),
         });
-    alert("BeepCard with " + beepCard.UUIC + " Updated")
     return response.json();
 }
 
 export async function deleteBeepCard(beepCardsId: string) {
     await fetchData("api/beepCards/" + beepCardsId, { method: "DELETE" });
-    alert("BeepCard with deleted")
 }

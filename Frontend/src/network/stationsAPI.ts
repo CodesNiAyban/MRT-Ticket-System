@@ -21,7 +21,6 @@ export async function createStation(station: StationInput): Promise<Stations> {
             },
             body: JSON.stringify(station),
         });
-    alert("Station" + station.stationName + " Created")
     return response.json();
 }
 
@@ -34,7 +33,6 @@ export async function updateStation(stationId: string, station: StationInput): P
             },
             body: JSON.stringify(station),
         });
-    alert("Station" + station.stationName + " Updated")
     return response.json();
 }
 

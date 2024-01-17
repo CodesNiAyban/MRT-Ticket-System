@@ -35,8 +35,8 @@ export const createBeepCard: RequestHandler<unknown, unknown, beepCardinterface.
 	const balance = req.body.balance;
 
 	try {
-		if (!UUIC) { throw createHttpError(400, "beepCards must have a staionName"); }
-		if (!balance) { throw createHttpError(400, "beepCards must have a coords"); }
+		if (!UUIC) { throw createHttpError(400, "beepCards must have a UUIC"); }
+		if (!balance) { throw createHttpError(400, "beepCards must have a balance"); }
 
 		const newBeepCards = await beepCardsModel.create({
 			UUIC: UUIC,

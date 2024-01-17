@@ -10,3 +10,13 @@
     justify-content: left;
     gap: 4px;
 }
+
+.flexCenterLoading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.blockCenterLoading {
+    text-align: center;
+}
