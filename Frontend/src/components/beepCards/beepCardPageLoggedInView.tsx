@@ -93,9 +93,9 @@ const BeepCardPageLoggedInView = () => {
     // Beep cards grid
     const beepCardsGrid =
         filteredBeepCards.length > 0 ? (
-            <Row xs={1} md={2} xl={3} className={`g-4 ${styles.stationGrid}`}>
+            <Row xs={1} md={2} xl={3} className={`mb-4 ${styles.stationGrid}`}>
                 {filteredBeepCards.map((beepCard) => (
-                    <Col key={beepCard._id}>
+                    <Col key={beepCard._id} xs={12} sm={6} lg={4}>
                         <BeepCards
                             beepCard={beepCard}
                             className={styles.station}
@@ -111,16 +111,21 @@ const BeepCardPageLoggedInView = () => {
 
     return (
         <Container>
-            {/* Add Beep Card Button */}
-            <Button
-                className={`mb-4 ${styleUtils.blockCenter} ${styleUtils.flexCenter}`}
-                onClick={() => setShowAddBeepCardDialog(true)}
-            >
-                <FaPlus />
-                Add New Beep Card
-            </Button>
+            {/* Title */}
+            <h1 className={`${styleUtils.textCenter} mb-4`}>BEEP CARDS</h1>
+
+            {/* Search Bar and Add Beep Card Button in the same row */}
             <Row className="mb-3">
-                <Col xs={12} sm={6} lg={4}>
+                <Col xs={12} sm={6} lg={8} className="d-flex align-items-center">
+                    <Button
+                        className={` ${styleUtils.blockStart} ${styleUtils.flexCenter}`}
+                        onClick={() => setShowAddBeepCardDialog(true)}
+                    >
+                        <FaPlus />
+                        Add New Beep Card
+                    </Button>
+                </Col>
+                <Col xs={12} sm={6} lg={4} className={`${styles.blockStart} ${"d-flex align-items-center"}`}>
                     <div className="input-group">
                         <input
                             type="text"

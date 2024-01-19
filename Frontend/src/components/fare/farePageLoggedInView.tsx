@@ -7,7 +7,7 @@ import styleUtils from "../../styles/utils.module.css";
 import Fare from "./fareComponent";
 import EditFareDialog from "./editFareDialog"; // Import the EditFareDialog component
 
-const AdminDashboardPageLoggedInView = () => {
+const FarePageLoggedInView = () => {
   const [fares, setFares] = useState<FaresModel[]>([]);
   const [faresLoading, setFaresLoading] = useState(true);
   const [fareToEdit, setFareToEdit] = useState<FaresModel | null>(null);
@@ -57,20 +57,20 @@ const AdminDashboardPageLoggedInView = () => {
   };
 
   const handleFareUpdate = async (updatedFare: FaresModel) => {
-	try {
-	  showAlertMessage("success", "Fare updated successfully.");
-  
-	  // Reload fares after successful update
-	  const updatedFares = await FareApi.fetchFare();
-	  setFares(updatedFares);
-  
-	  setFareToEdit(null);
-	  setUpdateText("");
-	  setShowEditForm(false);
-	} catch (error) {
-	  console.error(error);
-	  showAlertMessage("danger", "Error updating fare. Please try again.");
-	}
+    try {
+      showAlertMessage("success", "Fare updated successfully.");
+
+      // Reload fares after successful update
+      const updatedFares = await FareApi.fetchFare();
+      setFares(updatedFares);
+
+      setFareToEdit(null);
+      setUpdateText("");
+      setShowEditForm(false);
+    } catch (error) {
+      console.error(error);
+      showAlertMessage("danger", "Error updating fare. Please try again.");
+    }
   };
 
   const faresGrid =
@@ -88,7 +88,8 @@ const AdminDashboardPageLoggedInView = () => {
 
   return (
     <Container className={styles.settingsContainer}>
-      <h2 className={`${styleUtils.blockCenter} ${styles.settingsTitle}`}>OFFICIAL FARES</h2>
+      <h1 className={`${styleUtils.blockCenter} ${styles.settingsTitle} ${"mb-4"}`}>OFFICIAL FARES</h1>
+      
 
       {faresLoading && (
         <div className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}>
@@ -132,4 +133,4 @@ const AdminDashboardPageLoggedInView = () => {
   );
 };
 
-export default AdminDashboardPageLoggedInView;
+export default FarePageLoggedInView;

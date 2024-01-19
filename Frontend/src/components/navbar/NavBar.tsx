@@ -18,7 +18,6 @@ const navBarLinks =
             <Nav.Link as={Link} to="/beepcards">Beep Cards</Nav.Link>
         </Nav.Item>
 
-
         <Nav.Item>
             <Nav.Link as={Link} to="/stations">Stations</Nav.Link>
         </Nav.Item>

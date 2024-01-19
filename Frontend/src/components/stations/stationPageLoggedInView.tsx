@@ -94,18 +94,26 @@ const StationPageLoggedInView = () => {
 
   return (
     <Container>
+      <h1 className={`${styleUtils.blockCenter} mb-4`}>STATIONS</h1>
+
       {showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
 
-      <Button
-        className={`mb-4 ${styleUtils.blockCenter} ${styleUtils.flexCenter}`}
-        onClick={() => setShowAddStationDialog(true)}
-      >
-        <FaPlus />
-        Add New Station
-      </Button>
-
-      <Row className="mb-3">
+      <Row className="mb-4">
         <Col xs={12} sm={6} lg={4}>
+          <Button
+            className={`mb-4 ${styleUtils.blockStart} ${styleUtils.flexCenter}`}
+            onClick={() => setShowAddStationDialog(true)}
+          >
+            <FaPlus />
+            Add New Station
+          </Button>
+        </Col>
+
+        <Col xs={12} sm={6} lg={4}>
+        </Col>
+
+
+        <Col xs={12} sm={6} lg={4} className="text-end">
           <div className="input-group">
             <input
               type="text"
