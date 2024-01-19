@@ -4,7 +4,7 @@ import { BeepCard } from "../../model/beepCardModel";
 import * as BeepCardsApi from "../../network/beepCardAPI";
 import { BeepCardInput } from "../../network/beepCardAPI";
 import TextInputField from "../form/textInputFields";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AddEditBeepCardDialogProps {
     beepCardToEdit?: BeepCard,
@@ -25,6 +25,17 @@ const AddEditBeepCardDialog = ({ beepCardToEdit, onDismiss, onBeepCardSaved }: A
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [alertVariant, setAlertVariant] = useState<'success' | 'danger'>('success');
 
+    useEffect(() => {
+        // Automatically hide the alert after 3 seconds
+        const timeoutId = setTimeout(() => {
+            setShowAlert(false);
+            setAlertMessage(null);
+        }, 1300);
+
+        // Clear the timeout on unmount or when the modal is dismissed
+        return () => clearTimeout(timeoutId);
+    }, [showAlert]);
+
     async function onSubmit(input: BeepCardInput) {
         try {
             let beepCardResponse: BeepCard;
@@ -35,7 +46,7 @@ const AddEditBeepCardDialog = ({ beepCardToEdit, onDismiss, onBeepCardSaved }: A
                     input.balance === beepCardToEdit.balance
                 ) {
                     setAlertVariant('danger');
-                    setAlertMessage('Error: Update is unchanged.');
+                    setAlertMessage('Update is unchanged.');
                     setShowAlert(true);
                     return;
                 }
@@ -113,7 +124,7 @@ const AddEditBeepCardDialog = ({ beepCardToEdit, onDismiss, onBeepCardSaved }: A
             {/* Bootstrap Alert for Success/Error Messages */}
             {showAlert && (
                 <div className="position-fixed top-50 start-50 translate-middle">
-                    <Alert variant={alertVariant} onClose={() => setShowAlert(false)} dismissible>
+                    <Alert variant={alertVariant} onClose={() => setShowAlert(false)}>
                         {alertMessage}
                     </Alert>
                 </div>

@@ -4,7 +4,6 @@ import { Button, Col, Row, Spinner, Modal, Alert, Container } from 'react-bootst
 import { FaPlus, FaSearch } from 'react-icons/fa';
 import { BeepCard as BeepCardsModel } from '../../model/beepCardModel';
 import * as BeepCardApi from '../../network/beepCardAPI';
-import tableStyles from '../../styles/beepCardPage.module.css';
 import styles from '../../styles/beepCardPage.module.css';
 import styleUtils from '../../styles/utils.module.css';
 import AddEditBeepCardDialog from './addEditBeepCardDialog';
@@ -62,6 +61,11 @@ const AdminDashboardPageLoggedInView = () => {
                 } catch (error) {
                     console.error(error);
                     cusShowAlert('danger', 'Error deleting Beep Card. Please try again.');
+                    // Automatically hide the alert after 3 seconds
+                    setTimeout(() => {
+                        setcusShowAlert(false);
+                        setAlertMessage(null);
+                    }, 3000);
                 }
             },
             message: 'Are you sure you want to delete this Beep Card?',

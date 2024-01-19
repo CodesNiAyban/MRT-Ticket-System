@@ -4,5 +4,8 @@ export interface UpdateFareParams {
 }
 
 export interface UpdateFareBody {
-	fare: number
+	fare: number,
+	minimumFare : number,
+	defaultLoad : number,
+	penaltyFee : number,
 }
