@@ -7,7 +7,7 @@ import color from '../../styles/beepCard.module.css'
 import styleUtils from '../../styles/utils.module.css';
 import AddEditStationDialog from './addEditStationDialog';
 
-const AdminDashboardPageLoggedInView = () => {
+const StationPageLoggedInView = () => {
   const [stations, setStations] = useState<StationsModel[]>([]);
   const [stationsLoading, setStationsLoading] = useState(true);
   const [showStationsLoadingError, setShowStationsLoadingError] = useState(false);
@@ -221,4 +221,4 @@ const AdminDashboardPageLoggedInView = () => {
   );
 };
 
-export default AdminDashboardPageLoggedInView;
+export default StationPageLoggedInView;

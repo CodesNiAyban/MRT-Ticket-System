@@ -8,6 +8,7 @@ import * as adminApi from "./network/adminAPI";
 import BeepCardPage from './pages/beepCardPage';
 import PageNotFound from './pages/pageNotFound';
 import StationsPage from './pages/stationsPage';
+import FarePage from './pages/farePage';
 import styles from "./styles/app.module.css"
 
 function App() {
@@ -43,6 +44,10 @@ function App() {
 						<Route
 							path='/beepcards'
 							element={<BeepCardPage loggedInAdmin={loggedInAdmin}/>}
+						/>
+						<Route
+							path='/fare'
+							element={<FarePage loggedInAdmin={loggedInAdmin}/>}
 						/>
 						<Route
 							path='/*'

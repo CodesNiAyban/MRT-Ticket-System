@@ -1,25 +1,23 @@
 import styles from "../../styles/station.module.css"
 import styleUtils from "../../styles/utils.module.css"
 import { Card } from "react-bootstrap";
-import { BeepCard as BeepCardModel } from "../../model/beepCardModel"
+import { Fare as FareModel } from "../../model/fareModel"
 import { formatDate } from "../../utils/formatDate";
-import { MdDelete } from "react-icons/md"
 
 
-interface BeepCardProps {
-    beepCard: BeepCardModel,
-    onBeepCardClicked: (beepCards: BeepCardModel) => void,
-    onDeleteBeepCardClicked: (beepCards: BeepCardModel) => void,
+interface FareProps {
+    fares: FareModel,
+    onFareClicked: (fare: FareModel) => void,
     className?: string,
 }
 
-const BeepCard = ({ beepCard, onBeepCardClicked, onDeleteBeepCardClicked, className }: BeepCardProps) => {
+const Fare = ({ fares, onFareClicked, className }: FareProps) => {
     const {
-        UUIC,
-        balance,
+        fareType,
+        price,
         createdAt,
         updatedAt
-    } = beepCard;
+    } = fares;
 
     let createdUpdatedText: string;
     if (updatedAt > createdAt) {
@@ -31,20 +29,13 @@ const BeepCard = ({ beepCard, onBeepCardClicked, onDeleteBeepCardClicked, classN
     return (
         <Card
             className={`${styles.station} ${className}`}
-            onClick={() => onBeepCardClicked(beepCard)}>
+            onClick={() => onFareClicked(fares)}>
             <Card.Body className={styles.cardBody}>
                 <Card.Title className={styleUtils.flexCenter}>
-                    UUIC: {UUIC}
-                    <MdDelete
-                        className="text-muted ms-auto"
-                        onClick={(e) => {
-                            onDeleteBeepCardClicked(beepCard);
-                            e.stopPropagation();
-                        }}
-                    />
+                    {fareType}
                 </Card.Title>
                 <Card.Text className={styles.cardText}>
-                    Balance: {balance}
+                    Price: {price}
                 </Card.Text>
             </Card.Body>
             <Card.Footer className="text-muted">
@@ -54,4 +45,4 @@ const BeepCard = ({ beepCard, onBeepCardClicked, onDeleteBeepCardClicked, classN
     )
 }
 
-export default BeepCard;
+export default Fare;

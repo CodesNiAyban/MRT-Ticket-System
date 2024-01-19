@@ -1,4 +1,7 @@
-export interface fare {
+export interface Fare {
     _id: string,
-    fare: number
+    fareType: string,
+    price: number,
+    createdAt: string,
+    updatedAt: string,
 }

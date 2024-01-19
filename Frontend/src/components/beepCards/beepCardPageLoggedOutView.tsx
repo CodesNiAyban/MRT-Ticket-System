@@ -1,7 +1,6 @@
-const updateBeepCardbeepCardPageLoggedOutView = () => {
+const updateBeepCardPageLoggedOutView = () => {
     return (
         <p>TRAINS</p>
     );
 }
-
-export default updateBeepCardbeepCardPageLoggedOutView;
+export default updateBeepCardPageLoggedOutView;

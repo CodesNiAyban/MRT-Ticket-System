@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap";
-import BeepCardPageLoggedInView from "../components/beepCards/beepCardPageLoggedInView";
-import BeepCardPageLoggedOutView from "../components/beepCards/beepCardPageLoggedOutView";
+import FarePageLoggedInView from "../components/fare/farePageLoggedInView";
+import FarePageLoggedOutView from "../components/fare/farePageLoggedOutView";
 import { Admin } from "../model/adminModel";
 import styles from "../styles/stationPage.module.css";
 
@@ -8,17 +8,17 @@ interface LoginProps {
     loggedInAdmin: Admin | null,
 }
 
-const  beepCardPage = ( {loggedInAdmin}: LoginProps) => {
+const  farePage = ( {loggedInAdmin}: LoginProps) => {
     return (  
         <Container className={styles.stationPage}>
 				<>
 					{loggedInAdmin
-						? <BeepCardPageLoggedInView />
-						: <BeepCardPageLoggedOutView />
+						? <FarePageLoggedInView />
+						: <FarePageLoggedOutView />
 					}
 				</>
 			</Container>
     );
 }
  
-export default beepCardPage;
+export default farePage;

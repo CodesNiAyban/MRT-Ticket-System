@@ -8,7 +8,7 @@
     width: 100%;
 }
 
-.beepCard {
+.station {
     min-height: 200px;
     min-width: 150px;
     transition: box-shadow .2s ease-in-out;

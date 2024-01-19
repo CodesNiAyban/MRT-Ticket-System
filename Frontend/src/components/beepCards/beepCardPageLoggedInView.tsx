@@ -4,13 +4,13 @@ import { Button, Col, Row, Spinner, Modal, Alert, Container } from 'react-bootst
 import { FaPlus, FaSearch } from 'react-icons/fa';
 import { BeepCard as BeepCardsModel } from '../../model/beepCardModel';
 import * as BeepCardApi from '../../network/beepCardAPI';
-import styles from '../../styles/beepCardPage.module.css';
+import styles from '../../styles/stationPage.module.css';
 import styleUtils from '../../styles/utils.module.css';
 import AddEditBeepCardDialog from './addEditBeepCardDialog';
 import BeepCards from './beepCardComponent';
 
 // Define the main component
-const AdminDashboardPageLoggedInView = () => {
+const BeepCardPageLoggedInView = () => {
     // State variables
     const [beepCards, setBeepCards] = useState<BeepCardsModel[]>([]);
     const [beepCardsLoading, setBeepCardsLoading] = useState(true);
@@ -93,12 +93,12 @@ const AdminDashboardPageLoggedInView = () => {
     // Beep cards grid
     const beepCardsGrid =
         filteredBeepCards.length > 0 ? (
-            <Row xs={1} md={2} xl={3} className={`g-4 ${styles.beepCardGrid}`}>
+            <Row xs={1} md={2} xl={3} className={`g-4 ${styles.stationGrid}`}>
                 {filteredBeepCards.map((beepCard) => (
                     <Col key={beepCard._id}>
                         <BeepCards
                             beepCard={beepCard}
-                            className={styles.beepCard}
+                            className={styles.station}
                             onBeepCardClicked={setBeepCardToEdit}
                             onDeleteBeepCardClicked={deleteBeepCard}
                         />
@@ -208,4 +208,4 @@ const AdminDashboardPageLoggedInView = () => {
     );
 };
 
-export default AdminDashboardPageLoggedInView;
+export default BeepCardPageLoggedInView;
