@@ -11,7 +11,7 @@ interface EditFareDialogProps {
     onFareSaved: (fare: Fare) => void,
 }
 
-const EditFareDialogProps= ({ fareToEdit, onDismiss, onFareSaved }: EditFareDialogProps) => {
+const EditFareDialogProps = ({ fareToEdit, onDismiss, onFareSaved }: EditFareDialogProps) => {
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<Fare>({
         defaultValues: {
@@ -37,6 +37,14 @@ const EditFareDialogProps= ({ fareToEdit, onDismiss, onFareSaved }: EditFareDial
 
     async function onSubmit(input: Fare) {
         try {
+            // Validate if the price is within the specified range
+            if (input.price <= 0 || input.price >= 1000) {
+                setAlertVariant('danger');
+                setAlertMessage('Price must be greater than 0 and less than 1000.');
+                setShowAlert(true);
+                return;
+            }
+
             let fareResponse: Fare;
             if (fareToEdit) {
                 // Check if the update remains unchanged

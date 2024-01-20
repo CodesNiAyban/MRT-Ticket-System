@@ -29,7 +29,7 @@ const navBarLinks =
 
 const NavBar = ({ loggedInAdmin, onLoginClicked, onLogoutSuccessful }: NavBarProps) => {
     return (
-        <Navbar bg="dark" variant="dark" expand="sm" sticky="top" id="main-navbar">
+        <Navbar bg="dark" variant="dark" expand="sm" sticky="top" id="main-navbar" className={`mb-1`}>
             <Container>
                 <Nav.Item>
                     <Navbar.Brand as={Link} to="/stations">
@@ -47,9 +47,9 @@ const NavBar = ({ loggedInAdmin, onLoginClicked, onLogoutSuccessful }: NavBarPro
                 <Navbar.Toggle aria-controls="main-navbar" />
                 <Navbar.Collapse id="main-navbar">
 
-                {loggedInAdmin &&
-                navBarLinks
-                }
+                    {loggedInAdmin &&
+                        navBarLinks
+                    }
 
                     <Nav className="container-fluid" variant="tabs">
                         <Nav className="ms-auto">
