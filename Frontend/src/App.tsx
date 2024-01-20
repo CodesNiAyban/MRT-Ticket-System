@@ -9,6 +9,7 @@ import BeepCardPage from './pages/beepCardPage';
 import PageNotFound from './pages/pageNotFound';
 import StationsPage from './pages/stationsPage';
 import FarePage from './pages/farePage';
+import LoginPage from './pages/loginPage'
 import styles from "./styles/app.module.css"
 
 function App() {
@@ -37,17 +38,23 @@ function App() {
 				/>
 				<Container className={styles.pageContainer}>
 					<Routes>
+
+						<Route
+							path='/login'
+							element={<LoginPage/>}
+						/>
+
 						<Route
 							path='/stations'
 							element={<StationsPage loggedInAdmin={loggedInAdmin} />}
 						/>
 						<Route
 							path='/beepcards'
-							element={<BeepCardPage loggedInAdmin={loggedInAdmin}/>}
+							element={<BeepCardPage loggedInAdmin={loggedInAdmin} />}
 						/>
 						<Route
 							path='/fare'
-							element={<FarePage loggedInAdmin={loggedInAdmin}/>}
+							element={<FarePage loggedInAdmin={loggedInAdmin} />}
 						/>
 						<Route
 							path='/*'

@@ -9,6 +9,7 @@ const NavBarLoggedOutView = ({ onLoginClicked }: NavBarLoggedOutViewProps) => {
         <>
             <Button onClick={onLoginClicked} className={`mb-1`}>Log In</Button>
         </>
+        
     );
 }
 
