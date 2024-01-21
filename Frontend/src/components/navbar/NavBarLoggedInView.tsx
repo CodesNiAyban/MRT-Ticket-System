@@ -29,7 +29,7 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProp
 
     return (
         <>
-            <Navbar.Text className="me-4">
+            <Navbar.Text className="me-3">
                 Signed in as: {user.username}
             </Navbar.Text>
             <Button onClick={() => setShowConfirmationModal(true)} className={`mb-1`}>

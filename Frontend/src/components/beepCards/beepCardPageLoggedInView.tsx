@@ -95,7 +95,7 @@ const BeepCardPageLoggedInView = () => {
 
     const buttons =
         <>
-            <Row className="mb-3">
+           <Row className="mb-3">
                 <Col xs={12} sm={6} lg={8} className="d-flex align-items-center">
                     <Button
                         className={` ${styleUtils.blockStart} ${styleUtils.flexCenter}`}
@@ -123,7 +123,7 @@ const BeepCardPageLoggedInView = () => {
                 </Col>
             </Row>
         </>
-
+    
 
 
     const beepCardsGrid =
@@ -235,11 +235,7 @@ const BeepCardPageLoggedInView = () => {
             </Modal>
 
             {showAlert && (
-                <Alert
-                    variant={alertVariant}
-                    className={`position-fixed top-0 start-50 translate-middle-x ${styleUtils.blockCenter}`}
-                    style={{ zIndex: 9999 }}
-                >
+                <Alert variant={alertVariant} className={styleUtils.blockCenter}>
                     {alertMessage}
                 </Alert>
             )}
