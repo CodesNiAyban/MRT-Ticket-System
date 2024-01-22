@@ -1,4 +1,3 @@
-// addEditBeepCardDialog.tsx
 import { Button, Form, Modal, Alert } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { BeepCard } from "../../model/beepCardModel";
@@ -14,27 +13,29 @@ interface AddEditBeepCardDialogProps {
   onBeepCardSaved: (beepCard: BeepCard) => void;
 }
 
-// Function to generate a random 15-digit number with "123456" as the prefix
 const generateDefaultNumber = () => {
   const generatedUUIC =
     "123456" +
-    Math.floor(Math.random() * Math.pow(10, 9)).toString().padStart(9, "0");
+    Math.floor(Math.random() * Math.pow(10, 9))
+      .toString()
+      .padStart(9, "0");
   return generatedUUIC;
 };
 
-// Function to get the price for "Default Load" fare type
 const getDefaultLoadPrice = async () => {
   try {
     const fares = await FareApi.fetchFare();
-    const defaultLoadFare = fares.find((fare) => fare.fareType === "Default Load");
-    return defaultLoadFare ? defaultLoadFare.price : 10; // Set a default value if not found
+    const defaultLoadFare = fares.find(
+      (fare) => fare.fareType === "Default Load"
+    );
+    return defaultLoadFare?.price || 10; // Use optional chaining and provide a default value
   } catch (error) {
     console.error(error);
-    return 10; // Set a default value in case of an error
+    return 10;
   }
 };
 
-const AddEditBeepCardDialog = ({
+const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   beepCardToEdit,
   onDismiss,
   onBeepCardSaved,
@@ -53,7 +54,9 @@ const AddEditBeepCardDialog = ({
 
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
+  const [alertVariant, setAlertVariant] = useState<"success" | "danger">(
+    "success"
+  );
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -64,47 +67,54 @@ const AddEditBeepCardDialog = ({
     return () => clearTimeout(timeoutId);
   }, [showAlert]);
 
+  useEffect(() => {
+    setValue("UUIC", beepCardToEdit?.UUIC || generateDefaultNumber());
+    if (beepCardToEdit?.balance !== undefined)
+      setValue("balance", beepCardToEdit.balance);
+  }, [beepCardToEdit, setValue]);
+
   const setDefaultBalance = async () => {
-    const defaultLoadPrice = await getDefaultLoadPrice();
-    setValue("balance", defaultLoadPrice);
-    return defaultLoadPrice
+    if (!beepCardToEdit) {
+      const defaultLoadPrice = await getDefaultLoadPrice();
+      setValue("balance", defaultLoadPrice);
+      return defaultLoadPrice;
+    }
   };
 
-  async function onSubmit(input: BeepCardInput) {
+  const showAlertMessage = (variant: "success" | "danger", message: string) => {
+    setAlertVariant(variant);
+    setAlertMessage(message);
+    setShowAlert(true);
+  };
+
+  const onSubmit = async (input: BeepCardInput) => {
     try {
       if (!beepCardToEdit) {
-        if (!input.UUIC) {
-          setAlertVariant("danger");
-          setAlertMessage("Please generate UUIC before saving.");
-          setShowAlert(true);
+        if (!input.UUIC || !/^\d{15}$/.test(input.UUIC)) {
+          showAlertMessage(
+            "danger",
+            "Invalid UUIC format. Please enter 15 digits."
+          );
           return;
         }
 
-        if (!/^\d{15}$/.test(input.UUIC)) {
-          setAlertVariant("danger");
-          setAlertMessage("Invalid UUIC format. Please enter 15 digits.");
-          setShowAlert(true);
-          return;
-        }
-
-        // Set the default balance to the price of "Default Load" fare type
         input.balance = await getDefaultLoadPrice();
       } else {
         if (!/^123456\d{9}$/.test(input.UUIC)) {
-          setAlertVariant("danger");
-          setAlertMessage(
+          showAlertMessage(
+            "danger",
             "Invalid UUIC format. Must start with '123456' and have 15 digits."
           );
-          setShowAlert(true);
           return;
         }
       }
 
       const balanceValue = parseInt(input.balance as unknown as string, 10);
       if (isNaN(balanceValue) || balanceValue < 10 || balanceValue > 5000) {
-        setAlertVariant("danger");
-        setAlertMessage("Invalid balance. It should be between 10 and 5000.");
-        setShowAlert(true);
+        showAlertMessage(
+          "danger",
+          "Invalid balance. It should be between 10 and 5000."
+        );
         return;
       }
 
@@ -114,9 +124,7 @@ const AddEditBeepCardDialog = ({
           input.UUIC === beepCardToEdit.UUIC &&
           input.balance === beepCardToEdit.balance
         ) {
-          setAlertVariant("danger");
-          setAlertMessage("Update is unchanged.");
-          setShowAlert(true);
+          showAlertMessage("danger", "Update is unchanged.");
           return;
         }
 
@@ -133,36 +141,31 @@ const AddEditBeepCardDialog = ({
       console.error(error);
 
       if (error.message === "Network Error") {
-        setAlertVariant("danger");
-        setAlertMessage(
+        showAlertMessage(
+          "danger",
           "No connection. Please check your internet connection."
         );
       } else if (error.response && error.response.status === 409) {
-        setAlertVariant("danger");
-        setAlertMessage(
+        showAlertMessage(
+          "danger",
           "Error: Duplicate UUIC. Please use a different UUIC."
         );
       } else {
-        setAlertVariant("danger");
-        setAlertMessage("Error saving Beep Card. Please try again.");
+        showAlertMessage("danger", "Error saving Beep Card. Please try again.");
       }
-
-      setShowAlert(true);
     }
-  }
+  };
 
-  // Function to generate a random 15-digit number with "123456" as the prefix
   const generateNumber = () => {
-    const generatedUUIC =
-      "123456" +
-      Math.floor(Math.random() * Math.pow(10, 9)).toString().padStart(9, "0");
-    setValue("UUIC", generatedUUIC);
+    setValue("UUIC", generateDefaultNumber());
   };
 
   return (
     <Modal show onHide={onDismiss} centered>
       <Modal.Header closeButton>
-        <Modal.Title>{beepCardToEdit ? "Edit Beep Card™" : "Add Beep Card™"}</Modal.Title>
+        <Modal.Title>
+          {beepCardToEdit ? "Edit Beep Card™" : "Add Beep Card™"}
+        </Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -198,6 +201,7 @@ const AddEditBeepCardDialog = ({
           )}
         </Form>
       </Modal.Body>
+
       <Modal.Footer>
         <Button
           type="submit"

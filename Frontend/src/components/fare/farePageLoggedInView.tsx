@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Row, Spinner, Alert, Container, Form, Modal } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Row,
+  Spinner,
+  Alert,
+  Container,
+  Form,
+  Modal,
+} from "react-bootstrap";
 import { Fare as FaresModel } from "../../model/fareModel";
 import * as FareApi from "../../network/fareAPI";
 import styles from "../../styles/stationPage.module.css";
@@ -15,7 +24,9 @@ const FarePageLoggedInView = () => {
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [showAlert, setShowAlert] = useState(false);
-  const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
+  const [alertVariant, setAlertVariant] = useState<"success" | "danger">(
+    "success"
+  );
 
   const [editFormData, setEditFormData] = useState<FaresModel | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -78,7 +89,11 @@ const FarePageLoggedInView = () => {
       <Row xs={1} md={2} xl={3} className={`g-4 ${styles.stationGrid}`}>
         {fares.map((fare) => (
           <Col key={fare._id}>
-            <Fare onFareClicked={() => handleEditFormOpen(fare)} className={styles.station} fares={fare} />
+            <Fare
+              onFareClicked={() => handleEditFormOpen(fare)}
+              className={styles.station}
+              fares={fare}
+            />
           </Col>
         ))}
       </Row>
@@ -88,11 +103,18 @@ const FarePageLoggedInView = () => {
 
   return (
     <Container className={styles.settingsContainer}>
-      <h1 className={`${styleUtils.blockCenter} ${styles.settingsTitle} ${"mb-4"}`}>OFFICIAL FARES</h1>
-      
+      <h1
+        className={`${styleUtils.blockCenter} ${
+          styles.settingsTitle
+        } ${"mb-4"}`}
+      >
+        OFFICIAL FARES
+      </h1>
 
       {faresLoading && (
-        <div className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}>
+        <div
+          className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}
+        >
           <Spinner animation="border" role="status">
             <span className="visually-hidden">Loading...</span>
           </Spinner>
@@ -120,7 +142,11 @@ const FarePageLoggedInView = () => {
         </div>
       )}
 
-      {showAlert && <Alert variant={alertVariant} className={styleUtils.blockCenter}>{alertMessage}</Alert>}
+      {showAlert && (
+        <Alert variant={alertVariant} className={styleUtils.blockCenter}>
+          {alertMessage}
+        </Alert>
+      )}
 
       {showEditForm && editFormData && (
         <EditFareDialog

@@ -20,7 +20,7 @@ export async function createBeepCard(beepCard: BeepCardInput): Promise<BeepCard>
             },
             body: JSON.stringify(beepCard),
         });
-    return response.json();
+    return await response.json();
 }
 
 export async function updateBeepCard(beepCardId: string, beepCard: BeepCardInput): Promise<BeepCard> {
@@ -32,7 +32,7 @@ export async function updateBeepCard(beepCardId: string, beepCard: BeepCardInput
             },
             body: JSON.stringify(beepCard),
         });
-    return response.json();
+    return await response.json();
 }
 
 export async function deleteBeepCard(beepCardsId: string) {

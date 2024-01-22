@@ -3,7 +3,7 @@ import { fetchData } from "./fetcher";
 
 export async function fetchFare(): Promise<Fare[]> {
     const response = await fetch("/api/fare", { method: "GET" });
-    return response.json();
+    return await response.json();
 }
 
 export interface FareInput {
@@ -20,5 +20,5 @@ export async function updateFare(FareId: string, Fare: FareInput): Promise<Fare>
             },
             body: JSON.stringify(Fare),
         });
-    return response.json();
+    return await response.json();
 }

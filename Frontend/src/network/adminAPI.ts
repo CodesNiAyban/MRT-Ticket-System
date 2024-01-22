@@ -5,7 +5,7 @@ import { fetchData } from "./fetcher"
 
 export async function getLoggedInAdmin(): Promise<Admin> {
     const response = await fetchData("/api/admin", { method: "GET"});
-    return response.json();
+    return await response.json();
 }
 
 export async function adminLogin(credentials: LoginCredentials): Promise<Admin> {
@@ -17,7 +17,7 @@ export async function adminLogin(credentials: LoginCredentials): Promise<Admin> 
             },
             body: JSON.stringify(credentials),
         });
-    return response.json();
+    return await response.json();
 }
 export async function logout() {
     await fetchData("/api/admin/logout", { method: "POST"})
