@@ -4,6 +4,8 @@ import * as adminInterface from "../interfaces/adminInterface";
 import * as authInterface from "../interfaces/authInterface";
 import createHttpError from "http-errors";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import env from "../utils/validateENV";
 
 export const getAuthenticatedAdmin: RequestHandler = async (req, res, next) => {
 	const authenticatedAdminId = req.session.adminId;
@@ -78,6 +80,21 @@ export const login: RequestHandler<unknown, unknown, authInterface.LoginBody, un
 		if(!passwordMatch){
 			throw createHttpError(401, "Invalid Credentials.");
 		}
+
+		const token = jwt.sign(
+			{
+				username: admin.username,
+				password: admin.password
+			},
+			env.SESSION_SECRET,
+			{
+				expiresIn: "24h"
+			},
+		);
+
+		req.session.adminId = admin._id;
+
+		res.status(201).json({admin, token});
 
 		req.session.adminId = admin._id;
 

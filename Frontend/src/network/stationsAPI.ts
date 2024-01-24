@@ -21,7 +21,7 @@ export async function createStation(station: StationInput): Promise<Stations> {
             },
             body: JSON.stringify(station),
         });
-    return await response.json();
+    return response.json();
 }
 
 export async function updateStation(stationId: string, station: StationInput): Promise<Stations> {
@@ -33,7 +33,7 @@ export async function updateStation(stationId: string, station: StationInput): P
             },
             body: JSON.stringify(station),
         });
-    return await response.json();
+    return response.json();
 }
 
 export async function deleteStation(stationsId: string) {

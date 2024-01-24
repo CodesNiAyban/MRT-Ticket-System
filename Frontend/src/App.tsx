@@ -11,13 +11,23 @@ import StationsPage from "./pages/stationsPage";
 import FarePage from "./pages/farePage";
 import LoginPage from "./pages/loginPage";
 import styles from "./styles/app.module.css";
-
+import { JwtPayload } from 'jsonwebtoken';
+import * as AdminApi from "./network/adminAPI"
 
 function App() {
   const [loggedInAdmin, setLoggedInAdmin] = useState<Admin | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  
-  
+
+  async function onLogout() {
+    try {
+      await AdminApi.logout;
+      setLoggedInAdmin(null);
+    } catch (error) {
+      console.error(error);
+      alert(error);
+    }
+  }
+
   useEffect(() => {
     async function fetchLoggedInAdmin() {
       try {
@@ -27,9 +37,26 @@ function App() {
         console.error(error);
       }
     }
-    fetchLoggedInAdmin();
-  }, []);
 
+    // Check if there is a stored JWT token in local storage
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken) {
+      try {
+        const decodedToken = JSON.parse(atob(storedToken.split('.')[1])) as JwtPayload;
+        if (decodedToken.exp! * 1000 < Date.now()) {
+          // Token is expired, log the user out
+          onLogout();
+        } else {
+          // Token is valid, fetch the logged-in admin
+          fetchLoggedInAdmin();
+        }
+      } catch (error) {
+        // Error decoding token, log the user out
+        console.error(error);
+      }
+    }
+
+  }, []); // The empty dependency array ensures that this effect runs only once on mount
 
 
   return (
@@ -38,23 +65,11 @@ function App() {
         <NavBar
           loggedInAdmin={loggedInAdmin}
           onLoginClicked={() => setShowLoginModal(true)}
-          onLogoutSuccessful={() => setLoggedInAdmin(null)}
+          onLogoutSuccessful={onLogout}
         />
-        {/* <div className="d-flex" style={{ height: "100vh" }}>
-          <div
-            className=""
-            style={{ width: "75%", backgroundColor: "#023487" }}
-          >
-            right
-          </div>
-          <div className="" style={{ width: "25%", backgroundColor: "#000" }}>
-            left
-          </div>
-        </div> //REFERENCE STATION EDIT UI*/}
         <Container className={styles.pageContainer}>
           <Routes>
             <Route path="/" element={<LoginPage />} />
-
             <Route
               path="/stations"
               element={<StationsPage loggedInAdmin={loggedInAdmin} />}

@@ -1,31 +1,14 @@
 import { Container, Nav, Navbar } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import { Admin } from "../../model/adminModel";
 import NavBarLoggedInView from "./NavBarLoggedInView";
 import NavBarLoggedOutView from "./NavBarLoggedOutView";
-import { Link } from "react-router-dom";
-import { adminLogin } from "../../network/adminAPI";
 
 interface NavBarProps {
     loggedInAdmin: Admin | null,
     onLoginClicked: () => void,
     onLogoutSuccessful: () => void,
 }
-
-const navBarLinks =
-    <Nav className="container-fluid" variant="tabs">
-
-        <Nav.Item>
-            <Nav.Link as={Link} to="/beepcards">Beep Cards</Nav.Link>
-        </Nav.Item>
-
-        <Nav.Item>
-            <Nav.Link as={Link} to="/stations">Stations</Nav.Link>
-        </Nav.Item>
-
-        <Nav.Item>
-            <Nav.Link as={Link} to="/fare">Fare</Nav.Link>
-        </Nav.Item>
-    </Nav>
 
 const NavBar = ({ loggedInAdmin, onLoginClicked, onLogoutSuccessful }: NavBarProps) => {
     return (

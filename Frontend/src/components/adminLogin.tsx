@@ -11,11 +11,10 @@ import { UnauthorizedError } from "../errors/httpErrors";
 
 interface LoginModalProps {
     onDismiss: () => void,
-    onLoginSuccessful: (admin: Admin) => void,
+    onLoginSuccessful: (admin: Admin, token: string) => void,
 }
 
 const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
-
     const [errorText, setErrorText] = useState<string | null>(null);
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginCredentials>();
@@ -24,12 +23,13 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
 
     async function onSubmit(credentials: LoginCredentials) {
         try {
-            const admin = await AdminApi.adminLogin(credentials);
-            onLoginSuccessful(admin);
+            const { admin, token } = await AdminApi.adminLogin(credentials);
+            onLoginSuccessful(admin, token);
+            localStorage.setItem('authToken', token);
             navigate("/stations");
         } catch (error) {
-            if(error instanceof UnauthorizedError) {
-                setErrorText(error.message)
+            if (error instanceof UnauthorizedError) {
+                setErrorText(error.message);
             } else {
                 alert(error);
             }
@@ -46,7 +46,7 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
             </Modal.Header>
 
             <Modal.Body>
-                {errorText && 
+                {errorText &&
                     <Alert variant="danger">
                         {errorText}
                     </Alert>
@@ -59,7 +59,7 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
                         placeholder="Username"
                         register={register}
                         registerOptions={{ required: "Required" }}
-                        error={errors.username}
+                        errors={errors.admin?.username}
                     />
                     <AdminInputField
                         name="password"
@@ -68,7 +68,7 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
                         placeholder="Password"
                         register={register}
                         registerOptions={{ required: "Required" }}
-                        error={errors.password}
+                        errors={errors.admin?.password}
                     />
                     <Button
                         type="submit"

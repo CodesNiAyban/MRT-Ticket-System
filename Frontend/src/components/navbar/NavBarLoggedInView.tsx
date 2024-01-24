@@ -5,6 +5,7 @@ import * as AdminApi from "../../network/adminAPI";
 import styleUtils from "../styles/utils.module.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface NavBarLoggedInViewProps {
     user: Admin;
@@ -16,7 +17,7 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProp
 
     async function logout() {
         try {
-            await AdminApi.logout();
+            await AdminApi.logout;
             onLogoutSuccessful();
         } catch (error) {
             console.error(error);

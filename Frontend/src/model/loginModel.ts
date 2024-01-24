@@ -1,4 +1,9 @@
 export interface LoginCredentials {
-    username: string,
+    admin: Admin
+    token: string
+}
+
+export interface Admin {
+    username: string
     password: string
 }

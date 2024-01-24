@@ -1,4 +1,9 @@
+export interface Root {
+    admin: Admin
+    token: string
+}
+
 export interface Admin {
-    username: string,
-    email: string
+    username: string
+    password: string
 }
