@@ -5,17 +5,19 @@ import * as BeepCardsApi from "../../network/beepCardAPI";
 import { BeepCardInput } from "../../network/beepCardAPI";
 import TextInputField from "../form/textInputFields";
 import { useState, useEffect } from "react";
-import * as FareApi from "../../network/fareAPI"; // Import the FareApi to fetch fares
+import * as FareApi from "../../network/fareAPI";
+import styles from "./addEditBeepCardDialog.module.css";
 
 interface AddEditBeepCardDialogProps {
   beepCardToEdit?: BeepCard;
   onDismiss: () => void;
   onBeepCardSaved: (beepCard: BeepCard) => void;
+  editMode: boolean;
 }
 
 const generateDefaultNumber = () => {
   const generatedUUIC =
-    "123456" +
+    "637805" +
     Math.floor(Math.random() * Math.pow(10, 9))
       .toString()
       .padStart(9, "0");
@@ -28,7 +30,7 @@ const getDefaultLoadPrice = async () => {
     const defaultLoadFare = fares.find(
       (fare) => fare.fareType === "Default Load"
     );
-    return defaultLoadFare?.price || 10; // Use optional chaining and provide a default value
+    return defaultLoadFare?.price || 10;
   } catch (error) {
     console.error(error);
     return 10;
@@ -39,16 +41,18 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   beepCardToEdit,
   onDismiss,
   onBeepCardSaved,
+  editMode,
 }: AddEditBeepCardDialogProps) => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     setValue,
+    getValues,
   } = useForm<BeepCardInput>({
     defaultValues: {
       UUIC: beepCardToEdit?.UUIC || generateDefaultNumber(),
-      balance: beepCardToEdit?.balance,
+      balance: editMode ? beepCardToEdit?.balance : 0,
     },
   });
 
@@ -57,6 +61,10 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   const [alertVariant, setAlertVariant] = useState<"success" | "danger">(
     "success"
   );
+
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [previousBalance, setPreviousBalance] = useState<number | null>(null);
+  const [addedValue, setAddedValue] = useState<number | null>(null);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -67,12 +75,6 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     return () => clearTimeout(timeoutId);
   }, [showAlert]);
 
-  useEffect(() => {
-    setValue("UUIC", beepCardToEdit?.UUIC || generateDefaultNumber());
-    if (beepCardToEdit?.balance !== undefined)
-      setValue("balance", beepCardToEdit.balance);
-  }, [beepCardToEdit, setValue]);
-
   const setDefaultBalance = async () => {
     if (!beepCardToEdit) {
       const defaultLoadPrice = await getDefaultLoadPrice();
@@ -81,13 +83,46 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     }
   };
 
+  useEffect(() => {
+    const setDefaultValues = async () => {
+      setValue("UUIC", beepCardToEdit?.UUIC || generateDefaultNumber());
+
+      if (beepCardToEdit?.balance !== undefined) {
+        if (editMode) {
+          setValue("balance", beepCardToEdit.balance);
+        } else {
+          const defaultBalance = await getDefaultLoadPrice();
+          setValue("balance", defaultBalance);
+        }
+      }
+    };
+
+    setDefaultValues();
+  }, [beepCardToEdit, setValue, editMode]);
+
   const showAlertMessage = (variant: "success" | "danger", message: string) => {
     setAlertVariant(variant);
     setAlertMessage(message);
     setShowAlert(true);
   };
 
+  const showConfirmation = () => {
+    const balance = parseInt(getValues("balance") as unknown as string, 10);
+    setPreviousBalance(beepCardToEdit?.balance || 0);
+    setAddedValue(balance);
+    setShowConfirmationModal(true);
+  };
+
+  const handleConfirmation = async () => {
+    // Handle confirmation logic here
+    setShowConfirmationModal(false);
+    // Continue with the form submission or any other action
+    const input = getValues();
+    onSubmit(input);
+  };
+
   const onSubmit = async (input: BeepCardInput) => {
+    const defaultLoadPrice = await getDefaultLoadPrice();
     try {
       if (!beepCardToEdit) {
         if (!input.UUIC || !/^\d{15}$/.test(input.UUIC)) {
@@ -100,43 +135,44 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
 
         input.balance = await getDefaultLoadPrice();
       } else {
-        if (!/^123456\d{9}$/.test(input.UUIC)) {
+        if (!/^637805\d{9}$/.test(input.UUIC)) {
           showAlertMessage(
             "danger",
-            "Invalid UUIC format. Must start with '123456' and have 15 digits."
+            "Invalid UUIC format. Must start with '637805' and have 15 digits."
           );
           return;
         }
       }
 
       const balanceValue = parseInt(input.balance as unknown as string, 10);
-      if (isNaN(balanceValue) || balanceValue < 10 || balanceValue > 5000) {
+      if (isNaN(balanceValue) || balanceValue < defaultLoadPrice || balanceValue > 5000) {
         showAlertMessage(
           "danger",
-          "Invalid balance. It should be between 10 and 5000."
+          `Invalid balance. It should be between ${defaultLoadPrice} and 5000.`
         );
         return;
       }
 
       let beepCardResponse: BeepCard;
       if (beepCardToEdit) {
-        if (
-          input.UUIC === beepCardToEdit.UUIC &&
-          input.balance === beepCardToEdit.balance
-        ) {
-          showAlertMessage("danger", "Update is unchanged.");
-          return;
+        if (editMode) {
+          beepCardResponse = await BeepCardsApi.updateBeepCard(
+            beepCardToEdit._id,
+            input
+          );
+        } else {
+          const newBalance = beepCardToEdit.balance! + balanceValue;
+          beepCardResponse = await BeepCardsApi.updateBeepCard(
+            beepCardToEdit._id,
+            { ...input, balance: newBalance }
+          );
         }
-
-        beepCardResponse = await BeepCardsApi.updateBeepCard(
-          beepCardToEdit._id,
-          input
-        );
       } else {
         beepCardResponse = await BeepCardsApi.createBeepCard(input);
       }
 
       onBeepCardSaved(beepCardResponse);
+
     } catch (error: any) {
       console.error(error);
 
@@ -161,65 +197,141 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   };
 
   return (
-    <Modal show onHide={onDismiss} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>
-          {beepCardToEdit ? "Edit Beep Card™" : "Add Beep Card™"}
+    <Modal show onHide={onDismiss} centered className={styles.modalContent}>
+      <Modal.Header closeButton className={styles.modalHeader}>
+        <Modal.Title className={`${styles.modalTitle} modal-title`}>
+          {beepCardToEdit
+            ? editMode
+              ? "Edit Beep Card™"
+              : "Load Beep Card™"
+            : "Add Beep Card™"}
         </Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
+      <Modal.Body className={`${styles.modalBody} modal-body`}>
         <Form id="addEditBeepCardForm" onSubmit={handleSubmit(onSubmit)}>
-          <TextInputField
-            name="UUIC"
-            label="UUIC"
-            type="text"
-            placeholder="UUIC"
-            register={register}
-            registerOptions={{ required: "Required " }}
-            errors={errors.UUIC}
-          />
+          {!editMode && beepCardToEdit ? (
+            <>
+              <TextInputField
+                name="UUIC"
+                label="UUIC"
+                type="text"
+                placeholder="UUIC"
+                register={register}
+                registerOptions={{ required: "Required " }}
+                errors={errors.UUIC}
+                disabled
+              />
+              <TextInputField
+                name="balance"
+                label={editMode && beepCardToEdit ? "Balance" : "Load Amount"}
+                type="number"
+                placeholder={editMode && beepCardToEdit ? "Balance" : "Default Load"}
+                register={register}
+                registerOptions={{ required: "Required " }}
+                errors={errors.balance}
+              />
+            </>
+          ) : (
+            <>
+              <TextInputField
+                name="UUIC"
+                label="UUIC"
+                type="text"
+                placeholder="UUIC"
+                register={register}
+                registerOptions={{ required: "Required " }}
+                errors={errors.UUIC}
+              />
 
-          {!beepCardToEdit && (
-            <div className="mb-3">
-              <Button variant="secondary" onClick={generateNumber}>
-                Generate Account Number
-              </Button>
-            </div>
-          )}
+              {!beepCardToEdit && (
+                <div className="mb-3">
+                  <Button variant="secondary" onClick={generateNumber}>
+                    Generate Account Number
+                  </Button>
+                </div>
+              )}
 
-          {beepCardToEdit && (
-            <TextInputField
-              name="balance"
-              label="Balance"
-              type="number"
-              placeholder="balance"
-              register={register}
-              registerOptions={{ required: "Required " }}
-              errors={errors.balance}
-            />
+              {editMode && beepCardToEdit && (
+                <TextInputField
+                  name="balance"
+                  label="Balance"
+                  type="number"
+                  placeholder="balance"
+                  register={register}
+                  registerOptions={{ required: "Required " }}
+                  errors={errors.balance}
+                />
+              )}
+            </>
           )}
         </Form>
       </Modal.Body>
 
-      <Modal.Footer>
-        <Button
-          type="submit"
-          form="addEditBeepCardForm"
-          disabled={isSubmitting}
-          onClick={setDefaultBalance}
-        >
-          Save
-        </Button>
+      <Modal.Footer className={`${styles.modalFooter} modal-footer`}>
+        {beepCardToEdit ? (
+          editMode ? (
+            <Button
+              type="submit"
+              form="addEditBeepCardForm"
+              disabled={isSubmitting}
+              onClick={setDefaultBalance}
+              className={`btn-primary ${styles.primaryButton}`}
+            >
+              Save
+            </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              onClick={showConfirmation}
+              disabled={isSubmitting}
+              className={`btn-secondary ${styles.secondaryButton}`}
+            >
+              Show Confirmation
+            </Button>
+          )
+        ) : (
+          <Button
+            type="submit"
+            form="addEditBeepCardForm"
+            disabled={isSubmitting}
+            onClick={setDefaultBalance}
+            className={`btn-primary ${styles.primaryButton}`}
+          >
+            Save
+          </Button>
+        )}
       </Modal.Footer>
 
+
       {showAlert && (
-        <div className="position-fixed top-0 start-50 translate-middle-x">
+        <div className={`position-fixed top-0 start-50 translate-middle-x ${styles.alert}`}>
           <Alert variant={alertVariant} onClose={() => setShowAlert(false)}>
             {alertMessage}
           </Alert>
         </div>
       )}
+
+      <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)} centered className={styles.confirmationModal}>
+        <Modal.Header closeButton className={styles.confirmationModalHeader}>
+          <Modal.Title className={`${styles.confirmationModalTitle} confirmation-modal-title`}>Load Confirmation</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body className={`${styles.confirmationModalBody} confirmation-modal-body`}>
+          <p>Previous Balance: {previousBalance}</p>
+          <p>Added Value: {addedValue}</p>
+          <p>New Balance: {addedValue! + previousBalance!}</p>
+        </Modal.Body>
+
+        <Modal.Footer className={`${styles.confirmationModalFooter} confirmation-modal-footer`}>
+          <Button variant="secondary" onClick={() => setShowConfirmationModal(false)} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleConfirmation} disabled={isSubmitting}>
+            Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Modal>
   );
 };

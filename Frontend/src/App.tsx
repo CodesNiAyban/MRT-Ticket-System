@@ -11,10 +11,17 @@ import StationsPage from "./pages/stationsPage";
 import FarePage from "./pages/farePage";
 import LoginPage from "./pages/loginPage";
 import styles from "./styles/app.module.css";
+import jwt from 'jsonwebtoken'; // or wherever you are importing it from
 
 function App() {
   const [loggedInAdmin, setLoggedInAdmin] = useState<Admin | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const onLogout = () => {
+    // Clear local storage and perform any additional logout tasks
+    localStorage.removeItem('authToken');
+    setLoggedInAdmin(null);
+  };
 
   useEffect(() => {
     async function fetchLoggedInAdmin() {
@@ -25,8 +32,50 @@ function App() {
         console.error(error);
       }
     }
-    fetchLoggedInAdmin();
-  }, []);
+
+    // Check if there is a stored JWT token in local storage
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken) {
+      try {
+        const decodedToken = jwt.decode(storedToken) as { exp: number };
+        if (decodedToken.exp * 1000 < Date.now()) {
+          // Token is expired, log the user out
+          onLogout();
+        } else {
+          // Token is valid, fetch the logged-in admin
+          fetchLoggedInAdmin();
+        }
+      } catch (error) {
+        // Error decoding token, log the user out
+        onLogout();
+      }
+    }
+
+    // Set up an interval to periodically check token expiration
+    const checkTokenExpiration = () => {
+      const storedToken = localStorage.getItem('authToken');
+      if (!storedToken) {
+        // Token is not present, log the user out
+        onLogout();
+      } else {
+        try {
+          const decodedToken = jwt.decode(storedToken) as { exp: number };
+          if (decodedToken.exp * 1000 < Date.now()) {
+            // Token is expired, log the user out
+            onLogout();
+          }
+        } catch (error) {
+          // Error decoding token, log the user out
+          onLogout();
+        }
+      }
+    };
+
+    const checkTokenInterval = setInterval(checkTokenExpiration, 60000); // Check every minute
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(checkTokenInterval);
+  }, []); // The empty dependency array ensures that this effect runs only once on mount
 
   return (
     <BrowserRouter>
@@ -34,23 +83,11 @@ function App() {
         <NavBar
           loggedInAdmin={loggedInAdmin}
           onLoginClicked={() => setShowLoginModal(true)}
-          onLogoutSuccessful={() => setLoggedInAdmin(null)}
+          onLogoutSuccessful={onLogout}
         />
-        <div className="d-flex" style={{ height: "100vh" }}>
-          <div
-            className=""
-            style={{ width: "75%", backgroundColor: "#023487" }}
-          >
-            right
-          </div>
-          <div className="" style={{ width: "25%", backgroundColor: "#000" }}>
-            left
-          </div>
-        </div>
         <Container className={styles.pageContainer}>
           <Routes>
             <Route path="/" element={<LoginPage />} />
-
             <Route
               path="/stations"
               element={<StationsPage loggedInAdmin={loggedInAdmin} />}

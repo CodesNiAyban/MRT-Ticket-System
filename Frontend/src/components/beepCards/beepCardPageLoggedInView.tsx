@@ -8,16 +8,21 @@ import {
   Alert,
   Container,
 } from "react-bootstrap";
-import { FaPlus, FaSearch } from "react-icons/fa";
+import { FaPlus, FaSearch, FaEdit } from "react-icons/fa";
+import { FaPesoSign } from "react-icons/fa6";
 import { BeepCard as BeepCardsModel } from "../../model/beepCardModel";
 import * as BeepCardApi from "../../network/beepCardAPI";
-import styles from "../../styles/stationPage.module.css";
-import styleUtils from "../../styles/utils.module.css";
+import styles from "./beepCardPageLoggedInView.module.css";
+import styleUtils from "./beepCardPageLoggedInView.utils.module.css";
 import AddEditBeepCardDialog from "./addEditBeepCardDialog";
 import BeepCards from "./beepCardComponent";
 import { formatDate } from "../../utils/formatDate";
+// Import necessary icons and styles
+import { BiEdit, BiDollar, BiPlus } from "react-icons/bi";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { BsSearch, BsX } from "react-icons/bs";
 
-// Define the main component
+
 const BeepCardPageLoggedInView = () => {
   const [beepCards, setBeepCards] = useState<BeepCardsModel[]>([]);
   const [beepCardsLoading, setBeepCardsLoading] = useState(true);
@@ -32,13 +37,15 @@ const BeepCardPageLoggedInView = () => {
     show: boolean;
     action: () => void;
     message: string;
-  }>({ show: false, action: () => {}, message: "" });
+  }>({ show: false, action: () => { }, message: "" });
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [showAlert, setcusShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState<"success" | "danger">(
     "success"
   );
+
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     async function loadBeepCards() {
@@ -69,7 +76,7 @@ const BeepCardPageLoggedInView = () => {
             )
           );
           cusShowAlert("success", "Beep Card deleted successfully.");
-          setConfirmationModal({ show: false, action: () => {}, message: "" });
+          setConfirmationModal({ show: false, action: () => { }, message: "" });
         } catch (error) {
           console.error(error);
           cusShowAlert("danger", "Error deleting Beep Card. Please try again.");
@@ -133,8 +140,26 @@ const BeepCardPageLoggedInView = () => {
             className={` ${styleUtils.blockStart} ${styleUtils.flexCenter}`}
             onClick={() => setShowAddBeepCardDialog(true)}
           >
-            <FaPlus />
+            <BiPlus />
             Add New Beep Card
+          </Button>
+          <Button
+            className={` ${styleUtils.blockStart} ${styleUtils.flexCenter} ${editMode ? "btn-warning" : "btn-info"}`}
+            onClick={() => {
+              setEditMode(!editMode);
+            }}
+          >
+            {editMode ? (
+              <>
+                <BiEdit /> {/* Use the appropriate icon for edit mode */}
+                Exit Edit Beep Card Mode
+              </>
+            ) : (
+              <>
+                <BiDollar /> {/* Use the appropriate icon for load mode */}
+                Load Beep Card Mode
+              </>
+            )}
           </Button>
         </Col>
         <Col
@@ -156,7 +181,7 @@ const BeepCardPageLoggedInView = () => {
                 variant="outline-secondary"
                 onClick={() => setSearchQuery("")}
               >
-                <FaSearch />
+                <BsX />
               </Button>
             </div>
           </div>
@@ -168,14 +193,15 @@ const BeepCardPageLoggedInView = () => {
   const beepCardsGrid =
     currentBeepCards.length > 0 ? (
       <>
-        <Row xs={1} md={2} xl={3} className={`mb-4 ${styles.stationGrid}`}>
+        <Row xs={1} md={2} xl={3} className={`mb-4 ${styles.beepCardGrid}`}>
           {currentBeepCards.map((beepCard) => (
             <Col key={beepCard._id} xs={12} sm={6} lg={4}>
               <BeepCards
                 beepCard={beepCard}
-                className={styles.station}
+                className={styles.beepCard}
                 onBeepCardClicked={setBeepCardToEdit}
                 onDeleteBeepCardClicked={deleteBeepCard}
+                editMode={editMode}
               />
             </Col>
           ))}
@@ -206,92 +232,96 @@ const BeepCardPageLoggedInView = () => {
       <p>No matching Beep Cards found.</p>
     );
 
-  return (
-    <Container>
-      <h1 className={`${styleUtils.textCenter} mb-4`}>BEEP CARDS</h1>
-
-      {beepCardsLoading && (
-        <div
-          className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}
-        >
-          <Spinner animation="border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
-        </div>
-      )}
-
-      {showBeepCardsLoadingError && (
-        <p>Something went wrong. Please refresh the page.</p>
-      )}
-
-      {!beepCardsLoading && !showBeepCardsLoadingError && <>{buttons}</>}
-      {!beepCardsLoading && !showBeepCardsLoadingError && <>{beepCardsGrid}</>}
-
-      {showAddBeepCardDialog && (
-        <AddEditBeepCardDialog
-          onDismiss={() => setShowAddBeepCardDialog(false)}
-          onBeepCardSaved={(newBeepCard) => {
-            setBeepCards([...beepCards, newBeepCard]);
-            setShowAddBeepCardDialog(false);
-            cusShowAlert("success", "Beep Card added successfully.");
-          }}
-        />
-      )}
-
-      {beepCardToEdit && (
-        <AddEditBeepCardDialog
-          beepCardToEdit={beepCardToEdit}
-          onDismiss={() => setBeepCardToEdit(null)}
-          onBeepCardSaved={(updateBeepCard) => {
-            setBeepCards(
-              beepCards.map((existingBeepCard) =>
-                existingBeepCard._id === updateBeepCard._id
-                  ? updateBeepCard
-                  : existingBeepCard
-              )
-            );
-            setBeepCardToEdit(null);
-            cusShowAlert("success", "Beep Card updated successfully.");
-          }}
-        />
-      )}
-
-      <Modal
-        show={confirmationModal.show}
-        onHide={() =>
-          setConfirmationModal({ show: false, action: () => {}, message: "" })
-        }
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Confirmation</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{confirmationModal.message}</Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() =>
-              setConfirmationModal({
-                show: false,
-                action: () => {},
-                message: "",
-              })
-            }
+    return (
+      <Container>
+        <h1 className={`${styleUtils.textCenter} mb-4`}>BEEP CARDS</h1>
+  
+        {beepCardsLoading && (
+          <div
+            className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}
           >
-            No
-          </Button>
-          <Button variant="danger" onClick={() => confirmationModal.action()}>
-            Yes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {showAlert && (
-        <Alert variant={alertVariant} className={styleUtils.blockCenter}>
-          {alertMessage}
-        </Alert>
-      )}
-    </Container>
-  );
-};
-
-export default BeepCardPageLoggedInView;
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </div>
+        )}
+  
+        {showBeepCardsLoadingError && (
+          <Alert variant="danger" className={`${styles.alertOverlay} ${styleUtils.blockCenter}`}>
+            Something went wrong. Please refresh the page.
+          </Alert>
+        )}
+  
+        {!beepCardsLoading && !showBeepCardsLoadingError && <>{buttons}</>}
+        {!beepCardsLoading && !showBeepCardsLoadingError && <>{beepCardsGrid}</>}
+  
+        {showAddBeepCardDialog && (
+          <AddEditBeepCardDialog
+            onDismiss={() => setShowAddBeepCardDialog(false)}
+            editMode={editMode}
+            onBeepCardSaved={(newBeepCard) => {
+              setBeepCards([...beepCards, newBeepCard]);
+              setShowAddBeepCardDialog(false);
+              cusShowAlert("success", "Beep Card added successfully.");
+            }}
+          />
+        )}
+  
+        {beepCardToEdit && (
+          <AddEditBeepCardDialog
+            beepCardToEdit={beepCardToEdit}
+            onDismiss={() => setBeepCardToEdit(null)}
+            editMode={editMode}
+            onBeepCardSaved={(updateBeepCard) => {
+              setBeepCards(
+                beepCards.map((existingBeepCard) =>
+                  existingBeepCard._id === updateBeepCard._id
+                    ? updateBeepCard
+                    : existingBeepCard
+                )
+              );
+              setBeepCardToEdit(null);
+              cusShowAlert("success", "Beep Card updated successfully.");
+            }}
+          />
+        )}
+  
+        <Modal
+          show={confirmationModal.show}
+          onHide={() =>
+            setConfirmationModal({ show: false, action: () => { }, message: "" })
+          }
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirmation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>{confirmationModal.message}</Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() =>
+                setConfirmationModal({
+                  show: false,
+                  action: () => { },
+                  message: "",
+                })
+              }
+            >
+              No
+            </Button>
+            <Button variant="danger" onClick={() => confirmationModal.action()}>
+              Yes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+  
+        {showAlert && (
+          <Alert variant={alertVariant} className={styleUtils.blockCenter}>
+            {alertMessage}
+          </Alert>
+        )}
+      </Container>
+    );
+  };
+  
+  export default BeepCardPageLoggedInView;
