@@ -4,9 +4,9 @@ import { LoginCredentials } from "../model/loginModel"
 import * as AdminApi from "../network/adminAPI";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import AdminInputField from "./form/adminInputFields";
-import styleUtils from "../styles/utils.module.css";
+import styles from "../components/adminLogin.module.css";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UnauthorizedError } from "../errors/httpErrors";
 
 interface LoginModalProps {
@@ -37,47 +37,71 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
         }
     }
 
-    return (
-        <Modal show onHide={onDismiss}>
-            <Modal.Header closeButton>
-                <Modal.Title>
-                    Log In
-                </Modal.Title>
-            </Modal.Header>
+    useEffect(() => {
+        if (errorText) {
+            const timeoutId = setTimeout(() => {
+                setErrorText(null);
+            }, 2000);
 
-            <Modal.Body>
-                {errorText &&
-                    <Alert variant="danger">
-                        {errorText}
-                    </Alert>
-                }
-                <Form onSubmit={handleSubmit(onSubmit)}>
+            return () => clearTimeout(timeoutId);
+        }
+    }, [errorText]);
+
+    return (
+        <Modal
+            show
+            onHide={onDismiss}
+            centered
+            className={styles["Auth-form-container"]}
+            style={{ borderRadius: '12px', backgroundColor: 'white' }}  // Set the background color here
+        >
+            <Form className={styles["Auth-form"]} onSubmit={handleSubmit(onSubmit)}>
+                <div className={styles["Auth-form-content"]}>
+                    <h2 className={styles["Auth-form-title"]}>Admin Login</h2>
+
+                    {errorText && (
+                        <Alert variant="danger" style={{ position: 'absolute', top: '150px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
+                            {errorText}
+                        </Alert>
+                    )}
+
                     <AdminInputField
                         name="username"
                         label="Username"
                         type="text"
-                        placeholder="Username"
+                        placeholder="Enter your username"
                         register={register}
                         registerOptions={{ required: "Required" }}
                         errors={errors.admin?.username}
+                        className="form-group mt-3"
                     />
+
                     <AdminInputField
                         name="password"
                         label="Password"
                         type="password"
-                        placeholder="Password"
+                        placeholder="Enter your password"
                         register={register}
                         registerOptions={{ required: "Required" }}
                         errors={errors.admin?.password}
+                        className="form-group mt-3"
                     />
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={styleUtils.width100}>
-                        Log In
-                    </Button>
-                </Form>
-            </Modal.Body>
+
+                    {/* Line below Password */}
+                    <hr className="mt-3" style={{ borderTop: '1px solid #ddd', marginBottom: '15px' }} />
+
+                    <div className="d-grid gap-2 mt-3 ">
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="btn btn-primary"
+                            style={{ fontSize: '1rem', borderRadius: '8px' }}
+                        >
+                            LOG IN
+                        </Button>
+                    </div>
+                </div>
+            </Form>
         </Modal>
     );
 }

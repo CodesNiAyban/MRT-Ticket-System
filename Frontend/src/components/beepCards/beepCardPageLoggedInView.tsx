@@ -8,19 +8,16 @@ import {
   Alert,
   Container,
 } from "react-bootstrap";
-import { FaPlus, FaSearch, FaEdit } from "react-icons/fa";
 import { FaPesoSign } from "react-icons/fa6";
 import { BeepCard as BeepCardsModel } from "../../model/beepCardModel";
 import * as BeepCardApi from "../../network/beepCardAPI";
 import styles from "./beepCardPageLoggedInView.module.css";
-import styleUtils from "./beepCardPageLoggedInView.utils.module.css";
 import AddEditBeepCardDialog from "./addEditBeepCardDialog";
 import BeepCards from "./beepCardComponent";
 import { formatDate } from "../../utils/formatDate";
 // Import necessary icons and styles
-import { BiEdit, BiDollar, BiPlus } from "react-icons/bi";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { BsSearch, BsX } from "react-icons/bs";
+import { BiEdit, BiPlus } from "react-icons/bi";
+import { BsSearch } from "react-icons/bs";
 
 
 const BeepCardPageLoggedInView = () => {
@@ -135,28 +132,21 @@ const BeepCardPageLoggedInView = () => {
   const buttons = (
     <>
       <Row className="mb-3">
-        <Col xs={12} sm={6} lg={8} className="d-flex align-items-center">
-          <Button
-            className={` ${styleUtils.blockStart} ${styleUtils.flexCenter}`}
-            onClick={() => setShowAddBeepCardDialog(true)}
-          >
+        <Col xs={12} sm={6} lg={8} className={`${styles.blockStart} d-flex align-items-center`}>
+          <Button className={`me-1 ${styles.blockStart} ${styles.customButton} ${styles.flexCenter}`} onClick={() => setShowAddBeepCardDialog(true)}>
             <BiPlus />
             Add New Beep Card
           </Button>
-          <Button
-            className={` ${styleUtils.blockStart} ${styleUtils.flexCenter} ${editMode ? "btn-warning" : "btn-info"}`}
-            onClick={() => {
-              setEditMode(!editMode);
-            }}
-          >
+
+          <Button className={`ms-1 customButton ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${editMode ? "btn-warning" : "btn-info"}`} onClick={() => setEditMode(!editMode)}>
             {editMode ? (
               <>
-                <BiEdit /> {/* Use the appropriate icon for edit mode */}
+                <BiEdit />
                 Exit Edit Beep Card Mode
               </>
             ) : (
               <>
-                <BiDollar /> {/* Use the appropriate icon for load mode */}
+                <FaPesoSign />
                 Load Beep Card Mode
               </>
             )}
@@ -166,7 +156,7 @@ const BeepCardPageLoggedInView = () => {
           xs={12}
           sm={6}
           lg={4}
-          className={`${styles.blockStart} ${"d-flex align-items-center"}`}
+          className={`${styles.blockStart} d-flex align-items-center`}
         >
           <div className="input-group">
             <input
@@ -181,7 +171,7 @@ const BeepCardPageLoggedInView = () => {
                 variant="outline-secondary"
                 onClick={() => setSearchQuery("")}
               >
-                <BsX />
+                <BsSearch />
               </Button>
             </div>
           </div>
@@ -193,9 +183,9 @@ const BeepCardPageLoggedInView = () => {
   const beepCardsGrid =
     currentBeepCards.length > 0 ? (
       <>
-        <Row xs={1} md={2} xl={3} className={`mb-4 ${styles.beepCardGrid}`}>
+        <Row xs={1} md={2} xl={3} className={`mb-1 ${styles.beepCardGrid}`}>
           {currentBeepCards.map((beepCard) => (
-            <Col key={beepCard._id} xs={12} sm={6} lg={4}>
+            <Col key={beepCard._id} xs={12} sm={6} lg={4} className={`mb-3 ${styles.beepCardGrid}`}>
               <BeepCards
                 beepCard={beepCard}
                 className={styles.beepCard}
@@ -206,9 +196,8 @@ const BeepCardPageLoggedInView = () => {
             </Col>
           ))}
         </Row>
-
         {filteredBeepCards.length > itemsPerPage && (
-          <div className={`${styleUtils.flexCenter} ${styleUtils.blockEnd}`}>
+          <div className={` ms-auto me-2`} style={{width: '65vh', justifyContent: 'center'}}>
             <Button
               variant="outline-secondary"
               className="mb-3 mr-2"
@@ -234,11 +223,23 @@ const BeepCardPageLoggedInView = () => {
 
     return (
       <Container>
-        <h1 className={`${styleUtils.textCenter} mb-4`}>BEEP CARDS</h1>
+        <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
+          <h1 className={`${styles.textCenter} mb-4`}>BEEP CARDS</h1>
+        </div>
+  
+        {showAlert && (
+          <div className={`${styles.alertOverlay} ${styles.blockCenter}`} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1, textAlign: 'center', background: 'rgba(0, 0, 0, 0.5)', padding: '20px', borderRadius: '8px' }}>
+            <div className={`${styles.alertContainer}`}>
+              <Alert variant={alertVariant}>
+                {alertMessage}
+              </Alert>
+            </div>
+          </div>
+        )}
   
         {beepCardsLoading && (
           <div
-            className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}
+            className={`${styles.flexCenterLoading} ${styles.blockCenterLoading}`}
           >
             <Spinner animation="border" role="status">
               <span className="visually-hidden">Loading...</span>
@@ -247,7 +248,7 @@ const BeepCardPageLoggedInView = () => {
         )}
   
         {showBeepCardsLoadingError && (
-          <Alert variant="danger" className={`${styles.alertOverlay} ${styleUtils.blockCenter}`}>
+          <Alert variant="danger" className={`${styles.alertOverlay} ${styles.blockCenter}`}>
             Something went wrong. Please refresh the page.
           </Alert>
         )}
@@ -314,14 +315,8 @@ const BeepCardPageLoggedInView = () => {
             </Button>
           </Modal.Footer>
         </Modal>
-  
-        {showAlert && (
-          <Alert variant={alertVariant} className={styleUtils.blockCenter}>
-            {alertMessage}
-          </Alert>
-        )}
       </Container>
     );
   };
-  
-  export default BeepCardPageLoggedInView;
+
+export default BeepCardPageLoggedInView;

@@ -5,6 +5,7 @@ import { formatDate } from "../../utils/formatDate";
 import { MdDelete } from "react-icons/md";
 import styles from "./beepCardComponent.module.css";
 import styleUtils from "./beepCardComponent.utils.module.css";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 interface BeepCardProps {
   beepCard: BeepCardModel;
@@ -35,7 +36,7 @@ const BeepCard: React.FC<BeepCardProps> = ({
       <Card.Body className={styles.cardBody}>
         <Card.Title className={styleUtils.flexCenter}>
           UUID: {UUIC}
-          <MdDelete
+          <RiDeleteBin6Line
             className={`text-muted ms-auto ${styles.deleteIcon}`}
             onClick={(e) => {
               onDeleteBeepCardClicked(beepCard);
