@@ -95,10 +95,6 @@ export const login: RequestHandler<unknown, unknown, authInterface.LoginBody, un
 		req.session.adminId = admin._id;
 
 		res.status(201).json({admin, token});
-
-		req.session.adminId = admin._id;
-
-		res.status(201).json(admin);
 	} catch (error) {
 		next(error);
 	}

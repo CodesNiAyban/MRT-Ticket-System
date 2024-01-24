@@ -20,7 +20,7 @@ function App() {
 
   async function onLogout() {
     try {
-      await AdminApi.logout;
+      await AdminApi.logout();
       setLoggedInAdmin(null);
     } catch (error) {
       console.error(error);
@@ -28,35 +28,7 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    async function fetchLoggedInAdmin() {
-      try {
-        const admin = await adminApi.getLoggedInAdmin();
-        setLoggedInAdmin(admin);
-      } catch (error) {
-        console.error(error);
-      }
-    }
 
-    // Check if there is a stored JWT token in local storage
-    const storedToken = localStorage.getItem('authToken');
-    if (storedToken) {
-      try {
-        const decodedToken = JSON.parse(atob(storedToken.split('.')[1])) as JwtPayload;
-        if (decodedToken.exp! * 1000 < Date.now()) {
-          // Token is expired, log the user out
-          onLogout();
-        } else {
-          // Token is valid, fetch the logged-in admin
-          fetchLoggedInAdmin();
-        }
-      } catch (error) {
-        // Error decoding token, log the user out
-        console.error(error);
-      }
-    }
-
-  }, []); // The empty dependency array ensures that this effect runs only once on mount
 
 
   return (

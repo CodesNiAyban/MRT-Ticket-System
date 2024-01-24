@@ -24,11 +24,5 @@ interface LoginResponse {
 }
 
 export async function logout() {
-    await fetchData("/api/admin/logout", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-    });
-    localStorage.removeItem('authToken');
+    await fetchData("/api/admin/logout", {method: "POST" } );
 }
