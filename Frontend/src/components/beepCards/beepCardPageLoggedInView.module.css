@@ -1,0 +1,47 @@
+.beepCard {
+    background-color: blanchedalmond; /* Set background color to white */
+    border: 1px solid #e0e0e0; /* Add a light border */
+    border-radius: 8px; /* Add border-radius for rounded corners */
+    transition: transform 0.3s ease-in-out; /* Add a smooth transition effect */
+  
+    &:hover {
+      transform: scale(1.05); /* Scale up on hover for a subtle effect */
+    }
+  }
+  
+  .cardBody {
+    overflow: hidden;
+    mask-image: linear-gradient(180deg, #000 60%, transparent);
+  }
+  
+  .cardTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 18px; /* Increase font size for better readability */
+    color: #333333; /* Set text color to a dark shade */
+  }
+  
+  .deleteIcon {
+    font-size: 24px; /* Increase delete icon size */
+    color: #888888; /* Set delete icon color to a muted tone */
+    cursor: pointer;
+  }
+  
+  .cardText {
+    font-size: 16px; /* Increase font size for better readability */
+    color: #555555; /* Set text color to a slightly dark shade */
+  }
+  
+  .cardFooter {
+    font-size: 14px; /* Decrease font size for the footer */
+    color: #999999; /* Set footer text color to a light shade */
+  }
+  
+  /* Add the following styles to your global styles or App.css */
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Set a modern sans-serif font */
+  }
+  
+  

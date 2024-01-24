@@ -12,10 +12,12 @@ import FarePage from "./pages/farePage";
 import LoginPage from "./pages/loginPage";
 import styles from "./styles/app.module.css";
 
+
 function App() {
   const [loggedInAdmin, setLoggedInAdmin] = useState<Admin | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
-
+  
+  
   useEffect(() => {
     async function fetchLoggedInAdmin() {
       try {
@@ -28,6 +30,8 @@ function App() {
     fetchLoggedInAdmin();
   }, []);
 
+
+
   return (
     <BrowserRouter>
       <div>
@@ -36,7 +40,7 @@ function App() {
           onLoginClicked={() => setShowLoginModal(true)}
           onLogoutSuccessful={() => setLoggedInAdmin(null)}
         />
-        <div className="d-flex" style={{ height: "100vh" }}>
+        {/* <div className="d-flex" style={{ height: "100vh" }}>
           <div
             className=""
             style={{ width: "75%", backgroundColor: "#023487" }}
@@ -46,7 +50,7 @@ function App() {
           <div className="" style={{ width: "25%", backgroundColor: "#000" }}>
             left
           </div>
-        </div>
+        </div> //REFERENCE STATION EDIT UI*/}
         <Container className={styles.pageContainer}>
           <Routes>
             <Route path="/" element={<LoginPage />} />

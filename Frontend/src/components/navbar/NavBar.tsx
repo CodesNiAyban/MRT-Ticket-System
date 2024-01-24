@@ -46,19 +46,12 @@ const NavBar = ({ loggedInAdmin, onLoginClicked, onLogoutSuccessful }: NavBarPro
 
                 <Navbar.Toggle aria-controls="main-navbar" />
                 <Navbar.Collapse id="main-navbar">
-
-                {loggedInAdmin &&
-                navBarLinks
-                }
-
                     <Nav className="container-fluid" variant="tabs">
-                        <Nav className="ms-auto">
-                            {loggedInAdmin ? (
-                                <NavBarLoggedInView user={loggedInAdmin} onLogoutSuccessful={onLogoutSuccessful} />
-                            ) : (
-                                <NavBarLoggedOutView onLoginClicked={onLoginClicked} />
-                            )}
-                        </Nav>
+                        {loggedInAdmin ? (
+                            <NavBarLoggedInView user={loggedInAdmin} onLogoutSuccessful={onLogoutSuccessful} />
+                        ) : (
+                            <NavBarLoggedOutView onLoginClicked={onLoginClicked} />
+                        )}
                     </Nav>
                 </Navbar.Collapse>
             </Container>
