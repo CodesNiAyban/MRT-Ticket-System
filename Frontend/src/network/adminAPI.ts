@@ -9,6 +9,18 @@ export async function getLoggedInAdmin(): Promise<Admin> {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         },
     });
+
+    if (!response.ok) {
+        // Check for authorization failure (e.g., status code 401 or 403)
+        if (response.status === 401 || response.status === 403) {
+            console.error("Authorization failed. Logging out user.");
+            await logout();
+        }
+
+        // Handle other errors if needed
+        throw new Error(`Error: ${response.statusText}`);
+    }
+
     return await response.json();
 }
 
@@ -21,6 +33,18 @@ export async function adminLogin(credentials: LoginCredentials): Promise<LoginRe
         },
         body: JSON.stringify(credentials),
     });
+
+    if (!response.ok) {
+        // Check for authorization failure (e.g., status code 401 or 403)
+        if (response.status === 401 || response.status === 403) {
+            console.error("Authorization failed. Logging out user.");
+            await logout();
+        }
+
+        // Handle other errors if needed
+        throw new Error(`Error: ${response.statusText}`);
+    }
+
     return await response.json();
 }
 

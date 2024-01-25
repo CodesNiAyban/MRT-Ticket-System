@@ -20,24 +20,37 @@ function App() {
 
   async function onLogout() {
     try {
+      await AdminApi.logout;
       setLoggedInAdmin(null);
-      await AdminApi.logout();
     } catch (error) {
       console.error(error);
       alert(error);
     }
   }
+
   useEffect(() => {
     async function fetchLoggedInAdmin() {
       try {
-        const user = await adminApi.getLoggedInAdmin();
-        setLoggedInAdmin(user);
+        const admin = await adminApi.getLoggedInAdmin();
+        setLoggedInAdmin(admin);
       } catch (error) {
         console.error(error);
       }
     }
-    fetchLoggedInAdmin();
-  }, []);
+
+    // Check if there is a stored JWT token in local storage
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken) {
+      try {
+          fetchLoggedInAdmin();
+      } catch (error) {
+        // Error decoding token, log the user out
+        console.error(error);
+      }
+    }
+
+  }, []); // The empty dependency array ensures that this effect runs only once on mount
+
 
   return (
     <BrowserRouter>

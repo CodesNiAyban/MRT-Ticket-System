@@ -48,7 +48,7 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProp
                 </Nav.Link>
             </Nav.Item>
             <Nav.Item className={`${"ms-auto"}`}>
-            <Navbar.Text className={`${"me-4"}`}>
+                <Navbar.Text className={`${"me-4"}`}>
                     Signed in as: {user.username}
                 </Navbar.Text>
                 <Button onClick={() => setShowConfirmationModal(true)} className={`${"ms-auto"}`}>
