@@ -8,14 +8,17 @@ import jwt from "jsonwebtoken";
 import env from "../utils/validateENV";
 
 export const getAuthenticatedAdmin: RequestHandler = async (req, res, next) => {
-	const authenticatedAdminId = req.session.adminId;
+	const authenticatedAdminId = req.session ? req.session.adminId : undefined;
 
 	try {
-		if(!authenticatedAdminId)
+		if (!authenticatedAdminId) {
 			throw createHttpError(401, "Admin not authenticated");
+		}
 
-		const admin = await adminModel.findById(authenticatedAdminId).select("+email").exec();
-		
+		const admin = await adminModel.findById(authenticatedAdminId)
+			.select("+email")
+			.exec();
+
 		res.status(200).json(admin);
 	} catch (error) {
 		next(error);
@@ -34,13 +37,13 @@ export const createAdmin: RequestHandler<unknown, unknown, adminInterface.Create
 
 		const existingUsername = await adminModel.findOne({ username: username }).exec();
 
-		if(existingUsername){
+		if (existingUsername) {
 			throw createHttpError(409, "Username already taken. Please choose a different one or log in instead.");
 		}
 
 		const existingEmail = await adminModel.findOne({ email: email }).exec();
 
-		if(existingEmail){
+		if (existingEmail) {
 			throw createHttpError(409, "Email already taken. Please choose a different one or log in instead.");
 		}
 
@@ -71,13 +74,13 @@ export const login: RequestHandler<unknown, unknown, authInterface.LoginBody, un
 
 		const admin = await adminModel.findOne({ username: username }).select("+password +email").exec();
 
-		if(!admin){
+		if (!admin) {
 			throw createHttpError(401, "Invalid Credentials.");
 		}
 
 		const passwordMatch = await bcrypt.compare(password, admin.password);
 
-		if(!passwordMatch){
+		if (!passwordMatch) {
 			throw createHttpError(401, "Invalid Credentials.");
 		}
 
@@ -94,7 +97,7 @@ export const login: RequestHandler<unknown, unknown, authInterface.LoginBody, un
 
 		req.session.adminId = admin._id;
 
-		res.status(201).json({admin, token});
+		res.status(201).json({ admin, token });
 	} catch (error) {
 		next(error);
 	}
@@ -103,7 +106,7 @@ export const login: RequestHandler<unknown, unknown, authInterface.LoginBody, un
 export const logout: RequestHandler = (req, res, next) => {
 	req.session.destroy(error => {
 		if (error) {
-			next (error);
+			next(error);
 		} else {
 			res.sendStatus(200);
 		}

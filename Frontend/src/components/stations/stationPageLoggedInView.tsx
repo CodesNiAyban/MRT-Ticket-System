@@ -94,9 +94,9 @@ const StationPageLoggedInView = () => {
 
   return (
     <>
-    <div className='bg-black'>
+    {/* <div className='bg-black'>
       sample
-    </div>
+    </div> */}
     <Container>
       <h1 className={`${styleUtils.blockCenter} mb-4`}>STATIONS</h1>
 
@@ -214,10 +214,10 @@ const StationPageLoggedInView = () => {
           }}
         />
       )}
-
+{/* 
       <div className='bg-black'>
         sample
-      </div>
+      </div> */}
 
       <Modal show={showConfirmation} onHide={closeConfirmation}>
         <Modal.Header closeButton>

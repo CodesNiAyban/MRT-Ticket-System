@@ -2,13 +2,18 @@ import { BeepCard } from "../model/beepCardModel"
 import { fetchData } from "./fetcher";
 
 export async function fetchBeepCard(): Promise<BeepCard[]> {
-    const response = await fetch("/api/beepCards", { method: "GET" });
+    const response = await fetch("/api/beepCards", {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+        },
+    });
     return response.json();
 }
 
 export interface BeepCardInput {
     UUIC: string,
-	balance: number
+    balance: number
 }
 
 export async function createBeepCard(beepCard: BeepCardInput): Promise<BeepCard> {
@@ -17,6 +22,7 @@ export async function createBeepCard(beepCard: BeepCardInput): Promise<BeepCard>
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
             },
             body: JSON.stringify(beepCard),
         });
@@ -29,6 +35,7 @@ export async function updateBeepCard(beepCardId: string, beepCard: BeepCardInput
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
             },
             body: JSON.stringify(beepCard),
         });
@@ -36,5 +43,11 @@ export async function updateBeepCard(beepCardId: string, beepCard: BeepCardInput
 }
 
 export async function deleteBeepCard(beepCardsId: string) {
-    await fetchData("api/beepCards/" + beepCardsId, { method: "DELETE" });
+    await fetchData("api/beepCards/" + beepCardsId, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+        }
+    });
 }

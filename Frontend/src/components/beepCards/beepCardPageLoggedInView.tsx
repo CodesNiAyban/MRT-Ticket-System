@@ -66,7 +66,7 @@ const BeepCardPageLoggedInView = () => {
       show: true,
       action: async () => {
         try {
-          await BeepCardApi.deleteBeepCard(beepCard._id);
+          await BeepCardApi.deleteBeepCard(beepCard._id)
           setBeepCards(
             beepCards.filter(
               (existingBeepCard) => existingBeepCard._id !== beepCard._id
@@ -197,7 +197,7 @@ const BeepCardPageLoggedInView = () => {
           ))}
         </Row>
         {filteredBeepCards.length > itemsPerPage && (
-          <div className={` ms-auto me-2`} style={{width: '65vh', justifyContent: 'center'}}>
+          <div className={` ms-auto me-2`} style={{justifyContent: 'center'}}>
             <Button
               variant="outline-secondary"
               className="mb-3 mr-2"

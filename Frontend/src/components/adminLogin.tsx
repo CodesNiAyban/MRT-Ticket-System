@@ -26,7 +26,7 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
             const { admin, token } = await AdminApi.adminLogin(credentials);
             onLoginSuccessful(admin, token);
             localStorage.setItem('authToken', token);
-            navigate("/stations");
+            navigate("/beepcards");
         } catch (error) {
             if (error instanceof UnauthorizedError) {
                 setErrorText(error.message);
@@ -95,7 +95,7 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
                             type="submit"
                             disabled={isSubmitting}
                             className="btn btn-primary"
-                            style={{ fontSize: '1rem', borderRadius: '8px' }}
+                            style={{ fontSize: '1rem', borderRadius: '8px', padding: '15px 32px' }}
                         >
                             LOG IN
                         </Button>

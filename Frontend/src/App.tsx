@@ -12,12 +12,11 @@ import FarePage from "./pages/farePage";
 import LoginPage from "./pages/loginPage";
 import styles from "./styles/app.module.css";
 import { JwtPayload } from 'jsonwebtoken';
-import * as AdminApi from "./network/adminAPI"
+import * as AdminApi from "./network/adminAPI";
 
 function App() {
   const [loggedInAdmin, setLoggedInAdmin] = useState<Admin | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [currentToken, setCurrentToken] = useState<string | null>(null);
 
   async function onLogout() {
     try {
@@ -28,45 +27,17 @@ function App() {
       alert(error);
     }
   }
-
   useEffect(() => {
     async function fetchLoggedInAdmin() {
       try {
-        const admin = await adminApi.getLoggedInAdmin();
-        setLoggedInAdmin(admin);
+        const user = await adminApi.getLoggedInAdmin();
+        setLoggedInAdmin(user);
       } catch (error) {
         console.error(error);
       }
     }
-
-    const storedToken = localStorage.getItem('authToken');
-
-    if (storedToken) {
-      try {
-        const decodedToken = JSON.parse(atob(storedToken.split('.')[1])) as JwtPayload;
-
-        if (decodedToken.exp! * 1000 < Date.now()) {
-          // Token is expired, log the user out
-          onLogout();
-        } else {
-          // Token is valid, fetch the logged-in admin
-          fetchLoggedInAdmin();
-        }
-
-        setCurrentToken(storedToken);
-      } catch (error) {
-        // Error decoding token, log the user out
-        console.error(error);
-        onLogout();
-      }
-    }
-
-  }, []); // The empty dependency array ensures that this effect runs only once on mount
-
-  // Check if the token changes on every render
-  useEffect(() => {
-    onLogout();
-  }, [currentToken]);
+    fetchLoggedInAdmin();
+  }, []);
 
   return (
     <BrowserRouter>

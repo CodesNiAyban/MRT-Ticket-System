@@ -202,8 +202,8 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
         <Modal.Title className={`${styles.modalTitle} modal-title`}>
           {beepCardToEdit
             ? editMode
-              ? "Edit Beep Card™"
-              : "Load Beep Card™"
+              ? "Edit Beep Card"
+              : "Load Beep Card"
             : "Add Beep Card™"}
         </Modal.Title>
       </Modal.Header>

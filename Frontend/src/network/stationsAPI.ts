@@ -2,7 +2,10 @@ import { Stations } from "../model/stationsModel"
 import { fetchData } from "./fetcher";
 
 export async function fetchStations(): Promise<Stations[]> {
-    const response = await fetch("/api/stations", { method: "GET" });
+    const response = await fetch("/api/stations", { method: "GET", 
+    headers: {
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+    },});
     return response.json();
 }
 
@@ -18,6 +21,7 @@ export async function createStation(station: StationInput): Promise<Stations> {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
             },
             body: JSON.stringify(station),
         });
@@ -30,6 +34,7 @@ export async function updateStation(stationId: string, station: StationInput): P
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
             },
             body: JSON.stringify(station),
         });
@@ -37,5 +42,10 @@ export async function updateStation(stationId: string, station: StationInput): P
 }
 
 export async function deleteStation(stationsId: string) {
-    await fetchData("api/stations/" + stationsId, { method: "DELETE" });
+    await fetchData("api/stations/" + stationsId, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+        },
+    });
 }

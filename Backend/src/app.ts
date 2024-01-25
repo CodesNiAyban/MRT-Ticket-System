@@ -12,8 +12,8 @@ import beepCardRoute from "./routes/beepCardsRoute";
 import fareRoute from "./routes/fareRoutes";
 import stationRoute from "./routes/stationsRoute";
 import env from "./utils/validateENV";
-// import { verify, JsonWebTokenError, NotBeforeError, TokenExpiredError } from "jsonwebtoken";
-// import MongoStore from "connect-mongo";
+import MongoStore from "connect-mongo";
+import authenticateToken from "./middleware/authMiddleware"; // Update this with the correct path
 
 // Intializing the express app
 const app = express();
@@ -46,16 +46,18 @@ app.use(session({
 	secret: env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: false,
-	store: new session.MemoryStore(), // Use MemoryStore for local storage
+	store: MongoStore.create({
+		mongoUrl: env.MONGO_CONNECTION_STRING
+	}),
 	cookie: {
-		maxAge: 60 * 60 * 1000, // Session duration in milliseconds
+		maxAge: 60 * 3600 * 1000, // Session duration in milliseconds
 	},
 }));
 
 // Declaring station API URL
-app.use("/api/stations", stationRoute);
-app.use("/api/beepCards", beepCardRoute);
-app.use("/api/fare", fareRoute);
+app.use("/api/stations", authenticateToken, stationRoute);
+app.use("/api/beepCards", authenticateToken, beepCardRoute);
+app.use("/api/fare", authenticateToken, fareRoute);
 app.use("/api/admin", adminRoute);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
