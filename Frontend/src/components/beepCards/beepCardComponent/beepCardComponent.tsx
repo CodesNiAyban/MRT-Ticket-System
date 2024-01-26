@@ -1,10 +1,8 @@
 import React from "react";
 import { Card } from "react-bootstrap";
-import { BeepCard as BeepCardModel } from "../../model/beepCardModel";
-import { formatDate } from "../../utils/formatDate";
-import { MdDelete } from "react-icons/md";
-import styles from "./beepCardComponent.module.css";
-import styleUtils from "./beepCardComponent.utils.module.css";
+import { BeepCard as BeepCardModel } from "../../../model/beepCardModel";
+import { formatDate } from "../../../utils/formatDate";
+import styles from "././beepCardComponent.module.css";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
 interface BeepCardProps {
@@ -34,8 +32,8 @@ const BeepCard: React.FC<BeepCardProps> = ({
   return (
     <Card className={`${styles.beepCard} ${className}`} onClick={() => onBeepCardClicked(beepCard)}>
       <Card.Body className={styles.cardBody}>
-        <Card.Title className={styleUtils.flexCenter}>
-          UUID: {UUIC}
+        <Card.Title className={styles.flexCenter}>
+          CARD: {UUIC}
           <RiDeleteBin6Line
             className={`text-muted ms-auto ${styles.deleteIcon}`}
             onClick={(e) => {
@@ -45,7 +43,7 @@ const BeepCard: React.FC<BeepCardProps> = ({
           />
         </Card.Title>
         <Card.Text className={styles.cardText}>
-          Balance: {balance}
+          BALANCE: <p>{balance}</p>
         </Card.Text>
       </Card.Body>
       <Card.Footer className={`text-muted ${styles.cardFooter}`}>

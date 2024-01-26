@@ -1,5 +1,4 @@
-// NavBarLoggedInView.tsx
-import { Button, Modal, Navbar, Nav } from "react-bootstrap";
+import { Button, Modal, Navbar, Nav, Toast } from "react-bootstrap";
 import { Admin } from "../../model/adminModel";
 import * as AdminApi from "../../network/adminAPI";
 import styleUtils from "../styles/utils.module.css";
@@ -14,6 +13,7 @@ interface NavBarLoggedInViewProps {
 
 const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProps) => {
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
 
     async function logout() {
         try {
@@ -21,7 +21,6 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProp
             onLogoutSuccessful();
         } catch (error) {
             console.error(error);
-            alert(error);
         }
     }
 

@@ -1,12 +1,18 @@
-import { Button, Form, Modal, Alert } from "react-bootstrap";
+// AddEditBeepCardDialog.tsx
+import React, { useEffect, useState } from "react";
+import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
-import { BeepCard } from "../../model/beepCardModel";
-import * as BeepCardsApi from "../../network/beepCardAPI";
-import { BeepCardInput } from "../../network/beepCardAPI";
-import TextInputField from "../form/textInputFields";
-import { useState, useEffect } from "react";
-import * as FareApi from "../../network/fareAPI";
-import styles from "./addEditBeepCardDialog.module.css";
+import { BeepCard } from "../../../model/beepCardModel";
+import * as BeepCardsApi from "../../../network/beepCardAPI";
+import { BeepCardInput } from "../../../network/beepCardAPI";
+import styles from "././addEditBeepCardDialog.module.css";
+import ConfirmationModal from "./addEditCardConfirmModal";
+import {
+  generateDefaultNumber,
+  getDefaultLoadPrice,
+} from "./addEditBeepCardConstants";
+import BeepCardFormFields from "./addEditBeepCardFormFields"; // Import the extracted component
+import AlertComponent from "./addEditBeepCardAlert";
 
 interface AddEditBeepCardDialogProps {
   beepCardToEdit?: BeepCard;
@@ -14,28 +20,6 @@ interface AddEditBeepCardDialogProps {
   onBeepCardSaved: (beepCard: BeepCard) => void;
   editMode: boolean;
 }
-
-const generateDefaultNumber = () => {
-  const generatedUUIC =
-    "637805" +
-    Math.floor(Math.random() * Math.pow(10, 9))
-      .toString()
-      .padStart(9, "0");
-  return generatedUUIC;
-};
-
-const getDefaultLoadPrice = async () => {
-  try {
-    const fares = await FareApi.fetchFare();
-    const defaultLoadFare = fares.find(
-      (fare) => fare.fareType === "Default Load"
-    );
-    return defaultLoadFare?.price || 10;
-  } catch (error) {
-    console.error(error);
-    return 10;
-  }
-};
 
 const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   beepCardToEdit,
@@ -114,9 +98,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   };
 
   const handleConfirmation = async () => {
-    // Handle confirmation logic here
     setShowConfirmationModal(false);
-    // Continue with the form submission or any other action
     const input = getValues();
     onSubmit(input);
   };
@@ -204,67 +186,20 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
             ? editMode
               ? "Edit Beep Card"
               : "Load Beep Card"
-            : "Add Beep Card™"}
+            : "Add Beep Card"}
         </Modal.Title>
       </Modal.Header>
 
       <Modal.Body className={`${styles.modalBody} modal-body`}>
         <Form id="addEditBeepCardForm" onSubmit={handleSubmit(onSubmit)}>
-          {!editMode && beepCardToEdit ? (
-            <>
-              <TextInputField
-                name="UUIC"
-                label="UUIC"
-                type="text"
-                placeholder="UUIC"
-                register={register}
-                registerOptions={{ required: "Required " }}
-                errors={errors.UUIC}
-                disabled
-              />
-              <TextInputField
-                name="balance"
-                label={editMode && beepCardToEdit ? "Balance" : "Load Amount"}
-                type="number"
-                placeholder={editMode && beepCardToEdit ? "Balance" : "Default Load"}
-                register={register}
-                registerOptions={{ required: "Required " }}
-                errors={errors.balance}
-              />
-            </>
-          ) : (
-            <>
-              <TextInputField
-                name="UUIC"
-                label="UUIC"
-                type="text"
-                placeholder="UUIC"
-                register={register}
-                registerOptions={{ required: "Required " }}
-                errors={errors.UUIC}
-              />
-
-              {!beepCardToEdit && (
-                <div className="mb-3">
-                  <Button variant="secondary" onClick={generateNumber}>
-                    Generate Account Number
-                  </Button>
-                </div>
-              )}
-
-              {editMode && beepCardToEdit && (
-                <TextInputField
-                  name="balance"
-                  label="Balance"
-                  type="number"
-                  placeholder="balance"
-                  register={register}
-                  registerOptions={{ required: "Required " }}
-                  errors={errors.balance}
-                />
-              )}
-            </>
-          )}
+          <BeepCardFormFields
+            editMode={editMode}
+            beepCardToEdit={beepCardToEdit}
+            register={register}
+            errors={errors}
+            setValue={setValue}
+            generateNumber={generateNumber}
+          />
         </Form>
       </Modal.Body>
 
@@ -285,7 +220,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
               variant="secondary"
               onClick={showConfirmation}
               disabled={isSubmitting}
-              className={`btn-secondary ${styles.secondaryButton}`}
+              className={`btn-primary ${styles.secondaryButton}`}
             >
               Show Confirmation
             </Button>
@@ -303,35 +238,21 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
         )}
       </Modal.Footer>
 
-
       {showAlert && (
-        <div className={`position-fixed top-0 start-50 translate-middle-x ${styles.alert}`}>
-          <Alert variant={alertVariant} onClose={() => setShowAlert(false)}>
-            {alertMessage}
-          </Alert>
-        </div>
+        <AlertComponent
+          variant={alertVariant}
+          message={alertMessage}
+          onClose={() => setShowAlert(false)}
+        />
       )}
 
-      <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)} centered className={styles.confirmationModal}>
-        <Modal.Header closeButton className={styles.confirmationModalHeader}>
-          <Modal.Title className={`${styles.confirmationModalTitle} confirmation-modal-title`}>Load Confirmation</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body className={`${styles.confirmationModalBody} confirmation-modal-body`}>
-          <p>Previous Balance: {previousBalance}</p>
-          <p>Added Value: {addedValue}</p>
-          <p>New Balance: {addedValue! + previousBalance!}</p>
-        </Modal.Body>
-
-        <Modal.Footer className={`${styles.confirmationModalFooter} confirmation-modal-footer`}>
-          <Button variant="secondary" onClick={() => setShowConfirmationModal(false)} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleConfirmation} disabled={isSubmitting}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <ConfirmationModal
+        show={showConfirmationModal}
+        onHide={() => setShowConfirmationModal(false)}
+        previousBalance={previousBalance}
+        addedValue={addedValue}
+        onConfirmation={handleConfirmation}
+      />
     </Modal>
   );
 };
