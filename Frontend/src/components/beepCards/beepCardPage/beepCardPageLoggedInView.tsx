@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { Button, Spinner, Modal, Container } from "react-bootstrap";
-import { BeepCard as BeepCardsModel } from "../../../model/beepCardModel"; // Replace with your actual path
-import * as BeepCardApi from "../../../network/beepCardAPI"; // Replace with your actual path
+import { BeepCard as BeepCardsModel } from "../../../model/beepCardModel";
+import * as BeepCardApi from "../../../network/beepCardAPI";
 import styles from "././beepCardPageLoggedInView.module.css";
 import AddEditBeepCardDialog from "../addEditBeepCard/addEditBeepCardDialog";
 import { formatDate } from "../../../utils/formatDate";
 import Buttons from "./beepCardPageButtons";
 import BeepCardsGrid from "./beepCardPageGrid";
-import AlertComponent from "./beepCardPageToast"; // Import the new AlertComponent
+import AlertComponent from "./beepCardPageToast";
 
 const BeepCardPageLoggedInView = () => {
   const [beepCards, setBeepCards] = useState<BeepCardsModel[]>([]);

@@ -27,7 +27,7 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
         <>
           <TextInputField
             name="UUIC"
-            label="UUIC"
+            label="Beep Card ID"
             type="text"
             placeholder="UUIC"
             register={register}
@@ -36,13 +36,13 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
             disabled
           />
           <TextInputField
-             name="balance"
-             label="Balance"
-             type="number"
-             placeholder="balance"
-             register={register}
-             registerOptions={{ required: "Required " }}
-             errors={errors.balance}
+            name="balance"
+            label="Balance"
+            type="number"
+            placeholder="balance"
+            register={register}
+            registerOptions={{ required: "Required " }}
+            errors={errors.balance}
           />
         </>
       ) : (
@@ -59,7 +59,7 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
 
           {!beepCardToEdit && (
             <div className="mb-3">
-              <Button variant="secondary" onClick={generateNumber}>
+              <Button variant="warning" onClick={generateNumber}>
                 Generate Account Number
               </Button>
             </div>

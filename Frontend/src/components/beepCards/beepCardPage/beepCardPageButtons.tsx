@@ -41,12 +41,12 @@ const Buttons: React.FC<ButtonsProps> = ({
                     {editMode ? (
                         <>
                             <BiEdit />
-                            List Card with Edit Mode
+                            List Card with Edit
                         </>
                     ) : (
                         <>
                             <TbCurrencyPeso />
-                            Load Card Mode
+                            Load Card
                         </>
                     )}
                 </Button>

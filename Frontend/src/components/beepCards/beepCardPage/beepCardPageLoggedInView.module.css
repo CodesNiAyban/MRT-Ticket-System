@@ -173,3 +173,70 @@ body {
   height: 100vh;
   /* Adjust the height as needed */
 }
+
+.beepCardListItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.beepCardListItem:hover {
+  background-color: #e2e6ea;
+}
+
+.beepCardDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.beepCardID {
+  font-weight: bold;
+}
+
+.customToast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  max-width: 100%;
+  z-index: 9999;
+}
+
+/* Customize the toast position */
+.topstart {
+  top: 20px;
+}
+
+.topend {
+  top: 20px;
+  left: 20px;
+}
+
+.bottom-start {
+  bottom: 20px;
+  right: 20px;
+}
+
+.bottom-end {
+  bottom: 20px;
+  left: 20px;
+}
+
+/* Customize the toast colors */
+.toast-success {
+  background-color: #4caf50;
+  /* Green */
+  color: #fff;
+}
+
+.toast-danger {
+  background-color: #f44336;
+  /* Red */
+  color: #fff;
+}

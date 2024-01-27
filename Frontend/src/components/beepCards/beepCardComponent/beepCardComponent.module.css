@@ -1,22 +1,51 @@
-.beepCardPage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.beepCardGrid {
-  width: 100%;
-}
+/* BeepCardComponent.module.css */
 
 .beepCard {
-  min-height: 200px;
-  min-width: 150px;
-  transition: box-shadow .2s ease-in-out;
-  cursor: pointer;
+  background-color: blanchedalmond;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 15px 30px;
+  margin: 10px;
+  transition: transform 0.3s ease-in-out;
 }
 
 .beepCard:hover {
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+  transform: scale(1.05);
+}
+
+.cardBody {
+  overflow: hidden;
+  mask-image: linear-gradient(180deg, #000 60%, transparent);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 18px;
+  color: #333333;
+}
+
+.deleteIcon {
+  font-size: 24px;
+  color: #888888;
+  cursor: pointer;
+}
+
+.cardText {
+  font-size: 16px;
+  color: #555555;
+}
+
+.cardFooter {
+  font-size: 14px;
+  color: #999999;
+}
+
+/* Add the following styles to your global styles or App.css */
+
+.body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .blockCenter {
@@ -42,7 +71,75 @@
   text-align: center;
 }
 
-.alertOverlay {
-  z-index: 1000;
-  /* Adjust the value as needed to make it higher than other elements */
+.textCenter {
+  text-align: center;
+}
+
+.container-middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.beepCardListItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.beepCardListItem:hover {
+  background-color: #e2e6ea;
+}
+
+.beepCardDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.beepCardID {
+  font-weight: bold;
+}
+
+.customButton {
+  padding: 10px 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 50px;
+  padding: 15px 30px;
+  margin: 10px;
+  transition: transform 0.5s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+
+.customButton:hover {
+  transform: scale(1.05);
+}
+
+.pagination {
+  margin-left: auto;
+}
+
+.alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-container {
+  position: fixed;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
 }

@@ -11,7 +11,7 @@ import {
   generateDefaultNumber,
   getDefaultLoadPrice,
 } from "./addEditBeepCardConstants";
-import BeepCardFormFields from "./addEditBeepCardFormFields"; // Import the extracted component
+import BeepCardFormFields from "./addEditBeepCardFormFields";
 import AlertComponent from "./addEditBeepCardAlert";
 
 interface AddEditBeepCardDialogProps {
@@ -40,6 +40,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     },
   });
 
+  const [isLoading, setIsLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertVariant, setAlertVariant] = useState<"success" | "danger">(
@@ -61,13 +62,16 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
 
   const setDefaultBalance = async () => {
     if (!beepCardToEdit) {
+      // setIsLoading(true);
       const defaultLoadPrice = await getDefaultLoadPrice();
       setValue("balance", defaultLoadPrice);
+      // setIsLoading(false);
       return defaultLoadPrice;
     }
   };
 
   useEffect(() => {
+    setIsLoading(true);
     const setDefaultValues = async () => {
       setValue("UUIC", beepCardToEdit?.UUIC || generateDefaultNumber());
 
@@ -79,6 +83,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
           setValue("balance", defaultBalance);
         }
       }
+      setIsLoading(false);
     };
 
     setDefaultValues();
@@ -91,21 +96,26 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   };
 
   const showConfirmation = () => {
+    setIsLoading(true);
     const balance = parseInt(getValues("balance") as unknown as string, 10);
     setPreviousBalance(beepCardToEdit?.balance || 0);
     setAddedValue(balance);
     setShowConfirmationModal(true);
+        setIsLoading(true);
   };
 
   const handleConfirmation = async () => {
+    setIsLoading(true);
     setShowConfirmationModal(false);
     const input = getValues();
-    onSubmit(input);
+    await onSubmit(input);
+    setIsLoading(false);
   };
 
   const onSubmit = async (input: BeepCardInput) => {
     const defaultLoadPrice = await getDefaultLoadPrice();
     try {
+      setIsLoading(true);
       if (!beepCardToEdit) {
         if (!input.UUIC || !/^\d{15}$/.test(input.UUIC)) {
           showAlertMessage(
@@ -127,7 +137,11 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       }
 
       const balanceValue = parseInt(input.balance as unknown as string, 10);
-      if (isNaN(balanceValue) || balanceValue < defaultLoadPrice || balanceValue > 5000) {
+      if (
+        isNaN(balanceValue) ||
+        balanceValue < defaultLoadPrice ||
+        balanceValue > 5000
+      ) {
         showAlertMessage(
           "danger",
           `Invalid balance. It should be between ${defaultLoadPrice} and 5000.`
@@ -154,7 +168,6 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       }
 
       onBeepCardSaved(beepCardResponse);
-
     } catch (error: any) {
       console.error(error);
 
@@ -169,8 +182,13 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
           "Error: Duplicate UUIC. Please use a different UUIC."
         );
       } else {
-        showAlertMessage("danger", "Error saving Beep Card. Please try again.");
+        showAlertMessage(
+          "danger",
+          "Error saving Beep Card. Please try again."
+        );
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -191,16 +209,20 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       </Modal.Header>
 
       <Modal.Body className={`${styles.modalBody} modal-body`}>
-        <Form id="addEditBeepCardForm" onSubmit={handleSubmit(onSubmit)}>
-          <BeepCardFormFields
-            editMode={editMode}
-            beepCardToEdit={beepCardToEdit}
-            register={register}
-            errors={errors}
-            setValue={setValue}
-            generateNumber={generateNumber}
-          />
-        </Form>
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <Form id="addEditBeepCardForm" onSubmit={handleSubmit(onSubmit)}>
+            <BeepCardFormFields
+              editMode={editMode}
+              beepCardToEdit={beepCardToEdit}
+              register={register}
+              errors={errors}
+              setValue={setValue}
+              generateNumber={generateNumber}
+            />
+          </Form>
+        )}
       </Modal.Body>
 
       <Modal.Footer className={`${styles.modalFooter} modal-footer`}>
@@ -216,14 +238,17 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
               Save
             </Button>
           ) : (
-            <Button
-              variant="secondary"
-              onClick={showConfirmation}
-              disabled={isSubmitting}
-              className={`btn-primary ${styles.secondaryButton}`}
-            >
-              Show Confirmation
-            </Button>
+            !isLoading ? (
+              // Render the button when isLoading is true
+              <Button
+                variant="primary"
+                onClick={showConfirmation}
+                disabled={isSubmitting}
+                className={`btn-primary ${styles.secondaryButton}`}
+              >
+                Show Confirmation
+              </Button>
+            ) : null
           )
         ) : (
           <Button
@@ -233,7 +258,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
             onClick={setDefaultBalance}
             className={`btn-primary ${styles.primaryButton}`}
           >
-            Save
+            Create
           </Button>
         )}
       </Modal.Footer>
@@ -252,6 +277,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
         previousBalance={previousBalance}
         addedValue={addedValue}
         onConfirmation={handleConfirmation}
+        isLoading={isLoading}
       />
     </Modal>
   );

@@ -22,5 +22,5 @@
   },
   "include": [
     "src"
-, "src/components/beepCards/beepCardPage/.tsx"  ]
+, "src/components/beepCards/beepCardPage/beepCardPageList.tsx"  ]
 }
