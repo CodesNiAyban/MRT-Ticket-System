@@ -31,7 +31,7 @@ export interface StationInput {
 }
 
 export async function createStation(station: StationInput): Promise<Stations> {
-    const response = await fetchData("api/stations",
+    const response = await fetchData("/api/stations",
         {
             method: "POST",
             headers: {

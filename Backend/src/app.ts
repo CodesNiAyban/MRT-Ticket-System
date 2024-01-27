@@ -1,7 +1,7 @@
 import bodyParser from "body-parser";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import cors from "cors";
+// import cors from "cors";
 import "dotenv/config";
 import express, { type NextFunction, type Request, type Response } from "express";
 import session from "express-session";
@@ -22,22 +22,12 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(morgan("dev"));
 
-app.use(cors({
-	origin: "http://localhost:3000", // Replace with your frontend URL
-	credentials: true,
-}));
-
-// Configure CORS
-app.use((req, res, next) => {
-	res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // Replace with your frontend URL
-	res.header("Access-Control-Allow-Credentials", "true");
-	res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-	res.header(
-		"Access-Control-Allow-Headers",
-		"Origin, X-Requested-With, Content-Type, Accept, Authorization"
-	);
-	next();
-});
+// app.use(cors({
+// 	origin: "https://mrtonline.onrender.com",
+// 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+// 	credentials: true,
+// 	optionsSuccessStatus: 204,
+// }));
 
 // Using the dependancies
 app.use(express.json());

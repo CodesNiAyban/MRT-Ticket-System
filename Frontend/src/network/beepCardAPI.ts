@@ -29,7 +29,7 @@ export interface BeepCardInput {
 }
 
 export async function createBeepCard(beepCard: BeepCardInput): Promise<BeepCard> {
-    const response = await fetchData("api/beepCards",
+    const response = await fetchData("/api/beepCards",
         {
             method: "POST",
             headers: {

@@ -1,8 +1,8 @@
 // BeepCardFormFields.tsx
 import React from "react";
-import TextInputField from "../../form/textInputFields";
-import { BeepCard } from "../../../model/beepCardModel";
 import { Button } from "react-bootstrap";
+import { BeepCard } from "../../../model/beepCardModel";
+import TextInputField from "../../form/textInputFields";
 
 interface BeepCardFormFieldsProps {
   editMode: boolean;
@@ -27,22 +27,22 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
         <>
           <TextInputField
             name="UUIC"
-            label="Beep Card ID"
+            label="UUIC"
             type="text"
-            placeholder="ID"
+            placeholder="UUIC"
             register={register}
             registerOptions={{ required: "Required " }}
             errors={errors.UUIC}
             disabled
           />
           <TextInputField
-            name="Balance"
-            label={editMode && beepCardToEdit ? "Balance" : "Load Amount"}
-            type="number"
-            placeholder={editMode && beepCardToEdit ? "Balance" : "Value"}
-            register={register}
-            registerOptions={{ required: "Required " }}
-            errors={errors.balance}
+             name="balance"
+             label="Balance"
+             type="number"
+             placeholder="balance"
+             register={register}
+             registerOptions={{ required: "Required " }}
+             errors={errors.balance}
           />
         </>
       ) : (
@@ -59,7 +59,7 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
 
           {!beepCardToEdit && (
             <div className="mb-3">
-              <Button variant="warning" onClick={generateNumber}>
+              <Button variant="secondary" onClick={generateNumber}>
                 Generate Account Number
               </Button>
             </div>
@@ -70,7 +70,7 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
               name="balance"
               label="Balance"
               type="number"
-              placeholder="Balance"
+              placeholder="balance"
               register={register}
               registerOptions={{ required: "Required " }}
               errors={errors.balance}
