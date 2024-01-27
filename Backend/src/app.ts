@@ -24,7 +24,7 @@ app.use(morgan("dev"));
 
 
 app.use(cors({
-	origin: "https://mrtonlineapi.onrender.com",
+	origin: "https://mrtonline.onrender.com",
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	optionsSuccessStatus: 204,
