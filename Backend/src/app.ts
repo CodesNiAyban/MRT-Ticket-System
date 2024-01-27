@@ -22,14 +22,18 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(morgan("dev"));
 
+
 app.use(cors({
-	origin: "https://mrtonlineapi.onrender.com/", // Replace with your frontend URL
+	origin: "https://mrtonlineapi.onrender.com",
+	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
+	optionsSuccessStatus: 204,
 }));
+  
 
 // Configure CORS
 app.use((req, res, next) => {
-	res.header("Access-Control-Allow-Origin", "https://mrtonlineapi.onrender.com/"); // Replace with your frontend URL
+	res.header("Access-Control-Allow-Origin", "https://mrtonline.onrender.com/"); // Replace with your frontend URL
 	res.header("Access-Control-Allow-Credentials", "true");
 	res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 	res.header(
