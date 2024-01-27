@@ -29,19 +29,19 @@ app.use(cors({
 	credentials: true,
 	optionsSuccessStatus: 204,
 }));
-  
 
-// Configure CORS
-app.use((req, res, next) => {
-	res.header("Access-Control-Allow-Origin", "https://mrtonline.onrender.com/"); // Replace with your frontend URL
-	res.header("Access-Control-Allow-Credentials", "true");
-	res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-	res.header(
-		"Access-Control-Allow-Headers",
-		"Origin, X-Requested-With, Content-Type, Accept, Authorization"
-	);
-	next();
-});
+
+// // Configure CORS
+// app.use((req, res, next) => {
+// 	res.header("Access-Control-Allow-Origin", "https://mrtonline.onrender.com/"); // Replace with your frontend URL
+// 	res.header("Access-Control-Allow-Credentials", "true");
+// 	res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+// 	res.header(
+// 		"Access-Control-Allow-Headers",
+// 		"Origin, X-Requested-With, Content-Type, Accept, Authorization"
+// 	);
+// 	next();
+// });
 
 // Using the dependancies
 app.use(express.json());
