@@ -4,7 +4,7 @@ import { logout } from "./adminAPI"; // Make sure to import your logout function
 
 export async function fetchFare(): Promise<Fare[]> {
     try {
-        const response = await fetch("/api/fare", {
+        const response = await fetchData("https://mrtonlineapi.onrender.com/api/fare", {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('authToken')}`,
@@ -36,7 +36,7 @@ export interface FareInput {
 
 export async function updateFare(FareId: string, Fare: FareInput): Promise<Fare> {
     try {
-        const response = await fetchData("/api/fare/" + FareId, {
+        const response = await fetchData("https://mrtonlineapi.onrender.com/api/fare/" + FareId, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",

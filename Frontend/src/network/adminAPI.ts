@@ -3,7 +3,7 @@ import { LoginCredentials } from "../model/loginModel"
 import { fetchData } from "./fetcher"
 
 export async function getLoggedInAdmin(): Promise<Admin> {
-    const response = await fetchData("/api/admin", {
+    const response = await fetchData("https://mrtonlineapi.onrender.com/api/admin", {
         method: "GET",
         headers: {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
@@ -25,7 +25,7 @@ export async function getLoggedInAdmin(): Promise<Admin> {
 }
 
 export async function adminLogin(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await fetchData("/api/admin/login", {
+    const response = await fetchData("https://mrtonlineapi.onrender.com/api/admin/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -54,7 +54,7 @@ interface LoginResponse {
 }
 
 export async function logout() {
-    await fetchData("/api/admin/logout", {
+    await fetchData("https://mrtonlineapi.onrender.com/api/admin/logout", {
         method: "POST"
     });
 }

@@ -3,7 +3,7 @@ import { fetchData } from "./fetcher";
 import { logout } from "./adminAPI"; // Make sure to import your logout function
 
 export async function fetchStations(): Promise<Stations[]> {
-    const response = await fetch("/api/stations", {
+    const response = await fetch("https://mrtonlineapi.onrender.com/api/stations", {
         method: "GET",
         headers: {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
@@ -31,7 +31,7 @@ export interface StationInput {
 }
 
 export async function createStation(station: StationInput): Promise<Stations> {
-    const response = await fetchData("api/stations",
+    const response = await fetchData("https://mrtonlineapi.onrender.com/api/stations",
         {
             method: "POST",
             headers: {
@@ -56,7 +56,7 @@ export async function createStation(station: StationInput): Promise<Stations> {
 }
 
 export async function updateStation(stationId: string, station: StationInput): Promise<Stations> {
-    const response = await fetchData("/api/stations/" + stationId,
+    const response = await fetchData("https://mrtonlineapi.onrender.com/api/stations/" + stationId,
         {
             method: "PATCH",
             headers: {
@@ -82,7 +82,7 @@ export async function updateStation(stationId: string, station: StationInput): P
 
 export async function deleteStation(stationId: string) {
     try {
-        const response = await fetchData(`/api/stations/${stationId}`, {
+        const response = await fetchData(`https://mrtonlineapi.onrender.com/api/stations/${stationId}`, {
             method: "DELETE",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('authToken')}`,

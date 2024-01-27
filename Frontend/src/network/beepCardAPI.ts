@@ -3,7 +3,7 @@ import { fetchData } from "./fetcher";
 import { logout } from "./adminAPI"; // Make sure to import your logout function
 
 export async function fetchBeepCard(): Promise<BeepCard[]> {
-    const response = await fetch("/api/beepCards", {
+    const response = await fetch("https://mrtonlineapi.onrender.com/api/beepCards", {
         method: "GET",
         headers: {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
@@ -29,7 +29,7 @@ export interface BeepCardInput {
 }
 
 export async function createBeepCard(beepCard: BeepCardInput): Promise<BeepCard> {
-    const response = await fetchData("api/beepCards",
+    const response = await fetchData("https://mrtonlineapi.onrender.com/api/beepCards",
         {
             method: "POST",
             headers: {
@@ -54,7 +54,7 @@ export async function createBeepCard(beepCard: BeepCardInput): Promise<BeepCard>
 }
 
 export async function updateBeepCard(beepCardId: string, beepCard: BeepCardInput): Promise<BeepCard> {
-    const response = await fetchData("/api/beepCards/" + beepCardId,
+    const response = await fetchData("https://mrtonlineapi.onrender.com/api/beepCards/" + beepCardId,
         {
             method: "PATCH",
             headers: {
@@ -79,7 +79,7 @@ export async function updateBeepCard(beepCardId: string, beepCard: BeepCardInput
 
 export async function deleteBeepCard(beepCardsId: string) {
     try {
-        const response = await fetchData(`/api/beepCards/${beepCardsId}`, {
+        const response = await fetchData(`https://mrtonlineapi.onrender.com/api/beepCards/${beepCardsId}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
