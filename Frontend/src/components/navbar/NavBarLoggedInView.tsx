@@ -1,19 +1,19 @@
-import { Button, Modal, Navbar, Nav, Toast } from "react-bootstrap";
+import { Button, Modal, Navbar, Nav } from "react-bootstrap";
 import { Admin } from "../../model/adminModel";
 import * as AdminApi from "../../network/adminAPI";
-import styleUtils from "../styles/utils.module.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 
 interface NavBarLoggedInViewProps {
     user: Admin;
     onLogoutSuccessful: () => void;
 }
 
-const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProps) => {
+const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
+    user,
+    onLogoutSuccessful,
+}) => {
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-    const [toastMessage, setToastMessage] = useState<string | null>(null);
 
     async function logout() {
         try {
@@ -46,28 +46,33 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProp
                     Fare
                 </Nav.Link>
             </Nav.Item>
-            <Nav.Item className={`${"ms-auto"}`}>
-                <Navbar.Text className={`${"me-4"}`}>
-                    Signed in as: {user.username}
-                </Navbar.Text>
-                <Button onClick={() => setShowConfirmationModal(true)} className={`${"ms-auto"}`}>
+
+            <Nav.Item className="ms-auto d-lg-flex align-items-center me-4 center-content">
+                <Navbar.Text className="me-lg-2">Signed in as: {user.username}</Navbar.Text>
+                <Button
+                    className="ms-lg-2 btn-logout"
+                    onClick={() => setShowConfirmationModal(true)}
+                >
                     Log out
                 </Button>
             </Nav.Item>
 
             {/* Confirmation Modal */}
-            <Modal 
-            show={showConfirmationModal} 
-            centered
-            onHide={() => setShowConfirmationModal(false)}
-            style={{ borderRadius: '12px', backgroundColor: 'white' }}  // Set the background color here
+            <Modal
+                show={showConfirmationModal}
+                centered
+                onHide={() => setShowConfirmationModal(false)}
+                style={{ borderRadius: "12px", backgroundColor: "white" }}
             >
                 <Modal.Header closeButton>
                     <Modal.Title>Logout Confirmation</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>Are you sure you want to log out?</Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowConfirmationModal(false)}>
+                    <Button
+                        variant="secondary"
+                        onClick={() => setShowConfirmationModal(false)}
+                    >
                         Cancel
                     </Button>
                     <Button variant="primary" onClick={handleLogoutConfirmation}>

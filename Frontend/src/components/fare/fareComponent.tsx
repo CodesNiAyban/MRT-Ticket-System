@@ -1,5 +1,4 @@
-import styles from "../../styles/station.module.css"
-import styleUtils from "../../styles/utils.module.css"
+import styles from "./fare.module.css"
 import { Card } from "react-bootstrap";
 import { Fare as FareModel } from "../../model/fareModel"
 import { formatDate } from "../../utils/formatDate";
@@ -28,10 +27,10 @@ const Fare = ({ fares, onFareClicked, className }: FareProps) => {
 
     return (
         <Card
-            className={`${styles.station} ${className}`}
+            className={`${styles.fare} ${className}`}
             onClick={() => onFareClicked(fares)}>
             <Card.Body className={styles.cardBody}>
-                <Card.Title className={styleUtils.flexCenter}>
+                <Card.Title className={styles.flexCenter}>
                     {fareType}
                 </Card.Title>
                 <Card.Text className={styles.cardText}>

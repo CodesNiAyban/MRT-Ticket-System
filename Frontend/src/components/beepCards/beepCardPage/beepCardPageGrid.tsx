@@ -1,4 +1,3 @@
-// BeepCardsGrid.tsx
 import React from "react";
 import { Button, Col, Row } from "react-bootstrap";
 import BeepCards from "../beepCardComponent/beepCardComponent";
@@ -37,8 +36,8 @@ const BeepCardsGrid: React.FC<BeepCardsGridProps> = ({
                     <Col
                         key={beepCard._id}
                         xs={12}
-                        sm={6}
-                        lg={4}
+                        sm={12}
+                        lg={12}
                         className={`mb-3 ${styles.beepCardGrid}`}
                     >
                         <BeepCards
@@ -51,29 +50,6 @@ const BeepCardsGrid: React.FC<BeepCardsGridProps> = ({
                     </Col>
                 ))}
             </Row>
-            {filteredBeepCards.length > itemsPerPage && (
-                <div
-                    className={` ms-auto me-2`}
-                    style={{ justifyContent: "center" }}
-                >
-                    <Button
-                        variant="outline-secondary"
-                        className="mb-3 mr-2"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        variant="outline-secondary"
-                        className="mb-3 mr-2"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                        Next
-                    </Button>
-                </div>
-            )}
         </>
     );
 };

@@ -124,26 +124,17 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
         if (!input.UUIC || !/^\d{15}$/.test(input.UUIC)) {
           showAlertMessage(
             "danger",
-            "Invalid UUIC format. Please enter 15 digits."
+            "Invalid Beep Card ID format. Please enter 15 digits."
           );
           return;
         }
 
         input.balance = await getDefaultLoadPrice();
       } else {
-        if (
-          input.UUIC === beepCardToEdit.UUIC &&
-          parseFloat(input.balance.toString()) === beepCardToEdit.balance
-          && editMode
-        ) {
-          showAlertMessage("danger", "No changes made. Please modify the beep card data.");
-          return;
-        }
-
         if (!/^637805\d{9}$/.test(input.UUIC)) {
           showAlertMessage(
             "danger",
-            "Invalid UUIC format. Must start with '637805' and have 15 digits."
+            "Invalid Beep Card ID format. Must start with '637805' and have 15 digits."
           );
           return;
         }
@@ -193,7 +184,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       } else if (error.response && error.response.status === 409) {
         showAlertMessage(
           "danger",
-          "Error: Duplicate UUIC. Please use a different UUIC."
+          "Error: Duplicate Beep Card ID. Please use a different Beep Card ID."
         );
       } else {
         showAlertMessage(
@@ -203,6 +194,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       }
     } finally {
       setIsLoading(false);
+      setConfirming(false);
     }
   };
 
@@ -279,7 +271,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
                     ><span className="ml-2">Updating...</span></Spinner>
                   </>
                 )}
-                {!confirming && 'Confirm'}
+                {!confirming && 'Show Confirmation'}
               </Button>
             ) : null
           )

@@ -32,7 +32,7 @@ const BeepCard: React.FC<BeepCardProps> = ({
   return (
     <Card className={`${styles.beepCard} ${className}`} onClick={() => onBeepCardClicked(beepCard)}>
       <Card.Body className={styles.cardBody}>
-        <Card.Title className={styles.flexCenter}>
+        <Card.Title className={`${styles.flexCenter} ${styles.cardTitle}`}>
           CARD: {UUIC}
           <RiDeleteBin6Line
             className={`text-muted ms-auto ${styles.deleteIcon}`}

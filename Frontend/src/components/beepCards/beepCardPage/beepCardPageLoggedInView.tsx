@@ -1,7 +1,7 @@
 // BeepCardPageLoggedInView.tsx
 
 import React, { useEffect, useState } from "react";
-import { Button, Spinner, Modal, Container, Card } from "react-bootstrap";
+import { Button, Spinner, Modal, Container, Card, Pagination, Alert, Toast } from "react-bootstrap";
 import { BeepCard as BeepCardsModel } from "../../../model/beepCardModel";
 import * as BeepCardApi from "../../../network/beepCardAPI";
 import styles from "././beepCardPageLoggedInView.module.css";
@@ -9,7 +9,6 @@ import AddEditBeepCardDialog from "../addEditBeepCard/addEditBeepCardDialog";
 import { formatDate } from "../../../utils/formatDate";
 import Buttons from "./beepCardPageButtons";
 import BeepCardsGrid from "./beepCardPageGrid";
-import AlertComponent from "./beepCardPageToast";
 
 interface ConfirmationModalState {
   show: boolean;
@@ -36,6 +35,7 @@ const BeepCardPageLoggedInView = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
   const [editMode, setEditMode] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     async function loadBeepCards() {
@@ -67,10 +67,10 @@ const BeepCardPageLoggedInView = () => {
               (existingBeepCard) => existingBeepCard._id !== beepCard._id
             )
           );
-          showCustomAlert("success", "Beep Card deleted successfully.");
+          showCustomToast("success", "Beep Card deleted successfully.");
         } catch (error) {
           console.error(error);
-          showCustomAlert("danger", "Error deleting Beep Card. Please try again.");
+          showCustomToast("danger", "Error deleting Beep Card. Please try again.");
         } finally {
           setBeepCardsLoading(false);
           setConfirmationModal({
@@ -83,18 +83,19 @@ const BeepCardPageLoggedInView = () => {
       },
       message: "Are you sure you want to delete this Beep Card?",
       card: beepCard,
-    } as ConfirmationModalState)); // Explicitly provide the type
+    } as ConfirmationModalState));
   };
 
-  const showCustomAlert = (variant: "success" | "danger", message: string) => {
+  const showCustomToast = (variant: "success" | "danger", message: string) => {
     setAlertVariant(variant);
     setAlertMessage(message);
-    setShowAlert(true);
+    setShowToast(true);
     setTimeout(() => {
-      setShowAlert(false);
+      setShowToast(false);
       setAlertMessage(null);
     }, 3000);
   };
+
   const filteredBeepCards = beepCards.filter(
     (beepCard) =>
       beepCard.UUIC.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -108,8 +109,35 @@ const BeepCardPageLoggedInView = () => {
   const itemsPerPage = 9;
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(filteredBeepCards.length / itemsPerPage);
+  const showPagination = filteredBeepCards.length > itemsPerPage;
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
+  };
+
+  const renderPaginationButtons = () => {
+    if (!showPagination) {
+      return null;
+    }
+
+    const buttons = [];
+    const maxButtons = 5;
+    const totalPageButtons = Math.min(maxButtons, totalPages);
+    const startPage = Math.max(1, Math.min(currentPage - Math.floor(maxButtons / 2), totalPages - maxButtons + 1));
+
+    for (let i = startPage; i < startPage + totalPageButtons; i++) {
+      buttons.push(
+        <Pagination.Item
+          key={i}
+          active={i === currentPage}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </Pagination.Item>
+      );
+    }
+
+    return buttons;
   };
 
   let createdUpdatedText: string;
@@ -130,11 +158,29 @@ const BeepCardPageLoggedInView = () => {
         <h2 className={`${styles.textCenter} mb-4`}>BEEP CARDS</h2>
       </div>
 
-      <AlertComponent
-        variant={alertVariant}
-        message={alertMessage}
-        onClose={() => setShowAlert(false)}
-      />
+      <Toast
+        show={showToast}
+        onClose={() => setShowToast(false)}
+        delay={3000}
+        autohide
+        style={{
+          position: 'fixed',
+          top: 16,
+          right: 16,
+          zIndex: 9999,
+          width: '300px', // Set the width as needed
+          background: alertVariant === "success" ? "#28a745" : "#dc3545", // Background color
+          color: "#fff", // Text color
+        }}
+        className={`${styles.customToast}`}
+      >
+        <Toast.Header>
+          <strong className={`me-auto`}>
+            {alertVariant === "success" ? "Success" : "Error"}
+          </strong>
+        </Toast.Header>
+        <Toast.Body>{alertMessage}</Toast.Body>
+      </Toast>
 
       {beepCardsLoading && (
         <div
@@ -147,11 +193,13 @@ const BeepCardPageLoggedInView = () => {
       )}
 
       {showBeepCardsLoadingError && (
-        <AlertComponent
+        <Alert
           variant="danger"
-          message="Something went wrong. Please refresh the page."
           onClose={() => setShowBeepCardsLoadingError(false)}
-        />
+          dismissible
+        >
+          Something went wrong. Please refresh the page.
+        </Alert>
       )}
 
       {!beepCardsLoading && !showBeepCardsLoadingError && (
@@ -176,6 +224,27 @@ const BeepCardPageLoggedInView = () => {
         />
       )}
 
+      {!beepCardsLoading && (
+        filteredBeepCards.length === 0 && (
+          <div className={`${styles.containerMiddle} ${styles.textShadow}`} style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <h4>No results found</h4>
+          </div>
+        )
+      )}
+
+      {!beepCardsLoading && (
+        beepCards.length === 0 && !beepCardsLoading && (
+          <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
+            <h4>No beep cards generated</h4>
+          </div>
+        )
+      )}
+
+
       {showAddBeepCardDialog && (
         <AddEditBeepCardDialog
           onDismiss={() => setShowAddBeepCardDialog(false)}
@@ -183,7 +252,7 @@ const BeepCardPageLoggedInView = () => {
           onBeepCardSaved={(newBeepCard) => {
             setBeepCards([...beepCards, newBeepCard]);
             setShowAddBeepCardDialog(false);
-            showCustomAlert("success", "Beep Card added successfully.");
+            showCustomToast("success", "Beep Card added successfully.");
           }}
         />
       )}
@@ -202,18 +271,17 @@ const BeepCardPageLoggedInView = () => {
               )
             );
             setBeepCardToEdit(null);
-            showCustomAlert("success", "Beep Card updated successfully.");
+            showCustomToast("success", "Beep Card updated successfully.");
           }}
         />
       )}
-
 
       <Modal show={confirmationModal.show} onHide={() => setConfirmationModal({
         show: false,
         action: () => { },
         message: "",
         card: null,
-      } as ConfirmationModalState)} className={`${styles.modalContent}`}centered>
+      } as ConfirmationModalState)} className={`${styles.modalContent}`} centered>
         <Modal.Header closeButton>
           <Modal.Title className={`${styles.modalTitle} modal-title`}>
             Delete Confirmation
@@ -261,22 +329,48 @@ const BeepCardPageLoggedInView = () => {
             className={`btn-danger ${styles.primaryButton} d-flex align-items-center`}
           >
             {beepCardsLoading && (
-                <>
-                  <Spinner
-                    animation="border"
-                    variant="secondary"
-                    size="sm"
-                    className={`${styles.loadingcontainer}`}
-                  />
-                  <span className="ml-2">Deleting...</span>
-                </>
-              )}
-              {!beepCardsLoading && 'Delete'}
+              <>
+                <Spinner
+                  animation="border"
+                  variant="secondary"
+                  size="sm"
+                  className={`${styles.loadingcontainer}`}
+                />
+                <span className="ml-2">Deleting...</span>
+              </>
+            )}
+            {!beepCardsLoading && 'Delete'}
 
           </Button>
         </Modal.Footer>
       </Modal>
 
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        visibility: showPagination ? 'visible' : 'hidden', // Hide or show based on showPagination
+      }}>
+        <Pagination>
+          <Pagination.First
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+          />
+          <Pagination.Prev
+            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+          />
+          {renderPaginationButtons()}
+          <Pagination.Next
+            onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          />
+          <Pagination.Last
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+          />
+        </Pagination>
+      </div>
     </Container>
   );
 };

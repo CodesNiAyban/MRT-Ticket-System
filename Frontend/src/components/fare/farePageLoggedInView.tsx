@@ -4,17 +4,15 @@ import {
   Col,
   Row,
   Spinner,
-  Alert,
   Container,
   Form,
-  Modal,
+  Toast,
 } from "react-bootstrap";
 import { Fare as FaresModel } from "../../model/fareModel";
 import * as FareApi from "../../network/fareAPI";
-import styles from "../../styles/stationPage.module.css";
-import styleUtils from "../../styles/utils.module.css";
+import styles from "./fare.module.css";
 import Fare from "./fareComponent";
-import EditFareDialog from "./editFareDialog"; // Import the EditFareDialog component
+import UpdateFareDialog from "./updateFareDialog";
 
 const FarePageLoggedInView = () => {
   const [fares, setFares] = useState<FaresModel[]>([]);
@@ -46,7 +44,7 @@ const FarePageLoggedInView = () => {
     loadFares();
   }, []);
 
-  const showAlertMessage = (variant: "success" | "danger", message: string) => {
+  const showToastMessage = (variant: "success" | "danger", message: string) => {
     setAlertVariant(variant);
     setAlertMessage(message);
     setShowAlert(true);
@@ -69,29 +67,27 @@ const FarePageLoggedInView = () => {
 
   const handleFareUpdate = async (updatedFare: FaresModel) => {
     try {
-      showAlertMessage("success", "Fare updated successfully.");
-
-      // Reload fares after successful update
+      // Reload fares after a successful update
       const updatedFares = await FareApi.fetchFare();
       setFares(updatedFares);
-
       setFareToEdit(null);
       setUpdateText("");
       setShowEditForm(false);
+      showToastMessage("success", "Fare updated successfully.");
     } catch (error) {
       console.error(error);
-      showAlertMessage("danger", "Error updating fare. Please try again.");
+      showToastMessage("danger", "Error updating fare. Please try again.");
     }
   };
 
   const faresGrid =
     fares.length > 0 ? (
-      <Row xs={1} md={2} xl={3} className={`g-4 ${styles.stationGrid}`}>
+      <Row xs={1} md={2} xl={3} className={`g-4 ${styles.fareGrid}`}>
         {fares.map((fare) => (
           <Col key={fare._id}>
             <Fare
               onFareClicked={() => handleEditFormOpen(fare)}
-              className={styles.station}
+              className={styles.beepCard}
               fares={fare}
             />
           </Col>
@@ -103,17 +99,12 @@ const FarePageLoggedInView = () => {
 
   return (
     <Container className={styles.settingsContainer}>
-      <h1
-        className={`${styleUtils.blockCenter} ${
-          styles.settingsTitle
-        } ${"mb-4"}`}
-      >
-        OFFICIAL FARES
-      </h1>
-
+      <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
+        <h2 className={`${styles.textCenter} mb-4`}>OFFICIAL FARES</h2>
+      </div>
       {faresLoading && (
         <div
-          className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}
+          className={`${styles.flexCenterLoading} ${styles.blockCenterLoading}`}
         >
           <Spinner animation="border" role="status">
             <span className="visually-hidden">Loading...</span>
@@ -123,33 +114,32 @@ const FarePageLoggedInView = () => {
 
       {!faresLoading && <>{faresGrid}</>}
 
-      {fareToEdit && (
-        <div>
-          <Form.Control
-            type="text"
-            placeholder="Enter update text"
-            value={updateText}
-            onChange={(e) => setUpdateText(e.target.value)}
-            className={`mb-3 ${styles.updateText}`}
-          />
-          <Button
-            variant="primary"
-            className={`mb-3 ${styles.confirmButton}`}
-            onClick={() => handleFareUpdate(fareToEdit)}
-          >
-            Confirm Update
-          </Button>
-        </div>
-      )}
-
-      {showAlert && (
-        <Alert variant={alertVariant} className={styleUtils.blockCenter}>
-          {alertMessage}
-        </Alert>
-      )}
+      <Toast
+        show={showAlert}
+        onClose={() => setShowAlert(false)}
+        delay={3000}
+        autohide
+        style={{
+          position: 'fixed',
+          top: 16,
+          right: 16,
+          zIndex: 9999,
+          width: '300px',
+          background: alertVariant === "success" ? "#28a745" : "#dc3545",
+          color: "#fff",
+        }}
+        className={`${styles.customToast}`}
+      >
+        <Toast.Header closeButton={false}>
+          <strong className="me-auto">
+            {alertVariant === "success" ? "Success" : "Error"}
+          </strong>
+        </Toast.Header>
+        <Toast.Body>{alertMessage}</Toast.Body>
+      </Toast>
 
       {showEditForm && editFormData && (
-        <EditFareDialog
+        <UpdateFareDialog
           fareToEdit={editFormData}
           onDismiss={handleEditFormClose}
           onFareSaved={handleFareUpdate}

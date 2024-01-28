@@ -3,13 +3,11 @@
 .beepCard {
   background-color: blanchedalmond;
   border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 15px 30px;
-  margin: 10px;
+  border-radius: 20px;
   transition: transform 0.3s ease-in-out;
   cursor: pointer;
   min-height: 200px;
-  height: 30%;
+  height: 10%;
 }
 
 .beepCard:hover {

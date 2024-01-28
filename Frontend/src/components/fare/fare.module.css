@@ -1,0 +1,557 @@
+/* fareComponent.module.css */
+
+.fare {
+    background-color: blanchedalmond;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    padding: 10px;
+    transition: transform 0.3s ease-in-out;
+    cursor: pointer;
+    min-height: 200px;
+    height: 10%;
+}
+
+.fare:hover {
+    transform: scale(1.05);
+}
+
+.cardBody {
+    overflow: hidden;
+    mask-image: linear-gradient(180deg, #000 60%, transparent);
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 18px;
+    color: #333333;
+}
+
+.deleteIcon {
+    font-size: 24px;
+    color: #888888;
+    cursor: pointer;
+}
+
+.cardText {
+    font-size: 16px;
+    color: #555555;
+}
+
+.cardFooter {
+    font-size: 14px;
+    color: #999999;
+}
+
+/* Add the following styles to your global styles or App.css */
+
+.body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.blockCenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: 4px;
+}
+
+.flexCenterLoading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.blockCenterLoading {
+    text-align: center;
+}
+
+.textCenter {
+    text-align: center;
+}
+
+.container-middle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.fareListItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.fareListItem:hover {
+    background-color: #e2e6ea;
+}
+
+.fareDetails {
+    display: flex;
+    flex-direction: column;
+}
+
+.fareID {
+    font-weight: bold;
+}
+
+.customButton {
+    padding: 10px 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 50px;
+    padding: 15px 30px;
+    margin: 10px;
+    transition: transform 0.5s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+
+.customButton:hover {
+    transform: scale(1.05);
+}
+
+.pagination {
+    margin-left: auto;
+}
+
+.alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alert-container {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+}
+
+.modalContent {
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+.modalHeader {
+    border-bottom: none;
+}
+
+.modalTitle {
+    font-size: 24px;
+    color: #343a40;
+}
+
+.modalBody {
+    padding: 20px;
+}
+
+.modalFooter {
+    border-top: none;
+}
+
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 300px;
+}
+
+.confirmationModal {
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+.confirmationModalHeader {
+    border-bottom: none;
+}
+
+.confirmationModalTitle {
+    font-size: 20px;
+    color: #343a40;
+}
+
+.confirmationModalBody {
+    padding: 20px;
+}
+
+.confirmationModalFooter {
+    border-top: none;
+}
+
+.loadingcontainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    /* Align text within the container */
+}
+
+.loading-container p {
+    margin-left: 10px;
+    padding: 20px;
+    /* Adjust the margin as needed to separate spinner and text */
+}
+
+.blockCenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: 4px;
+}
+
+.flexCenterLoading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.blockCenterLoading {
+    text-align: center;
+}
+
+.alertOverlay {
+    z-index: 1000;
+    /* Adjust the value as needed to make it higher than other elements */
+}
+
+.beepCard {
+    background-color: blanchedalmond;
+    /* Set background color to white */
+    border: 1px solid #e0e0e0;
+    /* Add a light border */
+    border-radius: 10px;
+    padding: 15px 30px;
+    margin: 10px;
+    /* Add border-radius for rounded corners */
+    transition: transform 0.5s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 18px;
+    /* Increase font size for better readability */
+    color: #333333;
+    /* Set text color to a dark shade */
+}
+
+.deleteIcon {
+    font-size: 24px;
+    /* Increase delete icon size */
+    color: #888888;
+    /* Set delete icon color to a muted tone */
+    cursor: pointer;
+}
+
+.search-bar-container {
+    position: relative;
+    margin: 20px 0;
+    /* Adjust margin as needed */
+}
+
+.search-bar-input {
+    width: 300px;
+    /* Set the width of the input field */
+    padding: 10px;
+    /* Adjust padding for better spacing */
+    border: none;
+    border-radius: 25px;
+    /* Add border-radius for rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add a subtle box shadow */
+    outline: none;
+}
+
+.cardText {
+    font-size: 16px;
+    /* Increase font size for better readability */
+    color: #555555;
+    /* Set text color to a slightly dark shade */
+}
+
+.cardFooter {
+    font-size: 14px;
+    /* Decrease font size for the footer */
+    color: #999999;
+    /* Set footer text color to a light shade */
+}
+
+.customButton {
+    padding: 10px 20px;
+    /* Adjust padding for better spacing */
+    border: 1px solid #e0e0e0;
+    /* Add a light border */
+    border-radius: 50px;
+    padding: 15px 30px;
+    margin: 10px;
+    transition: transform 0.5s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+
+    &:hover {
+        transform: scale(1.05);
+        /* Scale up on hover for a subtle effect */
+    }
+}
+
+/* Add the following styles to your global styles or App.css */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Set a modern sans-serif font */
+}
+
+.blockCenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: 4px;
+}
+
+.flexCenterLoading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.blockCenterLoading {
+    text-align: center;
+}
+
+.alertOverlay {
+    z-index: 1000;
+    /* Adjust the value as needed to make it higher than other elements */
+}
+
+.beepCard {
+    padding: 20px;
+    /* Adjust padding for better spacing */
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Center the text title */
+    font-size: 18px;
+    color: #333333;
+}
+
+.pagination {
+    margin-left: auto;
+}
+
+.alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alert-container {
+    position: fixed;
+    top: 50px;
+    /* Adjust top position as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    /* Adjust width as needed */
+}
+
+.textCenter {
+    text-align: center;
+}
+
+.container-middle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    /* Adjust the height as needed */
+}
+
+.beepCardListItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.beepCardListItem:hover {
+    background-color: #e2e6ea;
+}
+
+.beepCardDetails {
+    display: flex;
+    flex-direction: column;
+}
+
+.beepCardID {
+    font-weight: bold;
+}
+
+.cusToast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    max-width: 100%;
+    z-index: 9999;
+}
+
+/* Customize the toast position */
+.topstart {
+    top: 20px;
+}
+
+.topend {
+    top: 20px;
+    left: 20px;
+}
+
+.bottom-start {
+    bottom: 20px;
+    right: 20px;
+}
+
+.bottom-end {
+    bottom: 20px;
+    left: 20px;
+}
+
+/* Customize the toast colors */
+.toast-success {
+    background-color: #4caf50;
+    /* Green */
+    color: #fff;
+}
+
+.toast-danger {
+    background-color: #f44336;
+    /* Red */
+    color: #fff;
+}
+
+.modalContent {
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+.modalHeader {
+    border-bottom: none;
+}
+
+.modalTitle {
+    font-size: 24px;
+    color: #343a40;
+}
+
+.modalBody {
+    padding: 20px;
+}
+
+.modalFooter {
+    border-top: none;
+}
+
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 300px;
+}
+
+.confirmationModal {
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+.confirmationModalHeader {
+    border-bottom: none;
+}
+
+.confirmationModalTitle {
+    font-size: 20px;
+    color: #343a40;
+}
+
+.confirmationModalBody {
+    padding: 20px;
+}
+
+.confirmationModalFooter {
+    border-top: none;
+}
+
+.pagination-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    /* Adjust the top margin as needed */
+}
+
+.pagination-buttons button {
+    padding: 8px 16px;
+    margin: 0 5px;
+    border: 1px solid #3498db;
+    background-color: #3498db;
+    color: #ffffff;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.pagination-buttons button:hover {
+    background-color: #2980b9;
+}
+
+.pagination-buttons button:disabled {
+    background-color: #bdc3c7;
+    border-color: #bdc3c7;
+    color: #ffffff;
+    cursor: not-allowed;
+}
