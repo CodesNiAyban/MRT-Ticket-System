@@ -22,5 +22,6 @@
 }
 
 .alertOverlay {
-    z-index: 1000; /* Adjust the value as needed to make it higher than other elements */
-  }
+    z-index: 1000;
+    /* Adjust the value as needed to make it higher than other elements */
+}

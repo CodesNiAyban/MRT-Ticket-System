@@ -31,7 +31,7 @@ const Buttons: React.FC<ButtonsProps> = ({
                     onClick={() => setShowAddBeepCardDialog(true)}
                 >
                     <BiPlus />
-                    Add New Beep Card
+                    Add Beep Card
                 </Button>
 
                 <Button
@@ -41,12 +41,12 @@ const Buttons: React.FC<ButtonsProps> = ({
                     {editMode ? (
                         <>
                             <BiEdit />
-                            List Card with Edit
+                            Edit Card Mode
                         </>
                     ) : (
                         <>
                             <TbCurrencyPeso />
-                            Load Card
+                            Load Card Mode
                         </>
                     )}
                 </Button>

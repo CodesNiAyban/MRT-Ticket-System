@@ -1,7 +1,7 @@
 // BeepCardPageLoggedInView.tsx
 
 import React, { useEffect, useState } from "react";
-import { Button, Spinner, Modal, Container } from "react-bootstrap";
+import { Button, Spinner, Modal, Container, Card } from "react-bootstrap";
 import { BeepCard as BeepCardsModel } from "../../../model/beepCardModel";
 import * as BeepCardApi from "../../../network/beepCardAPI";
 import styles from "././beepCardPageLoggedInView.module.css";
@@ -11,6 +11,13 @@ import Buttons from "./beepCardPageButtons";
 import BeepCardsGrid from "./beepCardPageGrid";
 import AlertComponent from "./beepCardPageToast";
 
+interface ConfirmationModalState {
+  show: boolean;
+  action: () => void;
+  message: string;
+  card: BeepCardsModel | null;
+}
+
 const BeepCardPageLoggedInView = () => {
   const [beepCards, setBeepCards] = useState<BeepCardsModel[]>([]);
   const [beepCardsLoading, setBeepCardsLoading] = useState(true);
@@ -18,16 +25,16 @@ const BeepCardPageLoggedInView = () => {
   const [showAddBeepCardDialog, setShowAddBeepCardDialog] = useState(false);
   const [beepCardToEdit, setBeepCardToEdit] = useState<BeepCardsModel | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [confirmationModal, setConfirmationModal] = useState<{
-    show: boolean;
-    action: () => void;
-    message: string;
-  }>({ show: false, action: () => { }, message: "" });
+  const [confirmationModal, setConfirmationModal] = useState<ConfirmationModalState>({
+    show: false,
+    action: () => { },
+    message: "",
+    card: null,
+  });
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
-
   const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
@@ -48,10 +55,12 @@ const BeepCardPageLoggedInView = () => {
   }, []);
 
   const deleteBeepCard = (beepCard: BeepCardsModel) => {
-    setConfirmationModal({
+    setConfirmationModal((prevModal: ConfirmationModalState) => ({
+      ...prevModal,
       show: true,
       action: async () => {
         try {
+          setBeepCardsLoading(true);
           await BeepCardApi.deleteBeepCard(beepCard._id);
           setBeepCards(
             beepCards.filter(
@@ -59,22 +68,22 @@ const BeepCardPageLoggedInView = () => {
             )
           );
           showCustomAlert("success", "Beep Card deleted successfully.");
+        } catch (error) {
+          console.error(error);
+          showCustomAlert("danger", "Error deleting Beep Card. Please try again.");
+        } finally {
+          setBeepCardsLoading(false);
           setConfirmationModal({
             show: false,
             action: () => { },
             message: "",
+            card: null,
           });
-        } catch (error) {
-          console.error(error);
-          showCustomAlert("danger", "Error deleting Beep Card. Please try again.");
-          setTimeout(() => {
-            setShowAlert(false);
-            setAlertMessage(null);
-          }, 3000);
         }
       },
       message: "Are you sure you want to delete this Beep Card?",
-    });
+      card: beepCard,
+    } as ConfirmationModalState)); // Explicitly provide the type
   };
 
   const showCustomAlert = (variant: "success" | "danger", message: string) => {
@@ -86,7 +95,6 @@ const BeepCardPageLoggedInView = () => {
       setAlertMessage(null);
     }, 3000);
   };
-
   const filteredBeepCards = beepCards.filter(
     (beepCard) =>
       beepCard.UUIC.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -99,12 +107,22 @@ const BeepCardPageLoggedInView = () => {
 
   const itemsPerPage = 9;
   const [currentPage, setCurrentPage] = useState(1);
-
   const totalPages = Math.ceil(filteredBeepCards.length / itemsPerPage);
-
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
+
+  let createdUpdatedText: string;
+  if (confirmationModal.card) {
+    const { createdAt, updatedAt } = confirmationModal.card;
+    if (updatedAt && updatedAt > createdAt) {
+      createdUpdatedText = "Updated: " + formatDate(updatedAt);
+    } else {
+      createdUpdatedText = "Created: " + formatDate(createdAt);
+    }
+  } else {
+    createdUpdatedText = "N/A";
+  }
 
   return (
     <Container>
@@ -189,41 +207,76 @@ const BeepCardPageLoggedInView = () => {
         />
       )}
 
-      <Modal
-        show={confirmationModal.show}
-        onHide={() =>
-          setConfirmationModal({
-            show: false,
-            action: () => { },
-            message: "",
-          })
-        }
-      >
+
+      <Modal show={confirmationModal.show} onHide={() => setConfirmationModal({
+        show: false,
+        action: () => { },
+        message: "",
+        card: null,
+      } as ConfirmationModalState)} className={`${styles.modalContent}`}centered>
         <Modal.Header closeButton>
-          <Modal.Title>Confirmation</Modal.Title>
+          <Modal.Title className={`${styles.modalTitle} modal-title`}>
+            Delete Confirmation
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>{confirmationModal.message}</Modal.Body>
+
+        <Modal.Body>
+          <Card className={`${styles.beepCard}`}>
+            <Card.Body className={styles.cardBody}>
+              <Card.Title className={styles.flexCenter}>
+                CARD: {confirmationModal?.card?.UUIC || "N/A"}
+              </Card.Title>
+              <Card.Text className={styles.cardText}>
+                BALANCE: {confirmationModal?.card?.balance || "N/A"}
+              </Card.Text>
+            </Card.Body>
+            <Card.Footer className={`text-muted ${styles.cardFooter}`}>
+              {createdUpdatedText}
+            </Card.Footer>
+          </Card>
+
+          <p className={styles.confirmationMessage}>
+            Are you sure you want to delete this Beep Card?
+          </p>
+        </Modal.Body>
+
         <Modal.Footer>
           <Button
             variant="secondary"
-            onClick={() =>
-              setConfirmationModal({
-                show: false,
-                action: () => { },
-                message: "",
-              })
-            }
+            onClick={() => setConfirmationModal({
+              show: false,
+              action: () => { },
+              message: "",
+              card: null,
+            } as ConfirmationModalState)}
+            disabled={beepCardsLoading}
+            className={`btn-secondary ${styles.secondaryButton}`}
           >
-            No
+            Cancel
           </Button>
           <Button
             variant="danger"
-            onClick={() => confirmationModal.action()}
+            onClick={confirmationModal.action}
+            disabled={beepCardsLoading}
+            className={`btn-danger ${styles.primaryButton} d-flex align-items-center`}
           >
-            Yes
+            {beepCardsLoading && (
+                <>
+                  <Spinner
+                    animation="border"
+                    variant="secondary"
+                    size="sm"
+                    className={`${styles.loadingcontainer}`}
+                  />
+                  <span className="ml-2">Deleting...</span>
+                </>
+              )}
+              {!beepCardsLoading && 'Delete'}
+
           </Button>
         </Modal.Footer>
       </Modal>
+
     </Container>
   );
 };

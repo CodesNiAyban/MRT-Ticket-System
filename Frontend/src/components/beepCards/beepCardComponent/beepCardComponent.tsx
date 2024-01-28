@@ -43,7 +43,7 @@ const BeepCard: React.FC<BeepCardProps> = ({
           />
         </Card.Title>
         <Card.Text className={styles.cardText}>
-          BALANCE: <p>{balance}</p>
+          BALANCE: {balance}
         </Card.Text>
       </Card.Body>
       <Card.Footer className={`text-muted ${styles.cardFooter}`}>

@@ -8,7 +8,8 @@ interface ConfirmationModalProps {
   previousBalance: number | null;
   addedValue: number | null;
   onConfirmation: () => void;
-  isLoading: boolean; // Loading state
+  isSubmitting: boolean;
+  isLoading: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -17,10 +18,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   previousBalance,
   addedValue,
   onConfirmation,
-  isLoading,
+  isSubmitting,
+  isLoading
 }: ConfirmationModalProps) => {
   return (
-    <Modal show={show} onHide={isLoading ? undefined : onHide} centered className={styles.confirmationModal}>
+    <Modal show={show} onHide={isLoading ? undefined : onHide} centered className={styles.modalContent}>
       <Modal.Header closeButton={!isLoading} className={styles.confirmationModalHeader}>
         <Modal.Title className={`${styles.confirmationModalTitle} confirmation-modal-title`}>
           Load Confirmation
@@ -47,15 +49,12 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       </Modal.Body>
 
       <Modal.Footer className={`${styles.confirmationModalFooter} confirmation-modal-footer`}>
-        {isLoading ? (
-          <Button variant="primary" disabled>
-            Confirming...
-          </Button>
-        ) : (
-          <Button variant="primary" onClick={onConfirmation}>
-            Confirm
-          </Button>
-        )}
+        <Button variant="secondary" onClick={onHide} disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={() => { onConfirmation(); }} disabled={isSubmitting}>
+          {isSubmitting ? 'Confirming...' : 'Confirm'}
+        </Button>
       </Modal.Footer>
     </Modal>
   );

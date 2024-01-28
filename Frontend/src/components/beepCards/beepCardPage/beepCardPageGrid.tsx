@@ -45,7 +45,7 @@ const BeepCardsGrid: React.FC<BeepCardsGridProps> = ({
                             beepCard={beepCard}
                             className={styles.beepCard}
                             onBeepCardClicked={setBeepCardToEdit}
-                            onDeleteBeepCardClicked={deleteBeepCard}
+                            onDeleteBeepCardClicked={() => deleteBeepCard(beepCard)}
                             editMode={editMode}
                         />
                     </Col>

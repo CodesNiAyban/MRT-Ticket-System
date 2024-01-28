@@ -9,7 +9,8 @@ interface BeepCardFormFieldsProps {
   beepCardToEdit?: BeepCard;
   register: any;
   errors: any;
-  setValue: any;
+  isSubmitting: boolean;
+  confirming: boolean;
   generateNumber: () => void;
 }
 
@@ -18,7 +19,8 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
   beepCardToEdit,
   register,
   errors,
-  setValue,
+  isSubmitting,
+  confirming,
   generateNumber,
 }: BeepCardFormFieldsProps) => {
   return (
@@ -43,6 +45,7 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
             register={register}
             registerOptions={{ required: "Required " }}
             errors={errors.balance}
+            disabled={confirming}
           />
         </>
       ) : (
@@ -55,11 +58,12 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
             register={register}
             registerOptions={{ required: "Required " }}
             errors={errors.UUIC}
+            disabled={isSubmitting}
           />
 
           {!beepCardToEdit && (
             <div className="mb-3">
-              <Button variant="warning" onClick={generateNumber}>
+              <Button variant="warning" onClick={generateNumber} disabled={isSubmitting}>
                 Generate Account Number
               </Button>
             </div>
@@ -74,6 +78,7 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
               register={register}
               registerOptions={{ required: "Required " }}
               errors={errors.balance}
+              disabled={isSubmitting}
             />
           )}
         </>

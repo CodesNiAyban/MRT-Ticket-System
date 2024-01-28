@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { Admin } from "../model/adminModel";
 import { LoginCredentials } from "../model/loginModel"
 import * as AdminApi from "../network/adminAPI";
-import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import AdminInputField from "./form/adminInputFields";
 import styles from "../components/adminLogin.module.css";
 import { useNavigate } from "react-router-dom";
@@ -95,9 +95,27 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
                             type="submit"
                             disabled={isSubmitting}
                             className="btn btn-primary"
-                            style={{ fontSize: '1rem', borderRadius: '8px', padding: '15px 32px' }}
+                            style={{
+                                fontSize: '1rem',
+                                borderRadius: '8px',
+                                padding: '15px 32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center', // To horizontally center the content
+                            }}
                         >
-                            LOG IN
+                            {isSubmitting && (
+                                <>
+                                    <Spinner
+                                        animation="border"
+                                        variant="secondary"
+                                        size="sm"
+                                        className={`${styles.loadingcontainer}`}
+                                    />
+                                    <span className="ml-2">Logging In...</span>
+                                </>
+                            )}
+                            {!isSubmitting && 'LOG IN'}
                         </Button>
                     </div>
                 </div>

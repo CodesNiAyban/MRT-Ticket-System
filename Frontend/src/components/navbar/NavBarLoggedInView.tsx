@@ -56,7 +56,12 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProp
             </Nav.Item>
 
             {/* Confirmation Modal */}
-            <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)}>
+            <Modal 
+            show={showConfirmationModal} 
+            centered
+            onHide={() => setShowConfirmationModal(false)}
+            style={{ borderRadius: '12px', backgroundColor: 'white' }}  // Set the background color here
+            >
                 <Modal.Header closeButton>
                     <Modal.Title>Logout Confirmation</Modal.Title>
                 </Modal.Header>

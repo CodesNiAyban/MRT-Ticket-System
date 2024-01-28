@@ -1,54 +1,93 @@
 .modalContent {
-    background-color: #ffffff;
-    border-radius: 10px;
-  }
-  
-  .modalHeader {
-    border-bottom: none;
-  }
-  
-  .modalTitle {
-    font-size: 24px;
-    color: #343a40;
-  }
-  
-  .modalBody {
-    padding: 20px;
-  }
-  
-  .modalFooter {
-    border-top: none;
-  }
-  
-  .alert {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    width: 300px;
-  }
-  
-  .confirmationModal {
-    background-color: #ffffff;
-    border-radius: 10px;
-  }
-  
-  .confirmationModalHeader {
-    border-bottom: none;
-  }
-  
-  .confirmationModalTitle {
-    font-size: 20px;
-    color: #343a40;
-  }
-  
-  .confirmationModalBody {
-    padding: 20px;
-  }
-  
-  .confirmationModalFooter {
-    border-top: none;
-  }
+  background-color: #ffffff;
+  border-radius: 10px;
+}
 
-  
+.modalHeader {
+  border-bottom: none;
+}
+
+.modalTitle {
+  font-size: 24px;
+  color: #343a40;
+}
+
+.modalBody {
+  padding: 20px;
+}
+
+.modalFooter {
+  border-top: none;
+}
+
+.alert {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 300px;
+}
+
+.confirmationModal {
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+
+.confirmationModalHeader {
+  border-bottom: none;
+}
+
+.confirmationModalTitle {
+  font-size: 20px;
+  color: #343a40;
+}
+
+.confirmationModalBody {
+  padding: 20px;
+}
+
+.confirmationModalFooter {
+  border-top: none;
+}
+
+.loadingcontainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* Align text within the container */
+}
+
+.loading-container p {
+  margin-left: 10px;
+  padding: 20px;
+  /* Adjust the margin as needed to separate spinner and text */
+}
+
+.blockCenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: 4px;
+}
+
+.flexCenterLoading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.blockCenterLoading {
+    text-align: center;
+}
+
+.alertOverlay {
+    z-index: 1000; /* Adjust the value as needed to make it higher than other elements */
+  }
