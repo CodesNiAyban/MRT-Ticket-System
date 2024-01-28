@@ -276,20 +276,25 @@ const BeepCardPageLoggedInView = () => {
         />
       )}
 
-      <Modal show={confirmationModal.show} onHide={() => setConfirmationModal({
-        show: false,
-        action: () => { },
-        message: "",
-        card: null,
-      } as ConfirmationModalState)} className={`${styles.modalContent}`} centered>
-        <Modal.Header closeButton>
+      <Modal
+        show={confirmationModal.show}
+        onHide={() => setConfirmationModal({
+          show: false,
+          action: () => { },
+          message: "",
+          card: null,
+        } as ConfirmationModalState)}
+        className={`${styles.modalContent} beep-card-modal`} // Add beep-card-modal class
+        centered
+      >
+        <Modal.Header closeButton className={`${styles.modalHeader} modal-header`}>
           <Modal.Title className={`${styles.modalTitle} modal-title`}>
             Delete Confirmation
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
-          <Card className={`${styles.beepCard}`}>
+          <Card className={`${styles.beepCard} beep-card`}>
             <Card.Body className={styles.cardBody}>
               <Card.Title className={styles.flexCenter}>
                 CARD: {confirmationModal?.card?.UUIC || "N/A"}
@@ -308,7 +313,7 @@ const BeepCardPageLoggedInView = () => {
           </p>
         </Modal.Body>
 
-        <Modal.Footer>
+        <Modal.Footer className={`${styles.modalFooter} modal-footer`}>
           <Button
             variant="secondary"
             onClick={() => setConfirmationModal({
@@ -340,7 +345,6 @@ const BeepCardPageLoggedInView = () => {
               </>
             )}
             {!beepCardsLoading && 'Delete'}
-
           </Button>
         </Modal.Footer>
       </Modal>

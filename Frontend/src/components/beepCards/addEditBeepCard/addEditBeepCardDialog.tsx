@@ -74,7 +74,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     const timeoutId = setTimeout(() => {
       setShowAlert(false);
       setAlertMessage(null);
-    }, 1300);
+    }, 3000);
 
     return () => clearTimeout(timeoutId);
   }, [showAlert]);
@@ -98,10 +98,10 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     setPreviousBalance(beepCardToEdit?.balance || 0);
     setAddedValue(balance);
     setShowConfirmationModal(true);
-    setConfirming(true); // Set confirming to true when "Show Confirmation" is clicked
   };
 
   const handleConfirmation = async () => {
+    setConfirming(true);
     setShowConfirmationModal(false);
     const input = getValues();
     await onSubmit(input);
@@ -189,7 +189,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       } else {
         showAlertMessage(
           "danger",
-          "Error saving Beep Card. Please try again."
+          "Error saving Beep Card. Please try again. Make sure that input ID's are unique."
         );
       }
     } finally {
@@ -262,14 +262,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
                 className={`btn-primary ${styles.primaryButton} d-flex align-items-center`}
               >
                 {confirming && (
-                  <>
-                    <Spinner
-                      animation="border"
-                      variant="secondary"
-                      size="sm"
-                      className={`${styles.loadingcontainer}`}
-                    ><span className="ml-2">Updating...</span></Spinner>
-                  </>
+                  <>Updating...</>
                 )}
                 {!confirming && 'Show Confirmation'}
               </Button>
