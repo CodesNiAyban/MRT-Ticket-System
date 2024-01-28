@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Button, Col, Container, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import { FaPencilAlt, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
 import { Stations as StationsModel } from '../../model/stationsModel';
@@ -6,6 +6,8 @@ import * as StationApi from '../../network/stationsAPI';
 import color from '../../styles/beepCard.module.css'
 import styleUtils from '../../styles/utils.module.css';
 import AddEditStationDialog from './addEditStationDialog';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css'; // Ensure this import for Leaflet styles
 
 const StationPageLoggedInView = () => {
   const [stations, setStations] = useState<StationsModel[]>([]);
@@ -94,146 +96,154 @@ const StationPageLoggedInView = () => {
 
   return (
     <>
-    {/* <div className='bg-black'>
-      sample
-    </div> */}
-    <Container>
-      <h1 className={`${styleUtils.blockCenter} mb-4`}>STATIONS</h1>
+      {/* Existing content */}
+      <Container>
+        <h1 className={`${styleUtils.blockCenter} mb-4`}>STATIONS</h1>
 
-      {showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
+        {showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
 
-      <Row className="mb-4">
-        <Col xs={12} sm={6} lg={4}>
-          <Button
-            className={`mb-4 ${styleUtils.blockStart} ${styleUtils.flexCenter}`}
-            onClick={() => setShowAddStationDialog(true)}
-          >
-            <FaPlus />
-            Add New Station
-          </Button>
-        </Col>
+        <Row className="mb-4">
+          <Col xs={12} sm={6} lg={4}>
+            <Button
+              className={`mb-4 ${styleUtils.blockStart} ${styleUtils.flexCenter}`}
+              onClick={() => setShowAddStationDialog(true)}
+            >
+              <FaPlus />
+              Add New Station
+            </Button>
+          </Col>
 
-        <Col xs={12} sm={6} lg={4}>
-        </Col>
+          <Col xs={12} sm={6} lg={4}>
+          </Col>
 
-
-        <Col xs={12} sm={6} lg={4} className="text-end">
-          <div className="input-group">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-            />
-            <div className="input-group-append">
-              <Button variant="outline-secondary" onClick={() => handleSearch(searchTerm)}>
-                <FaSearch />
-              </Button>
+          <Col xs={12} sm={6} lg={4} className="text-end">
+            <div className="input-group">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+              <div className="input-group-append">
+                <Button variant="outline-secondary" onClick={() => handleSearch(searchTerm)}>
+                  <FaSearch />
+                </Button>
+              </div>
             </div>
+          </Col>
+        </Row>
+
+        {/* Loading Spinner */}
+        {stationsLoading && (
+          <div className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}>
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
           </div>
-        </Col>
-      </Row>
+        )}
 
-      {/* Loading Spinner */}
-      {stationsLoading && (
-        <div className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}>
-          <Spinner animation="border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
-        </div>
-      )}
+        {showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
 
-      {showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
-
-      {!stationsLoading && !showStationsLoadingError && (
-        <>
-          {filteredStations.length > 0 ? (
-            <Table striped bordered responsive className="text-center">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Coordinates</th>
-                  <th>Connected To</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStations.map((station) => (
-                  <tr key={station._id}>
-                    <td>{station.stationName}</td>
-                    <td>{station.coords}</td>
-                    <td>{station.connectedTo.join(', ')}</td>
-                    <td>
-                      <Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
-                        <FaTrash /> DELETE
-                      </Button>{' '}
-                      <Button variant="primary" onClick={() => setStationToEdit(station)}>
-                        <FaPencilAlt /> UPDATE
-                      </Button>
-                    </td>
+        {!stationsLoading && !showStationsLoadingError && (
+          <>
+            {filteredStations.length > 0 ? (
+              <Table striped bordered responsive className="text-center">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Coordinates</th>
+                    <th>Connected To</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            <p>No matching stations found</p>
-          )}
-        </>
-      )}
+                </thead>
+                <tbody>
+                  {filteredStations.map((station) => (
+                    <tr key={station._id}>
+                      <td>{station.stationName}</td>
+                      <td>{station.coords}</td>
+                      <td>{station.connectedTo.join(', ')}</td>
+                      <td>
+                        <Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
+                          <FaTrash /> DELETE
+                        </Button>{' '}
+                        <Button variant="primary" onClick={() => setStationToEdit(station)}>
+                          <FaPencilAlt /> UPDATE
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            ) : (
+              <p>No matching stations found</p>
+            )}
+          </>
+        )}
 
-      {showAddStationDialog && (
-        <AddEditStationDialog
-          onDismiss={() => setShowAddStationDialog(false)}
-          onStationSaved={(newStation) => {
-            setStations([...stations, newStation]);
-            setFilteredStations([...filteredStations, newStation]);
-            setShowAddStationDialog(false);
-            showAlertMessage('Station added successfully', 'success');
-          }}
-        />
-      )}
+        {showAddStationDialog && (
+          <AddEditStationDialog
+            onDismiss={() => setShowAddStationDialog(false)}
+            onStationSaved={(newStation) => {
+              setStations([...stations, newStation]);
+              setFilteredStations([...filteredStations, newStation]);
+              setShowAddStationDialog(false);
+              showAlertMessage('Station added successfully', 'success');
+            }}
+          />
+        )}
 
-      {stationToEdit && (
-        <AddEditStationDialog
-          stationToEdit={stationToEdit}
-          onDismiss={() => setStationToEdit(null)}
-          onStationSaved={(updateStation) => {
-            setStations(
-              stations.map((existingStation) =>
-                existingStation._id === updateStation._id ? updateStation : existingStation
-              )
-            );
-            setFilteredStations(
-              filteredStations.map((existingStation) =>
-                existingStation._id === updateStation._id ? updateStation : existingStation
-              )
-            );
-            setStationToEdit(null);
-            showAlertMessage('Station updated successfully', 'success');
-          }}
-        />
-      )}
-{/* 
-      <div className='bg-black'>
-        sample
-      </div> */}
+        {stationToEdit && (
+          <AddEditStationDialog
+            stationToEdit={stationToEdit}
+            onDismiss={() => setStationToEdit(null)}
+            onStationSaved={(updateStation) => {
+              setStations(
+                stations.map((existingStation) =>
+                  existingStation._id === updateStation._id ? updateStation : existingStation
+                )
+              );
+              setFilteredStations(
+                filteredStations.map((existingStation) =>
+                  existingStation._id === updateStation._id ? updateStation : existingStation
+                )
+              );
+              setStationToEdit(null);
+              showAlertMessage('Station updated successfully', 'success');
+            }}
+          />
+        )}
 
-      <Modal show={showConfirmation} onHide={closeConfirmation}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirmation</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this station?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={closeConfirmation}>
-            No
-          </Button>
-          <Button variant="danger" onClick={() => confirmationAction && confirmationTarget && confirmationAction()}>
-            Yes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+        {/* Leaflet Map */}
+        <div id="map" style={{ width: '100vw', height: '100vh' }}>
+          <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false} style={{ width: '100%', height: '100%' }}>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[51.505, -0.09]}>
+              <Popup>
+                A pretty CSS3 popup. <br /> Easily customizable.
+              </Popup>
+            </Marker>
+          </MapContainer>
+        </div>
+
+        <Modal show={showConfirmation} onHide={closeConfirmation}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirmation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Are you sure you want to delete this station?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeConfirmation}>
+              No
+            </Button>
+            <Button variant="danger" onClick={() => confirmationAction && confirmationTarget && confirmationAction()}>
+              Yes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </Container>
     </>
   );
 };
