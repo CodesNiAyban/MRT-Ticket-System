@@ -5,19 +5,23 @@ import { Stations } from '../../model/stationsModel';
 import { StationInput } from '../../network/stationsAPI';
 import * as StationsApi from '../../network/stationsAPI';
 import TextInputField from '../form/textInputFields';
+import { Stations as StationsModel } from '../../model/stationsModel';
+import StationConnectedToModal from './stationConnectedToModal';
 
 interface AddEditStationDialogProps {
     stationToEdit?: Stations | null;
     onDismiss: () => void;
     onStationSaved: (station: Stations) => void;
     coordinates?: [number, number] | null;
+    setAdded: () => void
 }
 
 const AddEditStationDialog = ({
     stationToEdit,
     onDismiss,
     onStationSaved,
-    coordinates
+    coordinates,
+    setAdded
 }: AddEditStationDialogProps) => {
     const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<StationInput>({
         defaultValues: {
@@ -26,13 +30,59 @@ const AddEditStationDialog = ({
             connectedTo: stationToEdit?.connectedTo || [],
         },
     });
+
+    const [showConnectedToModal, setShowConnectedToModal] = useState(false);
+    const [selectedStations, setSelectedStations] = useState<StationsModel[]>([]);
+
+    const handleStationSelection = (station: StationsModel) => {
+        setSelectedStations([...selectedStations, station]);
+    };
+
+    const handleRemoveStation = (station: StationsModel) => {
+        setSelectedStations(selectedStations.filter((s) => s.stationName !== station.stationName));
+    };
+
+    const openConnectedToModal = () => {
+        setShowConnectedToModal(true);
+    };
+
+    const closeConnectedToModal = () => {
+        setShowConnectedToModal(false);
+    };
+
+    useEffect(() => {
+        // When the selected stations change, update the connectedTo field
+        setValue('connectedTo', selectedStations.map(station => station.stationName));
+    }, [selectedStations, setValue]);
+
+    const onSubmit = async (input: StationInput) => {
+        try {
+            // Create a new input object with connectedTo as an array of strings
+            const updatedInput = { ...input, connectedTo: input.connectedTo };
+
+            let stationResponse: Stations;
+            if (stationToEdit) {
+                // Editing an existing station
+                stationResponse = await StationsApi.updateStation(stationToEdit._id, updatedInput);
+                setAdded()
+            } else {
+                // Adding a new station
+                stationResponse = await StationsApi.createStation(updatedInput);
+            }
+            onStationSaved(stationResponse);
+        } catch (error) {
+            console.error(error);
+            alert(error);
+        }
+    };
+
     // Ensure that coordinates is an array before trying to access its elements
     const initialLatitude = coordinates && coordinates.length > 1 ? coordinates[0] : 0;
     const initialLongitude = coordinates && coordinates.length > 1 ? coordinates[1] : 0;
 
     const [input, setInput] = useState({
-        'coords.0': stationToEdit ? stationToEdit.coords[0].toString() : initialLatitude.toString(), // Set default value to '0' if not in edit mode
-        'coords.1': stationToEdit ? stationToEdit.coords[1].toString() : initialLongitude.toString(), // Set default value to '0' if not in edit mode
+        'coords.0': stationToEdit ? stationToEdit.coords[0].toString() : initialLatitude.toString(),
+        'coords.1': stationToEdit ? stationToEdit.coords[1].toString() : initialLongitude.toString(),
     });
 
     useEffect(() => {
@@ -47,23 +97,6 @@ const AddEditStationDialog = ({
 
     const handleCoordinatesChange = (index: number, value: string) => {
         setValue(`coords.${index}`, parseFloat(value));
-    };
-
-    const onSubmit = async (input: StationInput) => {
-        try {
-            let stationResponse: Stations;
-            if (stationToEdit) {
-                // Editing an existing station
-                stationResponse = await StationsApi.updateStation(stationToEdit._id, input);
-            } else {
-                // Adding a new station
-                stationResponse = await StationsApi.createStation(input);
-            }
-            onStationSaved(stationResponse);
-        } catch (error) {
-            console.error(error);
-            alert(error);
-        }
     };
 
     return (
@@ -118,12 +151,16 @@ const AddEditStationDialog = ({
                             type="text"
                             placeholder="Put Array of Strings Here"
                             isInvalid={!!errors.connectedTo}
-                            {...register('connectedTo', { required: 'Required' })}
+                            value={selectedStations.map((station) => station.stationName).join(', ')}
                         />
                         <Form.Control.Feedback type="invalid">
                             {errors.connectedTo?.message}
                         </Form.Control.Feedback>
+                        <Button variant="primary" onClick={openConnectedToModal}>
+                            Select Stations
+                        </Button>
                     </Form.Group>
+
                 </Form>
             </Modal.Body>
             <Modal.Footer>
@@ -131,6 +168,15 @@ const AddEditStationDialog = ({
                     Save
                 </Button>
             </Modal.Footer>
+
+            <StationConnectedToModal
+                show={showConnectedToModal}
+                onHide={closeConnectedToModal}
+                onStationSelection={handleStationSelection}
+                selectedStations={selectedStations}
+                onRemoveStation={handleRemoveStation}
+            />
+
         </Modal>
     );
 };

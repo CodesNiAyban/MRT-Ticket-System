@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import env from "../utils/validateENV";
 
 export const getAuthenticatedAdmin: RequestHandler = async (req, res, next) => {
-	const authenticatedAdminId = req.session ? req.session.adminId : undefined;
+	const authenticatedAdminId = req.session.adminId;
 
 	try {
 		if (!authenticatedAdminId) {

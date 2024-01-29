@@ -7,7 +7,6 @@ import styles from './station.module.css';
 import AddEditStationDialog from './addEditStationDialog';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import MapEventHandler from './stationsCoordinates';
-
 import 'leaflet/dist/leaflet.css'; // Ensure this import for Leaflet styles
 import L from 'leaflet';
 
@@ -33,6 +32,7 @@ const StationPageLoggedInView = () => {
   const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
   const [newMapMarker, setNewMapMarker] = useState<ReactElement[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<StationsModel | null>(null);
+  const [clickedCoords, setClickedCoords] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     async function loadStations() {
@@ -52,7 +52,6 @@ const StationPageLoggedInView = () => {
     loadStations();
   }, []);
 
-  const [clickedCoords, setClickedCoords] = useState<[number, number] | null>(null);
 
   const handleMapClick = (latlng: { lat: number; lng: number }) => {
     setClickedCoords([latlng.lat, latlng.lng]);
@@ -75,9 +74,7 @@ const StationPageLoggedInView = () => {
           }}
         >
           <Popup>
-            New Marker
-            <br />
-            Easily customizable.
+            New Station
           </Popup>
         </Marker>
       );
@@ -97,39 +94,47 @@ const StationPageLoggedInView = () => {
     shadowAnchor: [10, 46],
   });
 
-  useEffect(() => {
-    async function loadStationsAndMarkers() {
-      try {
-        setShowStationsLoadingError(false);
-        setStationsLoading(true);
+  const [stationList, setStationList] = useState<any>({});
 
-        const stations = await StationApi.fetchStations();
-        setStations(stations);
-        setFilteredStations(stations);
+  const loadStationsAndMarkers = async () => {
+    try {
+      setShowStationsLoadingError(false);
+      setStationsLoading(true);
 
-        const markers = stations.map((station) => (
-          <Marker key={station._id} position={[station.coords[0], station.coords[1]]} icon={customIcon}  eventHandlers={{
-            click:() => setStationToEdit(station)
-          }}>
-            <Popup>
-              {station.stationName}
-              <br />
-              Easily customizable.
-            </Popup>
-          </Marker>
-        ));
+      const stations = await StationApi.fetchStations();
+      setStations(stations);
+      setFilteredStations(stations);
 
-        setMapMarkers(markers);
-      } catch (error) {
-        console.error(error);
-        setShowStationsLoadingError(true);
-      } finally {
-        setStationsLoading(false);
-      }
+      const markers = stations.map((station) => (
+        <Marker key={station._id} position={[station.coords[0], station.coords[1]]} icon={customIcon} eventHandlers={{
+          // click: () => setStationToEdit(station)
+        }}>
+          <Popup>
+            {station.stationName}
+            <Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
+              <FaTrash /> DELETE
+            </Button>{' '}
+            <Button variant="primary" onClick={() => setStationToEdit(station)}>
+              <FaPencilAlt /> UPDATE
+            </Button>
+          </Popup>
+        </Marker>
+      ));
+
+      setMapMarkers(markers);
+    } catch (error) {
+      console.error(error);
+      setShowStationsLoadingError(true);
+    } finally {
+      setStationsLoading(false);
     }
+  }
 
+  const [added, setAdded] = useState(false);
+
+  useEffect(() => {
     loadStationsAndMarkers();
-  }, []);
+  }, [added]);
 
   const deleteStation = async (station: StationsModel) => {
     try {
@@ -181,7 +186,6 @@ const StationPageLoggedInView = () => {
 
   return (
     <>
-      {/* Existing content */}
       <Container>
         <h1 className={`${styles.blockCenter} mb-4`}>STATIONS</h1>
 
@@ -237,7 +241,8 @@ const StationPageLoggedInView = () => {
                 <thead>
                   <tr>
                     <th>Name</th>
-                    <th>Coordinates</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
                     <th>Connected To</th>
                     <th>Actions</th>
                   </tr>
@@ -246,7 +251,8 @@ const StationPageLoggedInView = () => {
                   {filteredStations.map((station) => (
                     <tr key={station._id}>
                       <td>{station.stationName}</td>
-                      <td>{"Lat: " + station.coords[0] + " Lng:" + station.coords[1]}</td>
+                      <td>{station.coords[1]}</td>
+                      <td>{station.coords[0]}</td>
                       <td>{station.connectedTo.join(', ')}</td>
                       <td>
                         <Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
@@ -279,6 +285,7 @@ const StationPageLoggedInView = () => {
               showAlertMessage('Station saved successfully', 'success');
               setSelectedMarker(null); // Reset selectedMarker after saving
             }}
+            setAdded={() => setAdded(!added)}
           />
         )}
 
@@ -301,14 +308,14 @@ const StationPageLoggedInView = () => {
               setStationToEdit(null);
               showAlertMessage('Station updated successfully', 'success');
             }}
+            setAdded={() => setAdded(!added)}
           />
         )}
 
         <div id="map" className={`${styles.mapContainer} border rounded`} style={{ width: '100%', height: '500px' }}>
-          <MapContainer center={[14.550561416466541, 121.02785649562283]} zoom={13} scrollWheelZoom={false} style={{ width: '100%', height: '100%' }}>
+          <MapContainer center={[14.550561416466541, 121.02785649562283]} zoom={13} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`} //https://www.jawg.io/lab/access-tokens
             />
             <MapEventHandler onClick={handleMapClick} />
             {mapMarkers}{newMapMarker}

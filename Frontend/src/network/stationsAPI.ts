@@ -1,9 +1,11 @@
-import { Stations } from "../model/stationsModel"
-import { fetchData } from "./fetcher";
+import { Stations } from "../model/stationsModel";
 import { logout } from "./adminAPI"; // Make sure to import your logout function
+import { fetchData } from "./fetcher";
+
+const MRT_API = process.env.REACT_APP_API_URL;
 
 export async function fetchStations(): Promise<Stations[]> {
-    const response = await fetch("/api/stations", {
+    const response = await fetchData(`${MRT_API}/api/stations`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
@@ -31,7 +33,7 @@ export interface StationInput {
 }
 
 export async function createStation(station: StationInput): Promise<Stations> {
-    const response = await fetchData("/api/stations",
+    const response = await fetchData(`${MRT_API}/api/stations`,
         {
             method: "POST",
             headers: {
@@ -56,7 +58,7 @@ export async function createStation(station: StationInput): Promise<Stations> {
 }
 
 export async function updateStation(stationId: string, station: StationInput): Promise<Stations> {
-    const response = await fetchData("/api/stations/" + stationId,
+    const response = await fetchData(`${MRT_API}/api/stations/${stationId}`,
         {
             method: "PATCH",
             headers: {
@@ -82,7 +84,7 @@ export async function updateStation(stationId: string, station: StationInput): P
 
 export async function deleteStation(stationId: string) {
     try {
-        const response = await fetchData(`/api/stations/${stationId}`, {
+        const response = await fetchData(`${MRT_API}/api/stations/${stationId}`, {
             method: "DELETE",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('authToken')}`,

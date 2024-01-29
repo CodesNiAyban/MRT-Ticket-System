@@ -1,10 +1,13 @@
 import { Admin } from "../model/adminModel";
-import { LoginCredentials } from "../model/loginModel"
-import { fetchData } from "./fetcher"
+import { LoginCredentials } from "../model/loginModel";
+import { fetchData } from "./fetcher";
+
+const MRT_API = process.env.REACT_APP_API_URL;
 
 export async function getLoggedInAdmin(): Promise<Admin> {
-    const response = await fetchData("/api/admin", {
+    const response = await fetchData(`${MRT_API}/api/admin`, {
         method: "GET",
+        credentials: "include",
         headers: {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         },
@@ -25,7 +28,7 @@ export async function getLoggedInAdmin(): Promise<Admin> {
 }
 
 export async function adminLogin(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await fetchData("/api/admin/login", {
+    const response = await fetchData(`${MRT_API}/api/admin/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -54,7 +57,7 @@ interface LoginResponse {
 }
 
 export async function logout() {
-    await fetchData("/api/admin/logout", {
+    await fetchData(`${MRT_API}/api/admin/logout`, {
         method: "POST"
     });
 }

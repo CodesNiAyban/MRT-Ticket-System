@@ -1,7 +1,7 @@
 import bodyParser from "body-parser";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-// import cors from "cors";
+import cors from "cors";
 import "dotenv/config";
 import express, { type NextFunction, type Request, type Response } from "express";
 import session from "express-session";
@@ -22,12 +22,13 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(morgan("dev"));
 
-// app.use(cors({
-// 	origin: "https://mrtonline.onrender.com",
-// 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-// 	credentials: true,
-// 	optionsSuccessStatus: 204,
-// }));
+app.use(cors({
+	origin: "http://localhost:3000",
+	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+	credentials: true,
+	optionsSuccessStatus: 204,
+	allowedHeaders: "Content-Type, Authorization",
+}));
 
 // Using the dependancies
 app.use(express.json());
@@ -40,6 +41,8 @@ app.use(session({
 		mongoUrl: env.MONGO_CONNECTION_STRING
 	}),
 	cookie: {
+		secure: false, // Set to false when developing locally
+		sameSite: "none",
 		maxAge: 60 * 3600 * 1000, // Session duration in milliseconds
 	},
 }));
