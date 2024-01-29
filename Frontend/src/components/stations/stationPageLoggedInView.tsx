@@ -271,28 +271,10 @@ const StationPageLoggedInView = () => {
             stationToEdit={selectedMarker} // Pass the selectedMarker as stationToEdit
             coordinates={clickedCoords} // Pass the clicked coordinates as a prop
             onDismiss={() => {
-              setNewMapMarker([]);
+              // setNewMapMarker([]);
               setShowAddStationDialog(false);
             }}
-            onStationSaved={(newStation) => {
-              if (selectedMarker) {
-                // Update the stations array when saving edits
-                setStations(
-                  stations.map((existingStation) =>
-                    existingStation._id === selectedMarker._id ? newStation : existingStation
-                  )
-                );
-                setFilteredStations(
-                  filteredStations.map((existingStation) =>
-                    existingStation._id === selectedMarker._id ? newStation : existingStation
-                  )
-                );
-              } else {
-                // Add a new station to the arrays when adding a new station
-                setStations([...stations, newStation]);
-                setFilteredStations([...filteredStations, newStation]);
-              }
-
+            onStationSaved={() => {
               setShowAddStationDialog(false);
               showAlertMessage('Station saved successfully', 'success');
               setSelectedMarker(null); // Reset selectedMarker after saving
@@ -330,20 +312,6 @@ const StationPageLoggedInView = () => {
             />
             <MapEventHandler onClick={handleMapClick} />
             {mapMarkers}{newMapMarker}
-            {newMapMarker && showAddStationDialog && (
-              <>
-                <AddEditStationDialog
-                  coordinates={clickedCoords} // Pass the clicked coordinates as a prop
-                  onDismiss={() => setShowAddStationDialog(false)}
-                  onStationSaved={(newStation) => {
-                    setStations([...stations, newStation]);
-                    setFilteredStations([...filteredStations, newStation]);
-                    setShowAddStationDialog(false);
-                    showAlertMessage('Station added successfully', 'success');
-                  }}
-                />
-              </>
-            )}
           </MapContainer>
         </div>
 

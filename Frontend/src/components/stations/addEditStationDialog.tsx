@@ -17,6 +17,7 @@ const AddEditStationDialog = ({
     stationToEdit,
     onDismiss,
     onStationSaved,
+    coordinates
 }: AddEditStationDialogProps) => {
     const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<StationInput>({
         defaultValues: {
@@ -25,18 +26,20 @@ const AddEditStationDialog = ({
             connectedTo: stationToEdit?.connectedTo || [],
         },
     });
+    // Ensure that coordinates is an array before trying to access its elements
+    const initialLatitude = coordinates && coordinates.length > 1 ? coordinates[0] : 0;
+    const initialLongitude = coordinates && coordinates.length > 1 ? coordinates[1] : 0;
 
     const [input, setInput] = useState({
-        'coords.0': stationToEdit ? stationToEdit.coords[0].toString() : '0', // Set default value to '0' if not in edit mode
-        'coords.1': stationToEdit ? stationToEdit.coords[1].toString() : '0', // Set default value to '0' if not in edit mode
-        // ... other state properties
+        'coords.0': stationToEdit ? stationToEdit.coords[0].toString() : initialLatitude.toString(), // Set default value to '0' if not in edit mode
+        'coords.1': stationToEdit ? stationToEdit.coords[1].toString() : initialLongitude.toString(), // Set default value to '0' if not in edit mode
     });
 
     useEffect(() => {
         const setDefaultValues = async () => {
             setValue('stationName', stationToEdit?.stationName || '');
-            setValue('coords.0', stationToEdit?.coords[0] || 0);
-            setValue('coords.1', stationToEdit?.coords[1] || 0);
+            setValue('coords.0', stationToEdit?.coords[0] || initialLatitude);
+            setValue('coords.1', stationToEdit?.coords[1] || initialLongitude);
             setValue('connectedTo', stationToEdit?.connectedTo || []);
         };
         setDefaultValues();
