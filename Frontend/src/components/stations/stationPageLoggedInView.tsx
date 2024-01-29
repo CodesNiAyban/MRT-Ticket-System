@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Alert, Button, Col, Container, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import { FaPencilAlt, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
 import { Stations as StationsModel } from '../../model/stationsModel';
 import * as StationApi from '../../network/stationsAPI';
-import color from '../../styles/beepCard.module.css'
-import styleUtils from '../../styles/utils.module.css';
+import styles from './station.module.css';
 import AddEditStationDialog from './addEditStationDialog';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import MapEventHandler from './stationsCoordinates';
+
 import 'leaflet/dist/leaflet.css'; // Ensure this import for Leaflet styles
+import L from 'leaflet';
 
 const StationPageLoggedInView = () => {
   const [stations, setStations] = useState<StationsModel[]>([]);
@@ -28,6 +30,10 @@ const StationPageLoggedInView = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState<'success' | 'danger'>('success');
 
+  const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
+  const [newMapMarker, setNewMapMarker] = useState<ReactElement[]>([]);
+  const [selectedMarker, setSelectedMarker] = useState<StationsModel | null>(null);
+
   useEffect(() => {
     async function loadStations() {
       try {
@@ -44,6 +50,85 @@ const StationPageLoggedInView = () => {
       }
     }
     loadStations();
+  }, []);
+
+  const [clickedCoords, setClickedCoords] = useState<[number, number] | null>(null);
+
+  const handleMapClick = (latlng: { lat: number; lng: number }) => {
+    setClickedCoords([latlng.lat, latlng.lng]);
+    setSelectedMarker(null); // Reset selectedMarker when map is clicked
+  };
+
+  const handleNewMarkerClick = () => {
+    setShowAddStationDialog(true); // Show the edit dialog
+  };
+
+  useEffect(() => {
+    if (clickedCoords) {
+      const newMarker = (
+        <Marker
+          key="newMarker"
+          position={clickedCoords}
+          icon={customIcon}
+          eventHandlers={{
+            click: () => handleNewMarkerClick()
+          }}
+        >
+          <Popup>
+            New Marker
+            <br />
+            Easily customizable.
+          </Popup>
+        </Marker>
+      );
+
+      setNewMapMarker([newMarker]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clickedCoords]);
+
+  const customIcon = L.icon({
+    iconUrl: 'https://react-component-depot.netlify.app/static/media/marker.a3b2d28b.png',
+    iconSize: [40, 40],
+    iconAnchor: [17, 46], //[left/right, top/bottom]
+    popupAnchor: [0, -46], //[left/right, top/bottom]
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [40, 40],
+    shadowAnchor: [10, 46],
+  });
+
+  useEffect(() => {
+    async function loadStationsAndMarkers() {
+      try {
+        setShowStationsLoadingError(false);
+        setStationsLoading(true);
+
+        const stations = await StationApi.fetchStations();
+        setStations(stations);
+        setFilteredStations(stations);
+
+        const markers = stations.map((station) => (
+          <Marker key={station._id} position={[station.coords[0], station.coords[1]]} icon={customIcon}  eventHandlers={{
+            click:() => setStationToEdit(station)
+          }}>
+            <Popup>
+              {station.stationName}
+              <br />
+              Easily customizable.
+            </Popup>
+          </Marker>
+        ));
+
+        setMapMarkers(markers);
+      } catch (error) {
+        console.error(error);
+        setShowStationsLoadingError(true);
+      } finally {
+        setStationsLoading(false);
+      }
+    }
+
+    loadStationsAndMarkers();
   }, []);
 
   const deleteStation = async (station: StationsModel) => {
@@ -98,14 +183,14 @@ const StationPageLoggedInView = () => {
     <>
       {/* Existing content */}
       <Container>
-        <h1 className={`${styleUtils.blockCenter} mb-4`}>STATIONS</h1>
+        <h1 className={`${styles.blockCenter} mb-4`}>STATIONS</h1>
 
         {showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
 
         <Row className="mb-4">
           <Col xs={12} sm={6} lg={4}>
             <Button
-              className={`mb-4 ${styleUtils.blockStart} ${styleUtils.flexCenter}`}
+              className={`mb-4 ${styles.blockStart} ${styles.flexCenter}`}
               onClick={() => setShowAddStationDialog(true)}
             >
               <FaPlus />
@@ -136,7 +221,7 @@ const StationPageLoggedInView = () => {
 
         {/* Loading Spinner */}
         {stationsLoading && (
-          <div className={`${styleUtils.flexCenterLoading} ${styleUtils.blockCenterLoading}`}>
+          <div className={`${styles.flexCenterLoading} ${styles.blockCenterLoading}`}>
             <Spinner animation="border" role="status">
               <span className="visually-hidden">Loading...</span>
             </Spinner>
@@ -161,7 +246,7 @@ const StationPageLoggedInView = () => {
                   {filteredStations.map((station) => (
                     <tr key={station._id}>
                       <td>{station.stationName}</td>
-                      <td>{station.coords}</td>
+                      <td>{"Lat: " + station.coords[0] + " Lng:" + station.coords[1]}</td>
                       <td>{station.connectedTo.join(', ')}</td>
                       <td>
                         <Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
@@ -183,15 +268,38 @@ const StationPageLoggedInView = () => {
 
         {showAddStationDialog && (
           <AddEditStationDialog
-            onDismiss={() => setShowAddStationDialog(false)}
-            onStationSaved={(newStation) => {
-              setStations([...stations, newStation]);
-              setFilteredStations([...filteredStations, newStation]);
+            stationToEdit={selectedMarker} // Pass the selectedMarker as stationToEdit
+            coordinates={clickedCoords} // Pass the clicked coordinates as a prop
+            onDismiss={() => {
+              setNewMapMarker([]);
               setShowAddStationDialog(false);
-              showAlertMessage('Station added successfully', 'success');
+            }}
+            onStationSaved={(newStation) => {
+              if (selectedMarker) {
+                // Update the stations array when saving edits
+                setStations(
+                  stations.map((existingStation) =>
+                    existingStation._id === selectedMarker._id ? newStation : existingStation
+                  )
+                );
+                setFilteredStations(
+                  filteredStations.map((existingStation) =>
+                    existingStation._id === selectedMarker._id ? newStation : existingStation
+                  )
+                );
+              } else {
+                // Add a new station to the arrays when adding a new station
+                setStations([...stations, newStation]);
+                setFilteredStations([...filteredStations, newStation]);
+              }
+
+              setShowAddStationDialog(false);
+              showAlertMessage('Station saved successfully', 'success');
+              setSelectedMarker(null); // Reset selectedMarker after saving
             }}
           />
         )}
+
 
         {stationToEdit && (
           <AddEditStationDialog
@@ -214,18 +322,28 @@ const StationPageLoggedInView = () => {
           />
         )}
 
-        {/* Leaflet Map */}
-        <div id="map" style={{ width: '100vw', height: '100vh' }}>
-          <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false} style={{ width: '100%', height: '100%' }}>
+        <div id="map" className={`${styles.mapContainer} border rounded`} style={{ width: '100%', height: '500px' }}>
+          <MapContainer center={[14.550561416466541, 121.02785649562283]} zoom={13} scrollWheelZoom={false} style={{ width: '100%', height: '100%' }}>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <Marker position={[51.505, -0.09]}>
-              <Popup>
-                A pretty CSS3 popup. <br /> Easily customizable.
-              </Popup>
-            </Marker>
+            <MapEventHandler onClick={handleMapClick} />
+            {mapMarkers}{newMapMarker}
+            {newMapMarker && showAddStationDialog && (
+              <>
+                <AddEditStationDialog
+                  coordinates={clickedCoords} // Pass the clicked coordinates as a prop
+                  onDismiss={() => setShowAddStationDialog(false)}
+                  onStationSaved={(newStation) => {
+                    setStations([...stations, newStation]);
+                    setFilteredStations([...filteredStations, newStation]);
+                    setShowAddStationDialog(false);
+                    showAlertMessage('Station added successfully', 'success');
+                  }}
+                />
+              </>
+            )}
           </MapContainer>
         </div>
 

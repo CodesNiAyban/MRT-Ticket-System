@@ -2,6 +2,7 @@ import { Button, Modal, Navbar, Nav } from "react-bootstrap";
 import { Admin } from "../../model/adminModel";
 import * as AdminApi from "../../network/adminAPI";
 import { useState } from "react";
+import styles from "./NavBar.module.css"
 import { Link } from "react-router-dom";
 
 interface NavBarLoggedInViewProps {
@@ -62,13 +63,18 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
                 show={showConfirmationModal}
                 centered
                 onHide={() => setShowConfirmationModal(false)}
+                className={`${styles.modalContent} beep-card-modal`}
                 style={{ borderRadius: "12px", backgroundColor: "white" }}
             >
-                <Modal.Header closeButton>
-                    <Modal.Title>Logout Confirmation</Modal.Title>
+                <Modal.Header closeButton className={`${styles.modalHeader} modal-header`}>
+                    <Modal.Title className={`${styles.modalTitle} modal-title`}>
+                        Logout Confirmation
+                    </Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Are you sure you want to log out?</Modal.Body>
-                <Modal.Footer>
+                <Modal.Body className={`${styles.modalBody} modal-body`}>
+                    Are you sure you want to log out?
+                </Modal.Body>
+                <Modal.Footer className={`${styles.modalFooter} modal-footer`}>
                     <Button
                         variant="secondary"
                         onClick={() => setShowConfirmationModal(false)}

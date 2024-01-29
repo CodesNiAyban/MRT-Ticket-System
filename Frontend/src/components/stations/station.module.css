@@ -1,0 +1,41 @@
+.blockCenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: 4px;
+}
+
+.flexCenterLoading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.blockCenterLoading {
+    text-align: center;
+}
+
+.alertOverlay {
+    z-index: 1000;
+    /* Adjust the value as needed to make it higher than other elements */
+}
+
+.mapContainer {
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Added box shadow for better visibility */
+
+    /* Adjust the following styles based on your preferences */
+    .leaflet-container {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px; /* Rounded corners for the map */
+    }
+}
