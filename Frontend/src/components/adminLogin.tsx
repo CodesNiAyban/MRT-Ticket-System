@@ -115,7 +115,7 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
                                     <span className="ml-2">Logging In...</span>
                                 </>
                             )}
-                            {!isSubmitting && 'LOG IN'}
+                            {!isSubmitting && 'Submit'}
                         </Button>
                     </div>
                 </div>

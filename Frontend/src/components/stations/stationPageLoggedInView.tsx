@@ -5,7 +5,7 @@ import { Stations as StationsModel } from '../../model/stationsModel';
 import * as StationApi from '../../network/stationsAPI';
 import styles from './station.module.css';
 import AddEditStationDialog from './addEditStationDialog';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap, Polyline } from 'react-leaflet';
 import MapEventHandler from './stationsCoordinates';
 import 'leaflet/dist/leaflet.css'; // Ensure this import for Leaflet styles
 import L from 'leaflet';
@@ -33,6 +33,7 @@ const StationPageLoggedInView = () => {
   const [newMapMarker, setNewMapMarker] = useState<ReactElement[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<StationsModel | null>(null);
   const [clickedCoords, setClickedCoords] = useState<[number, number] | null>(null);
+  const [polylines, setPolylines] = useState<ReactElement[]>([]);
 
   useEffect(() => {
     async function loadStations() {
@@ -68,13 +69,18 @@ const StationPageLoggedInView = () => {
         <Marker
           key="newMarker"
           position={clickedCoords}
-          icon={customIcon}
+          icon={newCustomIcon}
           eventHandlers={{
-            click: () => handleNewMarkerClick()
+            click: () => handleNewMarkerClick(),
+            mouseover: (event) => event.target.openPopup(),
+            mouseout: (event) => event.target.closePopup(),
           }}
         >
           <Popup>
-            New Station
+            NEW STATION<br />
+            Click to create to coords <br />
+            Latitude: {clickedCoords[1]}<br />
+            Longitude: {clickedCoords[0]}<br />
           </Popup>
         </Marker>
       );
@@ -94,47 +100,89 @@ const StationPageLoggedInView = () => {
     shadowAnchor: [10, 46],
   });
 
-  const [stationList, setStationList] = useState<any>({});
+  const newCustomIcon = L.icon({
+    iconUrl: '/newMarker.png',
+    iconSize: [38, 44],
+    iconAnchor: [17, 46], //[left/right, top/bottom]
+    popupAnchor: [0, -46], //[left/right, top/bottom]
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [40, 40],
+    shadowAnchor: [5, 46],
+  });
 
-  const loadStationsAndMarkers = async () => {
-    try {
-      setShowStationsLoadingError(false);
-      setStationsLoading(true);
 
-      const stations = await StationApi.fetchStations();
-      setStations(stations);
-      setFilteredStations(stations);
-
-      const markers = stations.map((station) => (
-        <Marker key={station._id} position={[station.coords[0], station.coords[1]]} icon={customIcon} eventHandlers={{
-          // click: () => setStationToEdit(station)
-        }}>
-          <Popup>
-            {station.stationName}
-            <Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
-              <FaTrash /> DELETE
-            </Button>{' '}
-            <Button variant="primary" onClick={() => setStationToEdit(station)}>
-              <FaPencilAlt /> UPDATE
-            </Button>
-          </Popup>
-        </Marker>
-      ));
-
-      setMapMarkers(markers);
-    } catch (error) {
-      console.error(error);
-      setShowStationsLoadingError(true);
-    } finally {
-      setStationsLoading(false);
-    }
-  }
-
-  const [added, setAdded] = useState(false);
 
   useEffect(() => {
+    const loadStationsAndMarkers = async () => {
+      try {
+        setShowStationsLoadingError(false);
+        setStationsLoading(true);
+
+        const stations = await StationApi.fetchStations();
+        setStations(stations);
+        setFilteredStations(stations);
+
+        const markers = stations.map((station) => (
+          <Marker key={station._id} position={[station.coords[0], station.coords[1]]} icon={customIcon} eventHandlers={{
+            // click: () => setStationToEdit(station)
+            mouseover: (event) => event.target.openPopup(),
+            // mouseout: (event) => event.target.closePopup(),
+          }}>
+            <Popup eventHandlers={{
+              mouseout: (event) => event.target.closePopup(),
+            }}>
+              {station.stationName}<br />
+              Latitude: {station.coords[1]}<br />
+              Longitude: {station.coords[0]}<br />
+              Connected To: {station.connectedTo.join(', ')}<br />
+              <Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
+                <FaTrash /> DELETE
+              </Button>{' '}
+              <Button variant="primary" onClick={() => setStationToEdit(station)}>
+                <FaPencilAlt /> UPDATE
+              </Button>
+            </Popup>
+          </Marker>
+        ));
+
+        setMapMarkers(markers);
+
+        // Create polylines based on connectedTo information
+        const lines: ReactElement[] = [];
+        stations.forEach((station) => {
+          station.connectedTo.forEach((connectedStationName) => {
+            const connectedStation = stations.find((s) => s.stationName === connectedStationName);
+            if (connectedStation) {
+              const line = (
+                <Polyline
+                  key={`${station._id}-${connectedStation._id}`}
+                  positions={[
+                    [station.coords[0], station.coords[1]],
+                    [connectedStation.coords[0], connectedStation.coords[1]],
+                  ]}
+                  color="black"  // Set the color of the polyline
+                  weight={3}     // Set the weight (thickness) of the polyline
+                  opacity={0.7}  // Set the opacity of the polyline
+                  dashArray="5, 10"  // Set a dash pattern for the polyline
+                />
+              );
+              lines.push(line);
+            }
+          });
+        });
+
+        setPolylines(lines);
+
+      } catch (error) {
+        console.error(error);
+        setShowStationsLoadingError(true);
+      } finally {
+        setStationsLoading(false);
+      }
+    }
+
     loadStationsAndMarkers();
-  }, [added]);
+  }, []);
 
   const deleteStation = async (station: StationsModel) => {
     try {
@@ -285,7 +333,6 @@ const StationPageLoggedInView = () => {
               showAlertMessage('Station saved successfully', 'success');
               setSelectedMarker(null); // Reset selectedMarker after saving
             }}
-            setAdded={() => setAdded(!added)}
           />
         )}
 
@@ -308,17 +355,16 @@ const StationPageLoggedInView = () => {
               setStationToEdit(null);
               showAlertMessage('Station updated successfully', 'success');
             }}
-            setAdded={() => setAdded(!added)}
           />
         )}
 
         <div id="map" className={`${styles.mapContainer} border rounded`} style={{ width: '100%', height: '500px' }}>
-          <MapContainer center={[14.550561416466541, 121.02785649562283]} zoom={13} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
+          <MapContainer center={[14.550561416466541, 121.02785649562283]} zoomControl={false} zoom={13} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
             <TileLayer
               url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`} //https://www.jawg.io/lab/access-tokens
             />
             <MapEventHandler onClick={handleMapClick} />
-            {mapMarkers}{newMapMarker}
+            {mapMarkers}{newMapMarker}{polylines}
           </MapContainer>
         </div>
 

@@ -7,13 +7,13 @@ import * as StationsApi from '../../network/stationsAPI';
 import TextInputField from '../form/textInputFields';
 import { Stations as StationsModel } from '../../model/stationsModel';
 import StationConnectedToModal from './stationConnectedToModal';
+import styles from './station.module.css';
 
 interface AddEditStationDialogProps {
     stationToEdit?: Stations | null;
     onDismiss: () => void;
     onStationSaved: (station: Stations) => void;
     coordinates?: [number, number] | null;
-    setAdded: () => void
 }
 
 const AddEditStationDialog = ({
@@ -21,7 +21,6 @@ const AddEditStationDialog = ({
     onDismiss,
     onStationSaved,
     coordinates,
-    setAdded
 }: AddEditStationDialogProps) => {
     const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<StationInput>({
         defaultValues: {
@@ -35,7 +34,13 @@ const AddEditStationDialog = ({
     const [selectedStations, setSelectedStations] = useState<StationsModel[]>([]);
 
     const handleStationSelection = (station: StationsModel) => {
-        setSelectedStations([...selectedStations, station]);
+        // Check if the station is already in the selected stations list
+        const isStationSelected = selectedStations.some((selectedStation) => selectedStation._id === station._id);
+
+        // If the station is not already selected, add it to the list
+        if (!isStationSelected) {
+            setSelectedStations([...selectedStations, station]);
+        }
     };
 
     const handleRemoveStation = (station: StationsModel) => {
@@ -58,13 +63,12 @@ const AddEditStationDialog = ({
     const onSubmit = async (input: StationInput) => {
         try {
             // Create a new input object with connectedTo as an array of strings
-            const updatedInput = { ...input, connectedTo: input.connectedTo };
+            const updatedInput = { ...input, connectedTo: selectedStations.map(station => station.stationName) };
 
             let stationResponse: Stations;
             if (stationToEdit) {
                 // Editing an existing station
                 stationResponse = await StationsApi.updateStation(stationToEdit._id, updatedInput);
-                setAdded()
             } else {
                 // Adding a new station
                 stationResponse = await StationsApi.createStation(updatedInput);
@@ -90,10 +94,24 @@ const AddEditStationDialog = ({
             setValue('stationName', stationToEdit?.stationName || '');
             setValue('coords.0', stationToEdit?.coords[0] || initialLatitude);
             setValue('coords.1', stationToEdit?.coords[1] || initialLongitude);
-            setValue('connectedTo', stationToEdit?.connectedTo || []);
+
+            // Handle the connectedTo field
+            const connectedToStations = stationToEdit?.connectedTo || [];
+
+            // Explicitly define the type of selectedStations
+            const newSelectedStations: Stations[] = connectedToStations.map(station => ({
+                _id: stationToEdit?._id || '', // Provide a default value (empty string or any other suitable value)
+                stationName: stationToEdit?.stationName || '',
+                coords: [stationToEdit?.coords[0] || 0, stationToEdit?.coords[1] || 0], // Provide default values (0 or any other suitable value)
+                connectedTo: [stationToEdit?.stationName || ''], // Provide a default value (empty string or any other suitable value)
+            }));
+
+            setSelectedStations(newSelectedStations);
         };
+
         setDefaultValues();
     }, [stationToEdit]);
+
 
     const handleCoordinatesChange = (index: number, value: string) => {
         setValue(`coords.${index}`, parseFloat(value));
@@ -146,21 +164,28 @@ const AddEditStationDialog = ({
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Connect Stations</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Put Array of Strings Here"
-                            isInvalid={!!errors.connectedTo}
-                            value={selectedStations.map((station) => station.stationName).join(', ')}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {errors.connectedTo?.message}
-                        </Form.Control.Feedback>
-                        <Button variant="primary" onClick={openConnectedToModal}>
-                            Select Stations
-                        </Button>
-                    </Form.Group>
+                        <Form.Label> {selectedStations.length > 0 ? <>Connected Stations</> : <>No Connecting Stations</>}</Form.Label>
 
+                        <div>
+                            {selectedStations.map((station) => (
+                                <span key={station._id} className={`${styles.badge} badge badge-pill badge-primary mr-2`}
+                                    style={{
+                                        background: '#0275d8',
+                                        color: 'white',
+                                        padding: '8px 16px',
+                                        borderRadius: '20px',
+                                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                    }}
+                                >
+                                    {station.stationName}
+                                </span>
+                            ))}
+                        </div>
+                        <div className="mt-3"><Button variant="primary" onClick={openConnectedToModal} className='ms-auto'>
+                            {selectedStations.length > 0 ? <>Edit Connecting Stations</> : <>Add Connecting Station/s</>}
+                        </Button>
+                        </div>
+                    </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
@@ -175,9 +200,10 @@ const AddEditStationDialog = ({
                 onStationSelection={handleStationSelection}
                 selectedStations={selectedStations}
                 onRemoveStation={handleRemoveStation}
+                onClearSelectedStations={() => setSelectedStations([])}
             />
 
-        </Modal>
+        </Modal >
     );
 };
 
