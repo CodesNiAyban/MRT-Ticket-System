@@ -62,4 +62,32 @@
     border-top: 1px solid #dee2e6;
     padding: 1rem;
   }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.8); /* White with low opacity */
+    z-index: 1000;
+  }
+  
+  .blocking-component {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allow clicks to pass through */
+    z-index: 1001;
+  }
+  
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
   

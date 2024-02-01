@@ -28,13 +28,14 @@ export async function getLoggedInAdmin(): Promise<Admin> {
 }
 
 export async function adminLogin(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await fetchData(`${MRT_API}/api/admin/login`, {
+    const response = await fetch(`${MRT_API}/api/admin/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         },
         body: JSON.stringify(credentials),
+        credentials: 'include', 
     });
 
     if (!response.ok) {

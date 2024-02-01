@@ -105,11 +105,19 @@ const AddEditStationDialog = ({
 
 	const handleStationSelection = (station: StationsModel) => {
 		// Check if the station is already in the selected stations list
-		const isStationSelected = selectedStations.some((selectedStation) => selectedStation._id === station._id);
+		const isStationSelected = selectedStations.some(
+			(selectedStation) => selectedStation._id === station._id
+		);
 
 		// If the station is not already selected, add it to the list
 		if (!isStationSelected) {
 			setSelectedStations([...selectedStations, station]);
+		} else {
+			// If the station is already selected, remove it from the list
+			const updatedSelectedStations = selectedStations.filter(
+				(selectedStation) => selectedStation._id !== station._id
+			);
+			setSelectedStations(updatedSelectedStations);
 		}
 	};
 
@@ -176,7 +184,7 @@ const AddEditStationDialog = ({
 
 						<div>
 							{selectedStations.map((station) => (
-								<span key={station._id} className={`${styles.badge} badge badge-pill badge-primary mr-2`}
+								<span key={`${Math.random()}${station._id}`} className={`${styles.badge} badge badge-pill badge-primary mr-2`}
 									style={{
 										background: '#0275d8',
 										color: 'white',

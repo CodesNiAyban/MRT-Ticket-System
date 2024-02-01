@@ -41,9 +41,7 @@ app.use(session({
 		mongoUrl: env.MONGO_CONNECTION_STRING
 	}),
 	cookie: {
-		secure: false, // Set to false when developing locally
-		sameSite: "none",
-		maxAge: 60 * 3600 * 1000, // Session duration in milliseconds
+		maxAge: 60 * 60 * 1000, // Session duration in milliseconds
 	},
 }));
 
