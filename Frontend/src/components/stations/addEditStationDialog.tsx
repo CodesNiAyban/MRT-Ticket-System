@@ -7,7 +7,7 @@ import { StationInput } from '../../network/stationsAPI';
 import TextInputField from '../form/textInputFields';
 import styles from './station.module.css';
 import StationConnectedToModal from './stationConnectedToModal';
-import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
+import { Polyline } from 'react-leaflet';
 import L from 'leaflet';
 
 interface AddEditStationDialogProps {
@@ -71,7 +71,7 @@ const AddEditStationDialog = ({
 						_id: stationDetails._id || '',
 						stationName: stationDetails.stationName || '',
 						coords: stationDetails.coords,
-						connectedTo: [stationToEdit?._id || ''], // Change this to connectedStation
+						connectedTo: [connectedToStations[i] || ''], // Change this to connectedStation
 					};
 					i++;
 					newSelectedStations.push(connectedStationDetails);

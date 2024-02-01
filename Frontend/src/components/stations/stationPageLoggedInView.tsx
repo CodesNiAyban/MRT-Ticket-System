@@ -152,6 +152,7 @@ const StationPageLoggedInView = () => {
 				setMapMarkers(markers);
 
 				// Create polylines based on connectedTo information
+				setPolylines([]);
 				const lines: ReactElement[] = [];
 				stations.forEach((station) => {
 					station.connectedTo.forEach((connectedStationId) => {
@@ -203,7 +204,7 @@ const StationPageLoggedInView = () => {
 				};
 			});
 
-			if(station.connectedTo.length > 0) await StationApi.updateStations(updatedStations);
+			if (station.connectedTo.length > 0) await StationApi.updateStations(updatedStations);
 
 			await StationApi.deleteStation(station._id);
 
@@ -387,7 +388,7 @@ const StationPageLoggedInView = () => {
 						stationToEdit={stationToEdit}
 						onDismiss={() => {
 							setStationToEdit(null);
-							// refresh(); // Call refresh() when dismissing the dialog
+							refresh(); // Call refresh() when dismissing the dialog
 						}}
 						onStationSaved={(updateStation) => {
 							refresh();

@@ -70,6 +70,26 @@ export const updateStation: RequestHandler<stationsInterface.UpdateStationParams
 
 		if (!station) throw createHttpError(404, "Station not found.");
 
+		// Remove connections that are not present in the updated connectedTo field
+		const removedConnections = station.connectedTo.filter(
+			(connectedStationId) => !newConnectedTo.includes(connectedStationId)
+		);
+
+		// Update the connectedTo field for stations that are affected by removed connections
+		if (removedConnections && removedConnections.length > 0) {
+			await Promise.all(
+				removedConnections.map(async (removedStationId) => {
+					const removedStation = await StationModel.findById(removedStationId).exec();
+					if (removedStation) {
+						removedStation.connectedTo = removedStation.connectedTo.filter(
+							(connectedStationId) => connectedStationId !== stationId
+						);
+						await removedStation.save();
+					}
+				})
+			);
+		}
+
 		station.stationName = newStationName;
 		station.coords = newCoords;
 		station.connectedTo = newConnectedTo;
