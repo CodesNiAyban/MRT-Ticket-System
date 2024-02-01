@@ -57,16 +57,15 @@ export async function createStation(station: StationInput): Promise<Stations> {
     return response.json();
 }
 
-export async function updateStation(stationId: string, station: StationInput): Promise<Stations> {
-    const response = await fetchData(`${MRT_API}/api/stations/${stationId}`,
-        {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-            },
-            body: JSON.stringify(station),
-        });
+export async function updateStation(stationId: string, station: Partial<StationInput>): Promise<Stations> {
+    const response = await fetchData(`${MRT_API}/api/stations/${stationId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+        },
+        body: JSON.stringify(station),
+    });
 
     if (!response.ok) {
         // Check for authorization failure (e.g., status code 401 or 403)

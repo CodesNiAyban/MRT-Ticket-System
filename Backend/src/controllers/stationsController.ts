@@ -62,9 +62,9 @@ export const updateStation: RequestHandler<stationsInterface.UpdateStationParams
 	try {
 		// Error handling
 		if (!mongoose.isValidObjectId(stationId)) throw createHttpError(400, "Invalid station id.");
-		if (!newStationName) { throw createHttpError(400, "Station must have a staionName"); }
-		if (!newCoords) { throw createHttpError(400, "Station must have a coords"); }
-		if (!newConnectedTo) { throw createHttpError(400, "Station must have a connectedTo"); }
+		if (!newStationName) { throw createHttpError(400, "Station must have a stationName"); }
+		if (!newCoords) { throw createHttpError(400, "Station must have coords"); }
+		if (!newConnectedTo) { throw createHttpError(400, "Station must have connectedTo"); }
 
 		const station = await StationModel.findById(stationId).exec();
 
@@ -79,17 +79,12 @@ export const updateStation: RequestHandler<stationsInterface.UpdateStationParams
 		res.status(200).json(updateStation);
 	} catch (error) {
 		next(error);
-
 	}
 };
 
 export const updateStations: RequestHandler<unknown, unknown, stationsInterface.UpdateStationsBody, unknown> = async (req, res, next) => {
 	try {
 		const { stations: updatedStations } = req.body;
-
-		if (!updatedStations || !Array.isArray(updatedStations) || updatedStations.length === 0) {
-			return res.status(400).json({ error: "Invalid or missing 'stations' array in the request body." });
-		}
 
 		const bulkUpdateOps = updatedStations.map((updatedStation) => {
 			const { _id, stationName, coords, connectedTo } = updatedStation;
@@ -104,9 +99,7 @@ export const updateStations: RequestHandler<unknown, unknown, stationsInterface.
 
 		const result = await StationModel.bulkWrite(bulkUpdateOps);
 
-		if (result.modifiedCount > 0) {
-			res.status(200).json({ updatedCount: result.modifiedCount });
-		}
+		res.status(200).json({ updatedCount: result.modifiedCount });
 	} catch (error) {
 		console.error("An error occurred while updating stations:", error);
 		next(error);

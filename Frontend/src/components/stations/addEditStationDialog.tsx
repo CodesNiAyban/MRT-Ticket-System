@@ -63,15 +63,15 @@ const AddEditStationDialog = ({
 		let i: number = 0;
 		for (const connectedStation of connectedToStations) {
 			try {
-				const stationDetailsArray = await StationsApi.fetchStations(); // Replace with your actual API call to fetch all stations
+				const stationDetailsArray = await StationsApi.fetchStations();
 				const stationDetails = stationDetailsArray.find(station => station._id === connectedStation);
 
 				if (stationDetails) {
 					const connectedStationDetails: Stations = {
-						_id: stationDetails._id || '', // Replace with the actual property from the fetched station details
+						_id: stationDetails._id || '',
 						stationName: stationDetails.stationName || '',
-						coords: stationDetails.coords, // Provide default values (0 or any other suitable value)
-						connectedTo: [stationToEdit?.stationName[i] || ''], // Replace with stationDetails.stationName
+						coords: stationDetails.coords,
+						connectedTo: [stationToEdit?._id || ''], // Change this to connectedStation
 					};
 					i++;
 					newSelectedStations.push(connectedStationDetails);
@@ -83,8 +83,8 @@ const AddEditStationDialog = ({
 				console.error(`Error fetching details for station ${connectedStation}:`, error);
 			}
 		}
-
 	};
+
 
 	useEffect(() => {
 		setDefaultValues();
@@ -94,7 +94,7 @@ const AddEditStationDialog = ({
 
 	useEffect(() => {
 		// When the selected stations change, update the connectedTo field
-		setValue('connectedTo', selectedStations.map(station => station.stationName));
+		setValue('connectedTo', selectedStations.map(station => station._id));
 	}, [selectedStations, setValue]);
 
 	const onSubmit = async (input: StationInput) => {
@@ -106,7 +106,7 @@ const AddEditStationDialog = ({
 				// Editing an existing station
 				stationResponse = await StationsApi.updateStation(stationToEdit._id, {
 					...input,
-					connectedTo: selectedStations.map(station => station._id),
+					connectedTo: selectedStations.map(station => station._id), // Change this to station._id
 				});
 			} else {
 				// Adding a new station
@@ -124,23 +124,24 @@ const AddEditStationDialog = ({
 				setSelectedStations([...selectedStations, newStationWithID]);
 			}
 
-			// Send a bulk update to update connectedTo for all relevant stations
-			const bulkUpdateStations = selectedStations.map((selectedStation) => {
-				const updatedConnectedTo = [...selectedStation.connectedTo, stationResponse.stationName];
-				return { ...selectedStation, connectedTo: updatedConnectedTo };
-			});
+			// Check if connectedTo input is not empty before performing bulk update
+			if (input.connectedTo.length > 0) {
+				// Send a bulk update to update connectedTo for all relevant stations
+				const bulkUpdateStations = selectedStations.map((selectedStation) => {
+					// Check if the current station is the same as the one being updated
+					const isSameStation = stationToEdit && selectedStation._id === stationToEdit._id;
 
-			// If it's a new station, add it to the bulk update as well
-			if (!stationToEdit) {
-				bulkUpdateStations.push({
-					_id: stationResponse._id,
-					stationName: stationResponse.stationName,
-					coords: stationResponse.coords,
-					connectedTo: selectedStations.map(station => station.stationName),
+					// If it's not the same station, update the connectedTo field
+					if (!isSameStation) {
+						const updatedConnectedTo = [...selectedStation.connectedTo, stationResponse._id];
+						return { ...selectedStation, connectedTo: updatedConnectedTo };
+					}
+
+					return selectedStation;
 				});
-			}
 
-			await StationsApi.updateStations(bulkUpdateStations);
+				await StationsApi.updateStations(bulkUpdateStations);
+			}
 
 			onStationSaved(stationResponse);
 		} catch (error) {
@@ -148,6 +149,8 @@ const AddEditStationDialog = ({
 			alert(error);
 		}
 	};
+
+
 
 	const handleCoordinatesChange = (index: number, value: string) => {
 		setValue(`coords.${index}`, parseFloat(value));
@@ -163,9 +166,9 @@ const AddEditStationDialog = ({
 			(selectedStation) => selectedStation._id === station._id
 		);
 
-		// Check if the station already exists in the selected stations list
+		// Check if the station already exists in the list
 		const isStationInList = selectedStations.some(
-			(selectedStation) => selectedStation.stationName === station.stationName
+			(selectedStation) => selectedStation._id === station._id
 		);
 
 		// Check if the stationName of the marker is the same as the current station's stationName
@@ -173,90 +176,84 @@ const AddEditStationDialog = ({
 
 		// If the station is not already selected, doesn't exist in the list, and is not the same station, add it to the list
 		if (!isStationSelected && !isStationInList && !isSameStation) {
-			// Check if the stationName of the marker is the same as the current station's stationName
-			const isSameStation = stationToEdit && station._id === stationToEdit._id;
+			// Update connectedTo for the selected station
+			const updatedSelectedStation: StationsModel = {
+				...station,
+				connectedTo: [...station.connectedTo, stationToEdit?._id || ''],
+			};
 
-			// If the station is not already selected, doesn't exist in the list, and is not the same station, add it to the list
-			if (!isStationSelected && !isStationInList && !isSameStation) {
-				// Update connectedTo for the selected station
-				const updatedSelectedStation: StationsModel = {
-					...station,
-					connectedTo: [...station.connectedTo, stationToEdit?._id || ''],
-				};
+			// Update connectedTo for other stations in selectedStations
+			const updatedStations = selectedStations.map((selectedStation) => ({
+				...selectedStation,
+				connectedTo: [...selectedStation.connectedTo, station._id],
+			}));
 
-				// Update connectedTo for other stations in selectedStations
-				const updatedStations = selectedStations.map((selectedStation) => ({
-					...selectedStation,
-					connectedTo: [...selectedStation.connectedTo, station._id],
-				}));
-
-				// If stationToEdit is present, update its connectedTo
-				if (stationToEdit) {
-					stationToEdit.connectedTo.push(station._id);
-				}
-
-				// Set the updated selected stations and update connectedTo for other stations
-				setSelectedStations([updatedSelectedStation, ...updatedStations]);
+			// If stationToEdit is present, update its connectedTo
+			if (stationToEdit) {
+				stationToEdit.connectedTo.push(station._id);
 			}
 
-			if (!selectedStations.some((selectedStation) => selectedStation._id === station._id)) {
-				if (stationToEdit && station._id !== stationToEdit._id) {
-					const distance = L.latLng(stationToEdit.coords[0], stationToEdit.coords[1]).distanceTo(
-						L.latLng(station.coords[0], station.coords[1])
-					);
-
-					if (distance > 500) {
-						const polyline = (
-							<Polyline
-								key={`polyline-${station._id}`}
-								positions={[
-									[
-										stationToEdit.coords[0],
-										stationToEdit.coords[1],
-									],
-									[station.coords[0], station.coords[1]],
-								]}
-							/>
-						);
-
-						setPolylines((prevPolylines) => [
-							...prevPolylines,
-							polyline,
-						]);
-					} else {
-						setShowToast(true);
-					}
-				} else if (newStation && station._id !== newStation._id) {
-					const distance = L.latLng(newStation.coords[0], newStation.coords[1]).distanceTo(
-						L.latLng(station.coords[0], station.coords[1])
-					);
-
-					if (distance > 500) {
-						const polyline = (
-							<Polyline
-								key={`polyline-${station._id}`}
-								positions={[
-									[newStation.coords[0], newStation.coords[1]],
-									[station.coords[0], station.coords[1]],
-								]}
-							/>
-						);
-
-						setPolylines((prevPolylines) => [
-							...prevPolylines,
-							polyline,
-						]);
-					} else {
-						setShowToast(true);
-					}
-				}
-			}
-			setSelectedStations([...selectedStations, station]);
+			// Set the updated selected stations and update connectedTo for other stations
+			setSelectedStations([updatedSelectedStation, ...updatedStations]);
 		}
+
+		if (!selectedStations.some((selectedStation) => selectedStation._id === station._id)) {
+			if (stationToEdit && station._id !== stationToEdit._id) {
+				const distance = L.latLng(stationToEdit.coords[0], stationToEdit.coords[1]).distanceTo(
+					L.latLng(station.coords[0], station.coords[1])
+				);
+
+				if (distance > 500) {
+					const polyline = (
+						<Polyline
+							key={`polyline-${station._id}`}
+							positions={[
+								[
+									stationToEdit.coords[0],
+									stationToEdit.coords[1],
+								],
+								[station.coords[0], station.coords[1]],
+							]}
+						/>
+					);
+
+					setPolylines((prevPolylines) => [
+						...prevPolylines,
+						polyline,
+					]);
+				} else {
+					setShowToast(true);
+				}
+			} else if (newStation && station._id !== newStation._id) {
+				const distance = L.latLng(newStation.coords[0], newStation.coords[1]).distanceTo(
+					L.latLng(station.coords[0], station.coords[1])
+				);
+
+				if (distance > 500) {
+					const polyline = (
+						<Polyline
+							key={`polyline-${station._id}`}
+							positions={[
+								[newStation.coords[0], newStation.coords[1]],
+								[station.coords[0], station.coords[1]],
+							]}
+						/>
+					);
+
+					setPolylines((prevPolylines) => [
+						...prevPolylines,
+						polyline,
+					]);
+				} else {
+					setShowToast(true);
+				}
+			}
+		}
+		setSelectedStations([...selectedStations, station]);
 	};
 
 	const handleRemoveStation = (station: StationsModel) => {
-		setSelectedStations(selectedStations.filter((s) => s.stationName !== station.stationName));
+		setSelectedStations(selectedStations.filter((s) => s._id !== station._id));
 	};
 
 	const openConnectedToModal = () => {

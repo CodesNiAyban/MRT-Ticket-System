@@ -188,7 +188,7 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 	const handleRemoveStationName = (stationName: string, stationId: string) => {
 		// Find the clicked station in selectedStations array
 		const stationToRemove = selectedStations.find(
-			(station) => station.stationName === stationName
+			(station) => station._id === stationId
 		);
 
 		if (stationToRemove) {

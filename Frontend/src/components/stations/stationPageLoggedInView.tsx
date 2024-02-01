@@ -203,10 +203,8 @@ const StationPageLoggedInView = () => {
 				};
 			});
 
-			// First, update all stations with the modified connectedTo arrays
-			await StationApi.updateStations(updatedStations);
+			if(station.connectedTo.length > 0) await StationApi.updateStations(updatedStations);
 
-			// Then, delete the specific station
 			await StationApi.deleteStation(station._id);
 
 			// Update the local state after successful deletion
@@ -216,8 +214,6 @@ const StationPageLoggedInView = () => {
 			refresh();
 			showAlertMessage('Station deleted successfully', 'success');
 		} catch (error) {
-			// Then, delete the specific station
-			await StationApi.deleteStation(station._id);
 			console.error("An error occurred while deleting the station:", error);
 			showAlertMessage('Error deleting station', 'danger');
 		}
