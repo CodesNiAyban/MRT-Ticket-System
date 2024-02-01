@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { Stations, Stations as StationsModel } from '../../model/stationsModel';
@@ -7,6 +7,8 @@ import { StationInput } from '../../network/stationsAPI';
 import TextInputField from '../form/textInputFields';
 import styles from './station.module.css';
 import StationConnectedToModal from './stationConnectedToModal';
+import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
+import L from 'leaflet';
 
 interface AddEditStationDialogProps {
 	stationToEdit?: Stations | null;
@@ -21,7 +23,8 @@ const AddEditStationDialog = ({
 	onDismiss,
 	onStationSaved,
 	coordinates,
-	newStation
+	newStation,
+
 }: AddEditStationDialogProps) => {
 	const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<StationInput>({
 		defaultValues: {
@@ -33,6 +36,11 @@ const AddEditStationDialog = ({
 
 	const [showConnectedToModal, setShowConnectedToModal] = useState(false);
 	const [selectedStations, setSelectedStations] = useState<StationsModel[]>([]);
+	const [runOnce, setRunOnce] = useState(true)
+
+
+	const [polylines, setPolylines] = useState<ReactElement[]>([]);
+	const [showToast, setShowToast] = useState(false);
 
 	const initialLatitude = coordinates && coordinates.length > 1 ? coordinates[0] : 0;
 	const initialLongitude = coordinates && coordinates.length > 1 ? coordinates[1] : 0;
@@ -64,6 +72,7 @@ const AddEditStationDialog = ({
 			};
 			i++;
 			newSelectedStations.push(connectedStationDetails);
+			selectedStations.push(connectedStationDetails)
 		}
 
 		setSelectedStations(newSelectedStations);
@@ -71,7 +80,8 @@ const AddEditStationDialog = ({
 
 	useEffect(() => {
 		setDefaultValues();
-	}, [stationToEdit]);
+		setRunOnce(false)
+	}, [runOnce]);
 
 
 	useEffect(() => {
@@ -103,21 +113,79 @@ const AddEditStationDialog = ({
 		setValue(`coords.${index}`, parseFloat(value));
 	};
 
-	const handleStationSelection = (station: StationsModel) => {
+	const handlePolylines = (polylines: any) => {
+		setPolylines(polylines)
+	}
+
+	const handleStationSelection = async (station: StationsModel) => {
 		// Check if the station is already in the selected stations list
 		const isStationSelected = selectedStations.some(
 			(selectedStation) => selectedStation._id === station._id
 		);
 
-		// If the station is not already selected, add it to the list
-		if (!isStationSelected) {
+		// Check if the station already exists in the selected stations list
+		const isStationInList = selectedStations.some(
+			(selectedStation) => selectedStation.stationName === station.stationName
+		);
+
+		// Check if the stationName of the marker is the same as the current station's stationName
+		const isSameStation = stationToEdit && station._id === stationToEdit._id;
+
+		// If the station is not already selected, doesn't exist in the list, and is not the same station, add it to the list
+		if (!isStationSelected && !isStationInList && !isSameStation) {
+			if (!selectedStations.some((selectedStation) => selectedStation._id === station._id)) {
+				if (stationToEdit && station._id !== stationToEdit._id) {
+					const distance = L.latLng(stationToEdit.coords[0], stationToEdit.coords[1]).distanceTo(
+						L.latLng(station.coords[0], station.coords[1])
+					);
+
+					if (distance > 500) {
+						const polyline = (
+							<Polyline
+								key={`polyline-${station._id}`}
+								positions={[
+									[
+										stationToEdit.coords[0],
+										stationToEdit.coords[1],
+									],
+									[station.coords[0], station.coords[1]],
+								]}
+							/>
+						);
+
+						setPolylines((prevPolylines) => [
+							...prevPolylines,
+							polyline,
+						]);
+					} else {
+						setShowToast(true);
+					}
+				} else if (newStation && station._id !== newStation._id) {
+					const distance = L.latLng(newStation.coords[0], newStation.coords[1]).distanceTo(
+						L.latLng(station.coords[0], station.coords[1])
+					);
+
+					if (distance > 500) {
+						const polyline = (
+							<Polyline
+								key={`polyline-${station._id}`}
+								positions={[
+									[newStation.coords[0], newStation.coords[1]],
+									[station.coords[0], station.coords[1]],
+								]}
+							/>
+						);
+
+						setPolylines((prevPolylines) => [
+							...prevPolylines,
+							polyline,
+						]);
+					} else {
+						setShowToast(true);
+					}
+				}
+			}
 			setSelectedStations([...selectedStations, station]);
-		} else {
-			// If the station is already selected, remove it from the list
-			const updatedSelectedStations = selectedStations.filter(
-				(selectedStation) => selectedStation._id !== station._id
-			);
-			setSelectedStations(updatedSelectedStations);
 		}
 	};
 
@@ -217,8 +285,12 @@ const AddEditStationDialog = ({
 				selectedStations={selectedStations}
 				onRemoveStation={handleRemoveStation}
 				onClearSelectedStations={() => setSelectedStations([])}
-				newStation={stationToEdit ? null : newStation} // Pass the new station
+				newStation={stationToEdit ? null : newStation}
 				stationToEdit={stationToEdit ? stationToEdit : null}
+				polylines={polylines}
+				setPolylines={handlePolylines}
+				showToast={showToast}
+
 			/>
 		</Modal >
 	);

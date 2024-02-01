@@ -17,6 +17,9 @@ interface StationConnectedToModalProps {
 	onClearSelectedStations: () => void;
 	newStation: StationsModel | null;
 	stationToEdit?: StationsModel | null;
+	polylines: ReactElement[];
+	setPolylines: React.Dispatch<React.SetStateAction<ReactElement[]>>;
+	showToast: any;
 }
 
 const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
@@ -27,13 +30,14 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 	onRemoveStation,
 	onClearSelectedStations,
 	newStation,
-	stationToEdit
+	stationToEdit,
+	polylines,
+	setPolylines,
+	showToast
 }: StationConnectedToModalProps) => {
-	const [showToast, setShowToast] = useState(false);
 	const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
 	const [newMapMarker, setNewMapMarker] = useState<ReactElement[]>([]);
 	const [clickedMarkerCoordinates, setClickedMarkerCoordinates] = useState<[number, number] | null>(null); // Track the clicked marker's coordinates
-	const [polylines, setPolylines] = useState<ReactElement[]>([]);
 	const [mapLoading, setMapLoading] = useState(true);
 
 	const customIcon = L.icon({
@@ -93,86 +97,12 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 						icon={customIcon}
 						eventHandlers={{
 							click: () => {
-								if (
-									!selectedStations.some(
-										(selectedStation) => selectedStation._id === station._id
-									)
-								) {
-									// Only proceed if the station is not in selectedStations
-									let targetCoordinates: [number, number];
-
-									if (newStation && !stationToEdit) {
-										targetCoordinates = [newStation.coords[0], newStation.coords[1]];
-									} else if (!newStation && stationToEdit) {
-										targetCoordinates = [
-											stationToEdit.coords[0],
-											stationToEdit.coords[1],
-										];
-									} else {
-										targetCoordinates = [station.coords[0], station.coords[1]];
-									}
-
-									const distance = L.latLng(targetCoordinates).distanceTo(
-										L.latLng(station.coords[0], station.coords[1])
-									);
-
-									if (distance > 500) {
-										if (stationToEdit) {
-											if (stationToEdit && station._id !== stationToEdit._id) {
-												onStationSelection(station);
-
-												// Create a new polyline when stationToEdit is selected
-												const polyline = (
-													<Polyline
-														key={`polyline-${station._id}`}
-														positions={[
-															[
-																stationToEdit.coords[0],
-																stationToEdit.coords[1],
-															],
-															[station.coords[0], station.coords[1]],
-														]}
-													/>
-												);
-
-												setPolylines((prevPolylines) => [
-													...prevPolylines,
-													polyline,
-												]);
-											}
-										} else if (newStation && station._id !== newStation._id) {
-											setClickedMarkerCoordinates([
-												station.coords[0],
-												station.coords[1],
-											]);
-											onStationSelection(station);
-
-											// Create a new polyline when a newStation is selected
-											const polyline = (
-												<Polyline
-													key={`polyline-${station._id}`}
-													positions={[
-														[newStation.coords[0], newStation.coords[1]],
-														[station.coords[0], station.coords[1]],
-													]}
-												/>
-											);
-
-											setPolylines((prevPolylines) => [
-												...prevPolylines,
-												polyline,
-											]);
-										} else {
-											// handleRemoveStationName(station.stationName, station._id)
-										}
-									} else {
-										setShowToast(true);
-									}
-								}
+								onStationSelection(station);
 							},
 							mouseover: (event) => event.target.openPopup(),
 							mouseout: (event) => event.target.closePopup(),
-						}}
+						}
+						}
 					>
 						<Popup>
 							<span
@@ -188,7 +118,7 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 								{station.stationName}
 							</span>
 						</Popup>
-					</Marker>
+					</Marker >
 				));
 
 				setMapMarkers(markers);
@@ -247,15 +177,8 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 					prevPolylines.filter((polyline) => polyline !== polylineToRemove)
 				);
 			}
-
 			setClickedMarkerCoordinates(null);
 		}
-	};
-
-	const handleCancel = () => {
-		onClearSelectedStations(); // Clear selected stations
-		setPolylines([]);
-		onHide();
 	};
 
 	return (
@@ -309,9 +232,6 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 					</div>
 				</Modal.Body>
 				<Modal.Footer>
-					<Button variant="secondary" onClick={handleCancel}>
-						Cancel
-					</Button>
 					<Button variant="primary" onClick={onHide}
 					// disabled={selectedStations.length === 0}
 					>
@@ -328,7 +248,7 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 						zIndex: 1000,
 					}}
 				>
-					<Toast onClose={() => setShowToast(false)}>
+					<Toast autohide onClose={() => null}>
 						<Toast.Header>
 							<strong className="mr-auto">Distance Violation</strong>
 						</Toast.Header>
