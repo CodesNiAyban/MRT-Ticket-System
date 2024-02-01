@@ -82,6 +82,36 @@ export async function updateStation(stationId: string, station: StationInput): P
     return response.json();
 }
 
+export async function updateStations(stations: Stations[]): Promise<Stations[]> {
+    try {
+        const response = await fetchData(`${MRT_API}/api/stations/updateStations`, {
+            method: "PUT", // Use PUT for updating multiple resources
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+            },
+            body: JSON.stringify({ stations }), // Wrap stations in an object
+        });
+
+        if (!response.ok) {
+            // Check for authorization failure (e.g., status code 401 or 403)
+            if (response.status === 401 || response.status === 403) {
+                console.error("Authorization failed. Logging out user.");
+                await logout();
+            } else {
+                // Handle other errors if needed
+                const errorMessage = await response.text(); // Extract error message from response body
+                throw new Error(`Error: ${response.statusText}. ${errorMessage}`);
+            }
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error("An error occurred while updating stations:", error);
+        throw error; // Rethrow the error after handling logout
+    }
+}
+
 export async function deleteStation(stationId: string) {
     try {
         const response = await fetchData(`${MRT_API}/api/stations/${stationId}`, {

@@ -1,17 +1,26 @@
 /* eslint-disable semi */
 
-export interface CreateStationBody{
+export interface CreateStationBody {
 	stationName?: string,
 	coords?: number[],
 	connectedTo?: string[]
 }
 
-export interface UpdateStationParams{
+export interface UpdateStationParams {
 	stationId: string,
 }
 
-export interface UpdateStationBody{
+export interface UpdateStationBody {
 	stationName?: string,
 	coords?: number[],
 	connectedTo?: string[]
+}
+
+export interface UpdateStationsBody {
+	stations: {
+		_id: string;
+		stationName: string;
+		coords: number[];
+		connectedTo: string[];
+	}[];
 }

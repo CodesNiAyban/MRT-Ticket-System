@@ -62,20 +62,28 @@ const AddEditStationDialog = ({
 		const newSelectedStations: Stations[] = [];
 		let i: number = 0;
 		for (const connectedStation of connectedToStations) {
+			try {
+				const stationDetailsArray = await StationsApi.fetchStations(); // Replace with your actual API call to fetch all stations
+				const stationDetails = stationDetailsArray.find(station => station._id === connectedStation);
 
-			const connectedStationDetails: Stations = {
-				_id: '', // You may need to replace this with an appropriate default value
-				stationName: connectedStation,
-				coords: [0, 0], // Provide default values (0 or any other suitable value)
-				connectedTo: [stationToEdit?.stationName[i] || ''], // Replace with connectedStation
-
-			};
-			i++;
-			newSelectedStations.push(connectedStationDetails);
-			selectedStations.push(connectedStationDetails)
+				if (stationDetails) {
+					const connectedStationDetails: Stations = {
+						_id: stationDetails._id || '', // Replace with the actual property from the fetched station details
+						stationName: stationDetails.stationName || '',
+						coords: stationDetails.coords, // Provide default values (0 or any other suitable value)
+						connectedTo: [stationToEdit?.stationName[i] || ''], // Replace with stationDetails.stationName
+					};
+					i++;
+					newSelectedStations.push(connectedStationDetails);
+					setSelectedStations(newSelectedStations);
+				} else {
+					console.error(`Station details not found for station ${connectedStation}`);
+				}
+			} catch (error) {
+				console.error(`Error fetching details for station ${connectedStation}:`, error);
+			}
 		}
 
-		setSelectedStations(newSelectedStations);
 	};
 
 	useEffect(() => {
@@ -91,17 +99,49 @@ const AddEditStationDialog = ({
 
 	const onSubmit = async (input: StationInput) => {
 		try {
-			// Create a new input object with connectedTo as an array of strings
-			const updatedInput = { ...input, connectedTo: selectedStations.map(station => station.stationName) };
-
+			// Check if it's a new station or an existing station
 			let stationResponse: Stations;
+
 			if (stationToEdit) {
 				// Editing an existing station
-				stationResponse = await StationsApi.updateStation(stationToEdit._id, updatedInput);
+				stationResponse = await StationsApi.updateStation(stationToEdit._id, {
+					...input,
+					connectedTo: selectedStations.map(station => station._id),
+				});
 			} else {
 				// Adding a new station
-				stationResponse = await StationsApi.createStation(updatedInput);
+				const newStationResponse = await StationsApi.createStation(input);
+
+				// Update the new station with a valid ID
+				const newStationWithID: StationsModel = {
+					...newStationResponse,
+					_id: newStationResponse._id || '',
+				};
+
+				stationResponse = newStationWithID;
+
+				// Add the new station to the selected stations list
+				setSelectedStations([...selectedStations, newStationWithID]);
 			}
+
+			// Send a bulk update to update connectedTo for all relevant stations
+			const bulkUpdateStations = selectedStations.map((selectedStation) => {
+				const updatedConnectedTo = [...selectedStation.connectedTo, stationResponse.stationName];
+				return { ...selectedStation, connectedTo: updatedConnectedTo };
+			});
+
+			// If it's a new station, add it to the bulk update as well
+			if (!stationToEdit) {
+				bulkUpdateStations.push({
+					_id: stationResponse._id,
+					stationName: stationResponse.stationName,
+					coords: stationResponse.coords,
+					connectedTo: selectedStations.map(station => station.stationName),
+				});
+			}
+
+			await StationsApi.updateStations(bulkUpdateStations);
+
 			onStationSaved(stationResponse);
 		} catch (error) {
 			console.error(error);
@@ -133,6 +173,32 @@ const AddEditStationDialog = ({
 
 		// If the station is not already selected, doesn't exist in the list, and is not the same station, add it to the list
 		if (!isStationSelected && !isStationInList && !isSameStation) {
+			// Check if the stationName of the marker is the same as the current station's stationName
+			const isSameStation = stationToEdit && station._id === stationToEdit._id;
+
+			// If the station is not already selected, doesn't exist in the list, and is not the same station, add it to the list
+			if (!isStationSelected && !isStationInList && !isSameStation) {
+				// Update connectedTo for the selected station
+				const updatedSelectedStation: StationsModel = {
+					...station,
+					connectedTo: [...station.connectedTo, stationToEdit?._id || ''],
+				};
+
+				// Update connectedTo for other stations in selectedStations
+				const updatedStations = selectedStations.map((selectedStation) => ({
+					...selectedStation,
+					connectedTo: [...selectedStation.connectedTo, station._id],
+				}));
+
+				// If stationToEdit is present, update its connectedTo
+				if (stationToEdit) {
+					stationToEdit.connectedTo.push(station._id);
+				}
+
+				// Set the updated selected stations and update connectedTo for other stations
+				setSelectedStations([updatedSelectedStation, ...updatedStations]);
+			}
+
 			if (!selectedStations.some((selectedStation) => selectedStation._id === station._id)) {
 				if (stationToEdit && station._id !== stationToEdit._id) {
 					const distance = L.latLng(stationToEdit.coords[0], stationToEdit.coords[1]).distanceTo(
@@ -248,11 +314,15 @@ const AddEditStationDialog = ({
 					</Form.Group>
 
 					<Form.Group className="mb-3">
-						<Form.Label> {selectedStations.length > 0 ? <>Connected Stations</> : <>No Connecting Stations</>}</Form.Label>
+						<Form.Label>
+							{selectedStations.length > 0 ? <>Connected Stations</> : <>No Connecting Stations</>}
+						</Form.Label>
 
 						<div>
 							{selectedStations.map((station) => (
-								<span key={`${Math.random()}${station._id}`} className={`${styles.badge} badge badge-pill badge-primary mr-2`}
+								<span
+									key={`${Math.random()}${station._id}`}
+									className={`${styles.badge} badge badge-pill badge-primary mr-2`}
 									style={{
 										background: '#0275d8',
 										color: 'white',
@@ -261,13 +331,14 @@ const AddEditStationDialog = ({
 										boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
 									}}
 								>
-									{station.stationName}
+									{station.stationName} {/* Display station name instead of ID */}
 								</span>
 							))}
 						</div>
-						<div className="mt-3"><Button variant="primary" onClick={openConnectedToModal} className='ms-auto'>
-							{selectedStations.length > 0 ? <>Edit Connecting Stations</> : <>Add Connecting Station/s</>}
-						</Button>
+						<div className="mt-3">
+							<Button variant="primary" onClick={openConnectedToModal} className='ms-auto'>
+								{selectedStations.length > 0 ? <>Edit Connecting Stations</> : <>Add Connecting Station/s</>}
+							</Button>
 						</div>
 					</Form.Group>
 				</Form>

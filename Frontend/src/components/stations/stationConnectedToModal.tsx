@@ -39,6 +39,7 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 	const [newMapMarker, setNewMapMarker] = useState<ReactElement[]>([]);
 	const [clickedMarkerCoordinates, setClickedMarkerCoordinates] = useState<[number, number] | null>(null); // Track the clicked marker's coordinates
 	const [mapLoading, setMapLoading] = useState(true);
+	const [mapPolylines, setMapPolylines] = useState<ReactElement[]>([]);
 
 	const customIcon = L.icon({
 		iconUrl: 'https://react-component-depot.netlify.app/static/media/marker.a3b2d28b.png',
@@ -120,6 +121,32 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 						</Popup>
 					</Marker >
 				));
+
+				// Create polylines based on connectedTo information
+				const lines: ReactElement[] = [];
+				stations.forEach((station) => {
+					station.connectedTo.forEach((connectedStationId) => {  // Use station IDs instead of names
+						const connectedStation = stations.find((s) => s._id === connectedStationId);
+						if (connectedStation) {
+							const line = (
+								<Polyline
+									key={`${station._id}-${connectedStation._id}`}
+									positions={[
+										[station.coords[0], station.coords[1]],
+										[connectedStation.coords[0], connectedStation.coords[1]],
+									]}
+									color="black"
+									weight={3}
+									opacity={0.7}
+									dashArray="5, 10"
+								/>
+							);
+							lines.push(line);
+						}
+					});
+				});
+
+				setMapPolylines(lines);
 
 				setMapMarkers(markers);
 			} catch (error) {
@@ -203,7 +230,7 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 							<TileLayer
 								url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`}
 							/>
-							{mapMarkers}{newMapMarker}{polylines}
+							{mapMarkers}{newMapMarker}{polylines}{mapPolylines}
 						</MapContainer>
 					</div>
 					<div className="mt-3">

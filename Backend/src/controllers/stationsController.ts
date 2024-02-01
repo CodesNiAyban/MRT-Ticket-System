@@ -83,6 +83,36 @@ export const updateStation: RequestHandler<stationsInterface.UpdateStationParams
 	}
 };
 
+export const updateStations: RequestHandler<unknown, unknown, stationsInterface.UpdateStationsBody, unknown> = async (req, res, next) => {
+	try {
+		const { stations: updatedStations } = req.body;
+
+		if (!updatedStations || !Array.isArray(updatedStations) || updatedStations.length === 0) {
+			return res.status(400).json({ error: "Invalid or missing 'stations' array in the request body." });
+		}
+
+		const bulkUpdateOps = updatedStations.map((updatedStation) => {
+			const { _id, stationName, coords, connectedTo } = updatedStation;
+
+			return {
+				updateOne: {
+					filter: { _id: new mongoose.Types.ObjectId(_id) },
+					update: { $set: { stationName, coords, connectedTo } },
+				},
+			};
+		});
+
+		const result = await StationModel.bulkWrite(bulkUpdateOps);
+
+		if (result.modifiedCount > 0) {
+			res.status(200).json({ updatedCount: result.modifiedCount });
+		}
+	} catch (error) {
+		console.error("An error occurred while updating stations:", error);
+		next(error);
+	}
+};
+
 export const deleteStation: RequestHandler = async (req, res, next) => {
 	try {
 		const stationId = req.params.stationId;

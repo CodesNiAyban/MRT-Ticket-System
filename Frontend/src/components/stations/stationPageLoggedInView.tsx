@@ -102,7 +102,7 @@ const StationPageLoggedInView = () => {
 				stationName: 'New Station',
 				coords: [clickedCoords[0], clickedCoords[1]],
 				connectedTo: [],
-			  });
+			});
 
 			setNewMapMarker([newMarker]);
 		}
@@ -121,9 +121,7 @@ const StationPageLoggedInView = () => {
 
 				const markers = stations.map((station) => (
 					<Marker key={station._id} position={[station.coords[0], station.coords[1]]} icon={customIcon} eventHandlers={{
-						// click: () => setStationToEdit(station)
 						mouseover: (event) => event.target.openPopup(),
-						// mouseout: (event) => event.target.closePopup(),
 					}}>
 						<Popup eventHandlers={{
 							mouseout: (event) => event.target.closePopup(),
@@ -131,7 +129,16 @@ const StationPageLoggedInView = () => {
 							{station.stationName}<br />
 							Latitude: {station.coords[1]}<br />
 							Longitude: {station.coords[0]}<br />
-							Connected To: {station.connectedTo.join(', ')}<br />
+							Connected To: {station.connectedTo.map((connectedStationId, index) => {
+								const connectedStation = stations.find(s => s._id === connectedStationId);
+								return (
+									<span key={index}>
+										{connectedStation ? connectedStation.stationName : 'Unknown Station'}
+										{index < station.connectedTo.length - 1 && ', '}
+									</span>
+								);
+							})}
+							<br />
 							<Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
 								<FaTrash /> DELETE
 							</Button>{' '}
@@ -147,8 +154,8 @@ const StationPageLoggedInView = () => {
 				// Create polylines based on connectedTo information
 				const lines: ReactElement[] = [];
 				stations.forEach((station) => {
-					station.connectedTo.forEach((connectedStationName) => {
-						const connectedStation = stations.find((s) => s.stationName === connectedStationName);
+					station.connectedTo.forEach((connectedStationId) => {
+						const connectedStation = stations.find((s) => s._id === connectedStationId);
 						if (connectedStation) {
 							const line = (
 								<Polyline
@@ -157,10 +164,10 @@ const StationPageLoggedInView = () => {
 										[station.coords[0], station.coords[1]],
 										[connectedStation.coords[0], connectedStation.coords[1]],
 									]}
-									color="black"  // Set the color of the polyline
-									weight={3}     // Set the weight (thickness) of the polyline
-									opacity={0.7}  // Set the opacity of the polyline
-									dashArray="5, 10"  // Set a dash pattern for the polyline
+									color="black"
+									weight={3}
+									opacity={0.7}
+									dashArray="5, 10"
 								/>
 							);
 							lines.push(line);
@@ -188,17 +195,34 @@ const StationPageLoggedInView = () => {
 
 	const deleteStation = async (station: StationsModel) => {
 		try {
+			// Remove the station from connectedTo of other stations
+			const updatedStations = stations.map((existingStation) => {
+				return {
+					...existingStation,
+					connectedTo: existingStation.connectedTo.filter((connectedStationId) => connectedStationId !== station._id),
+				};
+			});
+
+			// First, update all stations with the modified connectedTo arrays
+			await StationApi.updateStations(updatedStations);
+
+			// Then, delete the specific station
 			await StationApi.deleteStation(station._id);
-			setStations(stations.filter((existingStation) => existingStation._id !== station._id));
+
+			// Update the local state after successful deletion
+			setStations(updatedStations);
 			setFilteredStations(filteredStations.filter((existingStation) => existingStation._id !== station._id));
 			setShowConfirmation(false);
 			refresh();
 			showAlertMessage('Station deleted successfully', 'success');
 		} catch (error) {
-			console.error(error);
-			alert(error);
+			// Then, delete the specific station
+			await StationApi.deleteStation(station._id);
+			console.error("An error occurred while deleting the station:", error);
+			showAlertMessage('Error deleting station', 'danger');
 		}
 	};
+
 
 	const handleSearch = (searchTerm: string) => {
 		setSearchTerm(searchTerm);
@@ -313,7 +337,16 @@ const StationPageLoggedInView = () => {
 											<td>{station.stationName}</td>
 											<td>{station.coords[1]}</td>
 											<td>{station.coords[0]}</td>
-											<td>{station.connectedTo.join(', ')}</td>
+											<td>{station.connectedTo.map((connectedStationId, index) => {
+												const connectedStation = stations.find(s => s._id === connectedStationId);
+												return (
+													<span key={index}>
+														{connectedStation ? connectedStation.stationName : 'Unknown Station'}
+														{index < station.connectedTo.length - 1 && ', '}
+													</span>
+												);
+											})}
+											</td>
 											<td>
 												<Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
 													<FaTrash /> DELETE

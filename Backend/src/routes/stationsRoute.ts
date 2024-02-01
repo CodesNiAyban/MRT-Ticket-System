@@ -14,4 +14,6 @@ router.patch("/:stationId", StationController.updateStation);
 
 router.delete("/:stationId", StationController.deleteStation);
 
+router.put("/updateStations", StationController.updateStations);
+
 export default router;
