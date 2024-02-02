@@ -58,7 +58,8 @@ interface LoginResponse {
 }
 
 export async function logout() {
-    await fetchData(`${MRT_API}/api/admin/logout`, {
-        method: "POST"
+    await fetch(`${MRT_API}/api/admin/logout`, {
+        method: "POST",
+        credentials: "include",
     });
 }

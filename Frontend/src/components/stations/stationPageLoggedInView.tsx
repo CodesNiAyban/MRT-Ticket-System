@@ -39,6 +39,7 @@ const StationPageLoggedInView = () => {
 	const [newStation, setNewStation] = useState<StationsModel | null>(null);
 	const [activeTab, setActiveTab] = useState<string | null>('map');
 	const [draggedCoords, setDraggedCoords] = useState<[number, number] | null>(null);
+	const [isDragged, setIsDragged] = useState(false)
 
 	const newCustomIcon = L.icon({
 		iconUrl: '/newMarker.png',
@@ -62,13 +63,14 @@ const StationPageLoggedInView = () => {
 
 	const handleMarkerDragEnd = (event: any, station: StationsModel) => {
 		const { lat, lng } = event.target.getLatLng();
-		const updatedStations = stations.map((existingStation) =>
-			existingStation._id === station._id
-				? { ...existingStation, coords: [lng, lat] }
-				: existingStation
-		);
-		setStations(updatedStations);
-		setFilteredStations(updatedStations);
+		// const updatedStations = stations.map((existingStation) =>
+		// 	existingStation._id === station._id
+		// 		? { ...existingStation, coords: [lng, lat] }
+		// 		: existingStation
+		// );
+		// setStations(updatedStations);
+		// setFilteredStations(updatedStations);
+		setIsDragged(true)
 		setDraggedCoords([lat, lng]);
 	};
 
@@ -129,6 +131,7 @@ const StationPageLoggedInView = () => {
 			try {
 				setShowStationsLoadingError(false);
 				setStationsLoading(true);
+				setIsDragged(false)
 
 				const stations = await StationApi.fetchStations();
 				setStations(stations);
@@ -438,6 +441,7 @@ const StationPageLoggedInView = () => {
 							setNewMapMarker([]);
 						}}
 						newStation={newStation}
+						isDragged={false}
 					/>
 				)}
 
@@ -467,7 +471,9 @@ const StationPageLoggedInView = () => {
 							showAlertMessage('Station updated successfully', 'success');
 						}}
 						newStation={null}
-						coordinates={clickedCoords || draggedCoords}
+						coordinates={draggedCoords}
+						isDragged={isDragged}
+						
 					/>
 				)}
 

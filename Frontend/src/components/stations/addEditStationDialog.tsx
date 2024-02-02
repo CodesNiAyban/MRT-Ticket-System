@@ -17,6 +17,7 @@ interface AddEditStationDialogProps {
   coordinates?: [number, number] | null;
   newStation: StationsModel | null;
   stations: StationsModel[];
+  isDragged: boolean;
 }
 
 const AddEditStationDialog = ({
@@ -25,7 +26,8 @@ const AddEditStationDialog = ({
   onStationSaved,
   coordinates,
   newStation,
-  stations
+  stations,
+  isDragged
 }: AddEditStationDialogProps) => {
   const {
     register,
@@ -49,14 +51,15 @@ const AddEditStationDialog = ({
 
   const setDefaultValues = () => {
     setValue('stationName', stationToEdit?.stationName || '');
-    
+
     // Set default values for coordinates
     const defaultLatitude = coordinates?.[0] || 0;
     const defaultLongitude = coordinates?.[1] || 0;
-    
-    setValue('coords.0', defaultLatitude);
-    setValue('coords.1', defaultLongitude);
 
+    if (isDragged && coordinates) {
+      setValue('coords.0', defaultLatitude);
+      setValue('coords.1', defaultLongitude);
+    }
     // Handle the connectedTo field
     const connectedToStations = stationToEdit?.connectedTo || [];
 
@@ -156,25 +159,10 @@ const AddEditStationDialog = ({
     const isCurrentStationToEdit = stationToEdit && stationToEdit.stationName === station.stationName;
     if (!isCurrentStationToEdit) {
       if (!selectedStations.some((selectedStation) => selectedStation._id === station._id)) {
-        // Update connectedTo for the selected station
-        const updatedSelectedStation: StationsModel = {
-          ...station,
-          connectedTo: [...station.connectedTo, stationToEdit?._id || ''],
-        };
-
-        // Update connectedTo for other stations in selectedStations
-        const updatedStations = selectedStations.map((selectedStation) => ({
-          ...selectedStation,
-          connectedTo: [...selectedStation.connectedTo, station._id],
-        }));
-
         // If stationToEdit is present, update its connectedTo
         if (stationToEdit) {
           stationToEdit.connectedTo.push(station._id);
         }
-
-        // Set the updated selected stations and update connectedTo for other stations
-        setSelectedStations([updatedSelectedStation, ...updatedStations]);
 
         if (stationToEdit && station._id !== stationToEdit._id) {
           const distance = L.latLng(stationToEdit.coords[0], stationToEdit.coords[1]).distanceTo(
@@ -196,6 +184,7 @@ const AddEditStationDialog = ({
               ...prevPolylines,
               polyline,
             ]);
+            setSelectedStations([...selectedStations, station]);
           } else {
             setShowToast(true);
           }
@@ -219,14 +208,14 @@ const AddEditStationDialog = ({
               ...prevPolylines,
               polyline,
             ]);
+            setSelectedStations([...selectedStations, station]);
           } else {
             setShowToast(true);
           }
         }
-        setSelectedStations([...selectedStations, station]);
       }
     }
-  };
+  }; // FIX STRUCTURE //SIMPLIFY
 
   const handleRemoveStation = (station: StationsModel) => {
     setSelectedStations(selectedStations.filter((s) => s._id !== station._id));
@@ -265,7 +254,7 @@ const AddEditStationDialog = ({
               type="number"
               placeholder="Latitude"
               isInvalid={!!errors.coords}
-              defaultValue={(coordinates?.[0] || 0).toString()}
+              defaultValue={(coordinates?.[0] || stationToEdit?.coords[0] || 0).toString()}
               onChange={(e) => setValue('coords.0', parseFloat(e.target.value))}
             />
             <Form.Control.Feedback type="invalid">
@@ -280,7 +269,7 @@ const AddEditStationDialog = ({
               type="number"
               placeholder="Longitude"
               isInvalid={!!errors.coords}
-              defaultValue={(coordinates?.[1] || 0).toString()}
+              defaultValue={(coordinates?.[1] || stationToEdit?.coords[1] || 0).toString()}
               onChange={(e) => setValue('coords.1', parseFloat(e.target.value))}
             />
             <Form.Control.Feedback type="invalid">
@@ -306,7 +295,7 @@ const AddEditStationDialog = ({
                     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  {station.stationName} {/* Display station name instead of ID */}
+                  {station.stationName}
                 </span>
               ))}
             </div>

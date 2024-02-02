@@ -49,12 +49,12 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   const [previousBalance, setPreviousBalance] = useState<number | null>(null);
   const [addedValue, setAddedValue] = useState<number | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [generatedNumber, setGeneratedNumber] = useState<string>()
 
   useEffect(() => {
     setIsLoading(true);
     const setDefaultValues = async () => {
       setValue("UUIC", beepCardToEdit?.UUIC || generateDefaultNumber());
-
       if (beepCardToEdit?.balance !== undefined) {
         if (editMode) {
           setValue("balance", beepCardToEdit.balance);
@@ -83,7 +83,6 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     if (!beepCardToEdit) {
       const defaultLoadPrice = await getDefaultLoadPrice();
       setValue("balance", defaultLoadPrice);
-      return defaultLoadPrice;
     }
   };
 
@@ -94,7 +93,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   };
 
   const showConfirmation = () => {
-    const balance = parseInt(getValues("balance") as unknown as string, 10);
+    const balance = parseInt(getValues("balance") as unknown as string);
     setPreviousBalance(beepCardToEdit?.balance || 0);
     setAddedValue(balance);
     setShowConfirmationModal(true);
@@ -108,7 +107,8 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   };
 
   const generateNumber = () => {
-    setValue("UUIC", generateDefaultNumber());
+    setGeneratedNumber(generateDefaultNumber())
+    setValue("UUIC", generatedNumber!);
   };
 
   const onSubmit = async (input: BeepCardInput) => {

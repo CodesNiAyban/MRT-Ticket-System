@@ -17,9 +17,9 @@ export const getDefaultLoadPrice = async () => {
   try {
     const fares = await FareApi.fetchFare();
     const defaultLoadFare = fares.find(
-      (fare) => fare.fareType === "Default Load"
+      (fare) => fare.fareType === "DEFAULT LOAD"
     );
-    return defaultLoadFare?.price || DEFAULT_LOAD_MIN;
+    return defaultLoadFare!.price;
   } catch (error) {
     console.error(error);
     return DEFAULT_LOAD_MIN;

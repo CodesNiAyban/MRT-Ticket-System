@@ -52,7 +52,6 @@ export const createStation: RequestHandler<unknown, unknown, stationsInterface.C
 	}
 };
 
-
 export const updateStation: RequestHandler<stationsInterface.UpdateStationParams, unknown, stationsInterface.UpdateStationBody, unknown> = async (req, res, next) => {
 	const stationId = req.params.stationId;
 	const newStationName = req.body.stationName;
@@ -109,10 +108,13 @@ export const updateStations: RequestHandler<unknown, unknown, stationsInterface.
 		const bulkUpdateOps = updatedStations.map((updatedStation) => {
 			const { _id, stationName, coords, connectedTo } = updatedStation;
 
+			// Ensure that the own ID is not in the connectedTo array
+			const filteredConnectedTo = connectedTo.filter(id => id !== _id);
+
 			return {
 				updateOne: {
 					filter: { _id: new mongoose.Types.ObjectId(_id) },
-					update: { $set: { stationName, coords, connectedTo } },
+					update: { $set: { stationName, coords, connectedTo: filteredConnectedTo } },
 				},
 			};
 		});

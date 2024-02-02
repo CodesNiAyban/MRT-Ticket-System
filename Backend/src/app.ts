@@ -13,24 +13,29 @@ import fareRoute from "./routes/fareRoutes";
 import stationRoute from "./routes/stationsRoute";
 import env from "./utils/validateENV";
 import MongoStore from "connect-mongo";
-import authenticateToken from "./middleware/authMiddleware"; // Update this with the correct path
+import authenticateToken from "./middleware/authMiddleware"; 
 
-// Intializing the express app
+// Set isProduction to true when deploying to Render.com
+const isProduction = false;
+
+// Initializing the express app
 const app = express();
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(morgan("dev"));
 
-app.use(cors({
-	origin: "http://localhost:3000",
+// Set the origin based on deployment
+const corsOptions = {
+	origin: isProduction ? env.API_CONNECTION_STRING : "http://localhost:3000",
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	optionsSuccessStatus: 204,
 	allowedHeaders: "Content-Type, Authorization",
-}));
+};
 
-// Using the dependancies
+app.use(cors(corsOptions));
+// Using the dependencies
 app.use(express.json());
 
 app.use(session({
@@ -41,7 +46,7 @@ app.use(session({
 		mongoUrl: env.MONGO_CONNECTION_STRING
 	}),
 	cookie: {
-		maxAge: 60 * 60 * 1000, // Session duration in milliseconds
+		maxAge: 24 * 60 * 60 * 1000, // Set session duration to 24 hours in milliseconds
 	},
 }));
 
