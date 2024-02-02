@@ -303,7 +303,37 @@ const StationPageLoggedInView = () => {
 
 	return (
 		<>
-			<Container fluid className="h-100">
+			<div
+				id="map"
+				className={`border rounded`}
+				style={{
+					width: '100%',
+					height: `calc(100vh - 56px)`, // Adjusted to accommodate tabs
+					position: "relative"
+				}}
+			>
+				<div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)' }}>
+					<div className={`${styles.containerMiddle} ${styles.textShadow}`}>
+						<h1 className={`${styles.textCenter} mb-4`}>STATIONS</h1> {/* PUT TABLE DROPDOWN HERE */}
+					</div>
+				</div>
+				<MapContainer
+					center={mapCenter}
+					zoomControl={false}
+					zoom={13}
+					scrollWheelZoom={true}
+					style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+				>
+					<TileLayer
+						url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`}
+					/>
+					<MapEventHandler onClick={handleMapClick} />
+					{mapMarkers}
+					{newMapMarker}
+					{polylines}
+				</MapContainer>
+			</div>
+			<Container className="min-w-screen min-h-screen w-100 p-0 m-0">
 				<div className={`${styles.containerMiddle} ${styles.textShadow}`}>
 					<h1 className={`${styles.textCenter} mb-4`}>STATIONS</h1>
 				</div>
@@ -312,44 +342,6 @@ const StationPageLoggedInView = () => {
 
 				<Tabs activeKey={activeTab || undefined} onSelect={(tab: string | null | undefined) => tab && setActiveTab(tab)}>
 					<Tab eventKey="map" title="Map">
-						<div
-							id="map"
-							className={`${styles.mapContainer} border rounded`}
-							style={{
-								width: '100%',
-								height: `calc(100vh - 56px)`, // Adjusted to accommodate tabs
-								position: "relative"
-							}}
-						>
-							<div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)' }}>
-								<div className={`${styles.containerMiddle} ${styles.textShadow}`}>
-									<h1 className={`${styles.textCenter} mb-4`}>STATIONS</h1> {/* PUT TABLE DROPDOWN HERE */}
-								</div>
-							</div>
-							<MapContainer
-								center={mapCenter}
-								zoomControl={false}
-								zoom={13}
-								scrollWheelZoom={true}
-								style={{ width: '100%', height: '100%' }}
-							>
-								<TileLayer
-									url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`}
-								/>
-								<MapEventHandler onClick={handleMapClick} />
-
-								{/* <Marker key={1234} position={mapCenter}
-									icon={L.divIcon({
-										className: '',
-										html: `<span className=""> Pepe Station</span>`
-									})}>
-
-								</Marker> */}
-								{mapMarkers}
-								{newMapMarker}
-								{polylines}
-							</MapContainer>
-						</div>
 					</Tab>
 					<Tab eventKey="table" title="Table">
 						{stationsLoading && (
@@ -473,7 +465,7 @@ const StationPageLoggedInView = () => {
 						newStation={null}
 						coordinates={draggedCoords}
 						isDragged={isDragged}
-						
+
 					/>
 				)}
 

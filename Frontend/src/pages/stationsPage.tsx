@@ -10,14 +10,14 @@ interface LoginProps {
 
 const  stationPage = ( {loggedInAdmin}: LoginProps) => {
     return (  
-        <Container className={styles.stationPage}>
+        <div className={styles.stationPage} style={{ width:'100%' , height:'100%'}}>
 				<>
 					{loggedInAdmin
 						? <StationPageLoggedInView />
 						: <StationPageLoggedOutView />
 					}
 				</>
-			</Container>
+			</div>
     );
 }
  
