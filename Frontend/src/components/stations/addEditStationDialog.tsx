@@ -1,352 +1,346 @@
+import L from 'leaflet';
 import { ReactElement, useEffect, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
+import { Polyline } from 'react-leaflet';
 import { Stations, Stations as StationsModel } from '../../model/stationsModel';
 import * as StationsApi from '../../network/stationsAPI';
 import { StationInput } from '../../network/stationsAPI';
 import TextInputField from '../form/textInputFields';
 import styles from './station.module.css';
 import StationConnectedToModal from './stationConnectedToModal';
-import { Polyline } from 'react-leaflet';
-import L from 'leaflet';
 
 interface AddEditStationDialogProps {
-	stationToEdit?: Stations;
-	onDismiss: () => void;
-	onStationSaved: (station: Stations) => void;
-	coordinates?: [number, number] | null;
-	newStation: StationsModel | null;
-	stations: StationsModel[];
+  stationToEdit?: Stations;
+  onDismiss: () => void;
+  onStationSaved: (station: Stations) => void;
+  coordinates?: [number, number] | null;
+  newStation: StationsModel | null;
+  stations: StationsModel[];
 }
 
 const AddEditStationDialog = ({
-	stationToEdit,
-	onDismiss,
-	onStationSaved,
-	coordinates,
-	newStation,
-	stations
+  stationToEdit,
+  onDismiss,
+  onStationSaved,
+  coordinates,
+  newStation,
+  stations
 }: AddEditStationDialogProps) => {
-	const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<StationInput>({
-		defaultValues: {
-			stationName: stationToEdit?.stationName || '',
-			coords: stationToEdit?.coords || [0, 0],
-			connectedTo: stationToEdit?.connectedTo || [],
-		},
-	});
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting }
+  } = useForm<StationInput>({
+    defaultValues: {
+      stationName: stationToEdit?.stationName || '',
+      coords: stationToEdit?.coords || coordinates || [0, 0],
+      connectedTo: stationToEdit?.connectedTo || [],
+    },
+  });
 
-	const [showConnectedToModal, setShowConnectedToModal] = useState(false);
-	const [selectedStations, setSelectedStations] = useState<StationsModel[]>([]);
-	const [runOnce, setRunOnce] = useState(true)
+  const [showConnectedToModal, setShowConnectedToModal] = useState(false);
+  const [selectedStations, setSelectedStations] = useState<StationsModel[]>([]);
+  const [runOnce, setRunOnce] = useState(true)
 
+  const [polylines, setPolylines] = useState<ReactElement[]>([]);
+  const [showToast, setShowToast] = useState(false);
 
-	const [polylines, setPolylines] = useState<ReactElement[]>([]);
-	const [showToast, setShowToast] = useState(false);
+  const setDefaultValues = () => {
+    setValue('stationName', stationToEdit?.stationName || '');
+    
+    // Set default values for coordinates
+    const defaultLatitude = coordinates?.[0] || 0;
+    const defaultLongitude = coordinates?.[1] || 0;
+    
+    setValue('coords.0', defaultLatitude);
+    setValue('coords.1', defaultLongitude);
 
-	const initialLatitude = coordinates && coordinates.length > 1 ? coordinates[0] : 0;
-	const initialLongitude = coordinates && coordinates.length > 1 ? coordinates[1] : 0;
+    // Handle the connectedTo field
+    const connectedToStations = stationToEdit?.connectedTo || [];
 
-	const [input, setInput] = useState({
-		'coords.0': stationToEdit ? stationToEdit.coords[0].toString() : initialLatitude.toString(),
-		'coords.1': stationToEdit ? stationToEdit.coords[1].toString() : initialLongitude.toString(),
-	});
+    // Explicitly define the type of selectedStations
+    const newSelectedStations: Stations[] = [];
+    let i: number = 0;
+    for (const connectedStation of connectedToStations) {
+      try {
+        const stationDetails = stations.find(station => station._id === connectedStation);
 
-	const setDefaultValues = () => {
-		setValue('stationName', stationToEdit?.stationName || '');
-		setValue('coords.0', stationToEdit?.coords[0] || initialLatitude);
-		setValue('coords.1', stationToEdit?.coords[1] || initialLongitude);
+        if (stationDetails) {
+          const connectedStationDetails: Stations = {
+            _id: stationDetails._id || '',
+            stationName: stationDetails.stationName || '',
+            coords: stationDetails.coords,
+            connectedTo: [connectedToStations[i] || ''],
+          };
+          i++;
+          newSelectedStations.push(connectedStationDetails);
+          setSelectedStations(newSelectedStations);
+        } else {
+          console.error(`Station details not found for station ${connectedStation}`);
+        }
+      } catch (error) {
+        console.error(`Error fetching details for station ${connectedStation}:`, error);
+      }
+    }
+  };
 
-		// Handle the connectedTo field
-		const connectedToStations = stationToEdit?.connectedTo || [];
+  useEffect(() => {
+    setDefaultValues();
+    setRunOnce(false)
+  }, [runOnce]);
 
-		// Explicitly define the type of selectedStations
-		const newSelectedStations: Stations[] = [];
-		let i: number = 0;
-		for (const connectedStation of connectedToStations) {
-			try {
-				const stationDetails = stations.find(station => station._id === connectedStation);
+  useEffect(() => {
+    // When the selected stations change, update the connectedTo field
+    setValue('connectedTo', selectedStations.map(station => station._id));
+  }, [selectedStations, setValue]);
 
-				if (stationDetails) {
-					const connectedStationDetails: Stations = {
-						_id: stationDetails._id || '',
-						stationName: stationDetails.stationName || '',
-						coords: stationDetails.coords,
-						connectedTo: [connectedToStations[i] || ''], // Change this to connectedStation
-					};
-					i++;
-					newSelectedStations.push(connectedStationDetails);
-					setSelectedStations(newSelectedStations);
-				} else {
-					console.error(`Station details not found for station ${connectedStation}`);
-				}
-			} catch (error) {
-				console.error(`Error fetching details for station ${connectedStation}:`, error);
-			}
-		}
-	};
+  const onSubmit = async (input: StationInput) => {
+    try {
+      // Check if it's a new station or an existing station
+      let stationResponse: Stations;
 
+      if (stationToEdit) {
+        // Editing an existing station
+        stationResponse = await StationsApi.updateStation(stationToEdit._id, {
+          ...input,
+          connectedTo: selectedStations.map(station => station._id),
+        });
+      } else {
+        // Adding a new station
+        const newStationResponse = await StationsApi.createStation(input);
 
-	useEffect(() => {
-		setDefaultValues();
-		setRunOnce(false)
-	}, [runOnce]);
+        // Update the new station with a valid ID
+        const newStationWithID: StationsModel = {
+          ...newStationResponse,
+          _id: newStationResponse._id || '',
+        };
 
+        stationResponse = newStationWithID;
 
-	useEffect(() => {
-		// When the selected stations change, update the connectedTo field
-		setValue('connectedTo', selectedStations.map(station => station._id));
-	}, [selectedStations, setValue]);
+        // Add the new station to the selected stations list
+        setSelectedStations([...selectedStations, newStationWithID]);
+      }
 
-	const onSubmit = async (input: StationInput) => {
-		try {
-			// Check if it's a new station or an existing station
-			let stationResponse: Stations;
+      // Check if connectedTo input is not empty before performing bulk update
+      if (input.connectedTo.length > 0) {
+        // Send a bulk update to update connectedTo for all relevant stations
+        const bulkUpdateStations = selectedStations.map((selectedStation) => {
+          // Check if the current station is the same as the one being updated
+          const isSameStation = stationToEdit && selectedStation._id === stationToEdit._id;
 
-			if (stationToEdit) {
-				// Editing an existing station
-				stationResponse = await StationsApi.updateStation(stationToEdit._id, {
-					...input,
-					connectedTo: selectedStations.map(station => station._id), // Change this to station._id
-				});
-			} else {
-				// Adding a new station
-				const newStationResponse = await StationsApi.createStation(input);
+          // If it's not the same station, update the connectedTo field
+          if (!isSameStation) {
+            const updatedConnectedTo = [...selectedStation.connectedTo, stationResponse._id];
+            return { ...selectedStation, connectedTo: updatedConnectedTo };
+          }
 
-				// Update the new station with a valid ID
-				const newStationWithID: StationsModel = {
-					...newStationResponse,
-					_id: newStationResponse._id || '',
-				};
+          return selectedStation;
+        });
 
-				stationResponse = newStationWithID;
+        await StationsApi.updateStations(bulkUpdateStations);
+      }
+      onStationSaved(stationResponse);
+    } catch (error) {
+      console.error(error);
+      alert(error);
+    }
+  };
 
-				// Add the new station to the selected stations list
-				setSelectedStations([...selectedStations, newStationWithID]);
-			}
+  const handlePolylines = (polylines: any) => {
+    setPolylines(polylines)
+  }
 
-			// Check if connectedTo input is not empty before performing bulk update
-			if (input.connectedTo.length > 0) {
-				// Send a bulk update to update connectedTo for all relevant stations
-				const bulkUpdateStations = selectedStations.map((selectedStation) => {
-					// Check if the current station is the same as the one being updated
-					const isSameStation = stationToEdit && selectedStation._id === stationToEdit._id;
+  const handleStationSelection = async (station: StationsModel) => {
+    const isCurrentStationToEdit = stationToEdit && stationToEdit.stationName === station.stationName;
+    if (!isCurrentStationToEdit) {
+      if (!selectedStations.some((selectedStation) => selectedStation._id === station._id)) {
+        // Update connectedTo for the selected station
+        const updatedSelectedStation: StationsModel = {
+          ...station,
+          connectedTo: [...station.connectedTo, stationToEdit?._id || ''],
+        };
 
-					// If it's not the same station, update the connectedTo field
-					if (!isSameStation) {
-						const updatedConnectedTo = [...selectedStation.connectedTo, stationResponse._id];
-						return { ...selectedStation, connectedTo: updatedConnectedTo };
-					}
+        // Update connectedTo for other stations in selectedStations
+        const updatedStations = selectedStations.map((selectedStation) => ({
+          ...selectedStation,
+          connectedTo: [...selectedStation.connectedTo, station._id],
+        }));
 
-					return selectedStation;
-				});
+        // If stationToEdit is present, update its connectedTo
+        if (stationToEdit) {
+          stationToEdit.connectedTo.push(station._id);
+        }
 
-				await StationsApi.updateStations(bulkUpdateStations);
-			}
+        // Set the updated selected stations and update connectedTo for other stations
+        setSelectedStations([updatedSelectedStation, ...updatedStations]);
 
-			onStationSaved(stationResponse);
-		} catch (error) {
-			console.error(error);
-			alert(error);
-		}
-	};
+        if (stationToEdit && station._id !== stationToEdit._id) {
+          const distance = L.latLng(stationToEdit.coords[0], stationToEdit.coords[1]).distanceTo(
+            L.latLng(station.coords[0], station.coords[1])
+          );
 
+          if (distance > 500) {
+            const polyline = (
+              <Polyline
+                key={`polyline-${station._id}`}
+                positions={[
+                  [stationToEdit.coords[0], stationToEdit.coords[1],],
+                  [station.coords[0], station.coords[1]],
+                ]}
+              />
+            );
 
+            setPolylines((prevPolylines) => [
+              ...prevPolylines,
+              polyline,
+            ]);
+          } else {
+            setShowToast(true);
+          }
+        } else if (newStation && station._id !== newStation._id) {
+          const distance = L.latLng(newStation.coords[0], newStation.coords[1]).distanceTo(
+            L.latLng(station.coords[0], station.coords[1])
+          );
 
-	const handleCoordinatesChange = (index: number, value: string) => {
-		setValue(`coords.${index}`, parseFloat(value));
-	};
+          if (distance > 500) {
+            const polyline = (
+              <Polyline
+                key={`polyline-${station._id}`}
+                positions={[
+                  [newStation.coords[0], newStation.coords[1]],
+                  [station.coords[0], station.coords[1]],
+                ]}
+              />
+            );
 
-	const handlePolylines = (polylines: any) => {
-		setPolylines(polylines)
-	}
+            setPolylines((prevPolylines) => [
+              ...prevPolylines,
+              polyline,
+            ]);
+          } else {
+            setShowToast(true);
+          }
+        }
+        setSelectedStations([...selectedStations, station]);
+      }
+    }
+  };
 
-	const handleStationSelection = async (station: StationsModel) => {
-		const isCurrentStationToEdit = stationToEdit && stationToEdit.stationName === station.stationName;
-		if (!isCurrentStationToEdit) {
-			if (!selectedStations.some((selectedStation) => selectedStation._id === station._id)) {
-				// Update connectedTo for the selected station
-				const updatedSelectedStation: StationsModel = {
-					...station,
-					connectedTo: [...station.connectedTo, stationToEdit?._id || ''],
-				};
+  const handleRemoveStation = (station: StationsModel) => {
+    setSelectedStations(selectedStations.filter((s) => s._id !== station._id));
+  };
 
-				// Update connectedTo for other stations in selectedStations
-				const updatedStations = selectedStations.map((selectedStation) => ({
-					...selectedStation,
-					connectedTo: [...selectedStation.connectedTo, station._id],
-				}));
+  const openConnectedToModal = () => {
+    setShowConnectedToModal(true);
+  };
 
-				// If stationToEdit is present, update its connectedTo
-				if (stationToEdit) {
-					stationToEdit.connectedTo.push(station._id);
-				}
+  const closeConnectedToModal = () => {
+    setShowConnectedToModal(false);
+  };
 
-				// Set the updated selected stations and update connectedTo for other stations
-				setSelectedStations([updatedSelectedStation, ...updatedStations]);
+  return (
+    <Modal show onHide={onDismiss}>
+      <Modal.Header closeButton>
+        <Modal.Title>{stationToEdit ? 'Edit station' : 'Add station'}</Modal.Title>
+      </Modal.Header>
 
-				if (stationToEdit && station._id !== stationToEdit._id) {
-					const distance = L.latLng(stationToEdit.coords[0], stationToEdit.coords[1]).distanceTo(
-						L.latLng(station.coords[0], station.coords[1])
-					);
+      <Modal.Body>
+        <Form id="addEditStationForm" onSubmit={handleSubmit(onSubmit)}>
+          <TextInputField
+            name="stationName"
+            label="Station Name"
+            type="text"
+            placeholder="Title"
+            register={register}
+            registerOptions={{ required: 'Required' }}
+            error={errors.stationName}
+          />
 
-					if (distance > 500) {
-						const polyline = (
-							<Polyline
-								key={`polyline-${station._id}`}
-								positions={[
-									[stationToEdit.coords[0], stationToEdit.coords[1],],
-									[station.coords[0], station.coords[1]],
-								]}
-							/>
-						);
+          {/* Latitude form input */}
+          <Form.Group className="mb-3">
+            <Form.Label>Latitude</Form.Label>
+            <Form.Control
+              type="number"
+              placeholder="Latitude"
+              isInvalid={!!errors.coords}
+              defaultValue={(coordinates?.[0] || 0).toString()}
+              onChange={(e) => setValue('coords.0', parseFloat(e.target.value))}
+            />
+            <Form.Control.Feedback type="invalid">
+              {errors.coords?.message}
+            </Form.Control.Feedback>
+          </Form.Group>
 
-						setPolylines((prevPolylines) => [
-							...prevPolylines,
-							polyline,
-						]);
-					} else {
-						setShowToast(true);
-					}
-				} else if (newStation && station._id !== newStation._id) {
-					const distance = L.latLng(newStation.coords[0], newStation.coords[1]).distanceTo(
-						L.latLng(station.coords[0], station.coords[1])
-					);
+          {/* Longitude form input */}
+          <Form.Group className="mb-3">
+            <Form.Label>Longitude</Form.Label>
+            <Form.Control
+              type="number"
+              placeholder="Longitude"
+              isInvalid={!!errors.coords}
+              defaultValue={(coordinates?.[1] || 0).toString()}
+              onChange={(e) => setValue('coords.1', parseFloat(e.target.value))}
+            />
+            <Form.Control.Feedback type="invalid">
+              {errors.coords?.message}
+            </Form.Control.Feedback>
+          </Form.Group>
 
-					if (distance > 500) {
-						const polyline = (
-							<Polyline
-								key={`polyline-${station._id}`}
-								positions={[
-									[newStation.coords[0], newStation.coords[1]],
-									[station.coords[0], station.coords[1]],
-								]}
-							/>
-						);
+          <Form.Group className="mb-3">
+            <Form.Label>
+              {selectedStations.length > 0 ? <>Connected Stations</> : <>No Connecting Stations</>}
+            </Form.Label>
 
-						setPolylines((prevPolylines) => [
-							...prevPolylines,
-							polyline,
-						]);
-					} else {
-						setShowToast(true);
-					}
-				}
-				setSelectedStations([...selectedStations, station]);
-			}
-		}
-	};
-
-	const handleRemoveStation = (station: StationsModel) => {
-		setSelectedStations(selectedStations.filter((s) => s._id !== station._id));
-	};
-
-	const openConnectedToModal = () => {
-		setShowConnectedToModal(true);
-	};
-
-	const closeConnectedToModal = () => {
-		setShowConnectedToModal(false);
-	};
-
-	return (
-		<Modal show onHide={onDismiss}>
-			<Modal.Header closeButton>
-				<Modal.Title>{stationToEdit ? 'Edit station' : 'Add station'}</Modal.Title>
-			</Modal.Header>
-
-			<Modal.Body>
-				<Form id="addEditStationForm" onSubmit={handleSubmit(onSubmit)}>
-					<TextInputField
-						name="stationName"
-						label="Station Name"
-						type="text"
-						placeholder="Title"
-						register={register}
-						registerOptions={{ required: 'Required' }}
-						error={errors.stationName}
-					/>
-
-					<Form.Group className="mb-3">
-						<Form.Label>Latitude</Form.Label>
-						<Form.Control
-							type="number"
-							placeholder="Latitude"
-							isInvalid={!!errors.coords}
-							value={parseFloat(input['coords.0'])}
-							onChange={(e) => handleCoordinatesChange(0, e.target.value)}
-						/>
-						<Form.Control.Feedback type="invalid">
-							{errors.coords?.message}
-						</Form.Control.Feedback>
-					</Form.Group>
-
-					<Form.Group className="mb-3">
-						<Form.Label>Longitude</Form.Label>
-						<Form.Control
-							type="number"
-							placeholder="Longitude"
-							isInvalid={!!errors.coords}
-							value={parseFloat(input['coords.1'])}
-							onChange={(e) => handleCoordinatesChange(1, e.target.value)}
-						/>
-						<Form.Control.Feedback type="invalid">
-							{errors.coords?.message}
-						</Form.Control.Feedback>
-					</Form.Group>
-
-					<Form.Group className="mb-3">
-						<Form.Label>
-							{selectedStations.length > 0 ? <>Connected Stations</> : <>No Connecting Stations</>}
-						</Form.Label>
-
-						<div>
-							{selectedStations.map((station) => (
-								<span
-									key={`${Math.random()}${station._id}`}
-									className={`${styles.badge} badge badge-pill badge-primary mr-2`}
-									style={{
-										background: '#0275d8',
-										color: 'white',
-										padding: '8px 16px',
-										borderRadius: '20px',
-										boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-									}}
-								>
-									{station.stationName} {/* Display station name instead of ID */}
-								</span>
-							))}
-						</div>
-						<div className="mt-3">
-							<Button variant="primary" onClick={openConnectedToModal} className='ms-auto'>
-								{selectedStations.length > 0 ? <>Edit Connecting Stations</> : <>Add Connecting Station/s</>}
-							</Button>
-						</div>
-					</Form.Group>
-				</Form>
-			</Modal.Body>
-			<Modal.Footer>
-				<Button type="submit" form="addEditStationForm" disabled={isSubmitting}>
-					Save
-				</Button>
-			</Modal.Footer>
-			{showConnectedToModal && (
-				<StationConnectedToModal
-					show={showConnectedToModal}
-					onHide={closeConnectedToModal}
-					onStationSelection={handleStationSelection}
-					selectedStations={selectedStations}
-					onRemoveStation={handleRemoveStation}
-					onClearSelectedStations={() => setSelectedStations([])}
-					stations={stations}
-					newStation={stationToEdit ? null : newStation}
-					stationToEdit={stationToEdit ? stationToEdit : null}
-					polylines={polylines}
-					setPolylines={handlePolylines}
-					showToast={showToast}
-				/>
-			)}
-		</Modal >
-	);
+            <div>
+              {selectedStations.map((station) => (
+                <span
+                  key={`${Math.random()}${station._id}`}
+                  className={`${styles.badge} badge badge-pill badge-primary mr-2`}
+                  style={{
+                    background: '#0275d8',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  {station.stationName} {/* Display station name instead of ID */}
+                </span>
+              ))}
+            </div>
+            <div className="mt-3">
+              <Button variant="primary" onClick={openConnectedToModal} className='ms-auto'>
+                {selectedStations.length > 0 ? <>Edit Connecting Stations</> : <>Add Connecting Station/s</>}
+              </Button>
+            </div>
+          </Form.Group>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button type="submit" form="addEditStationForm" disabled={isSubmitting}>
+          Save
+        </Button>
+      </Modal.Footer>
+      {showConnectedToModal && (
+        <StationConnectedToModal
+          show={showConnectedToModal}
+          onHide={closeConnectedToModal}
+          onStationSelection={handleStationSelection}
+          selectedStations={selectedStations}
+          onRemoveStation={handleRemoveStation}
+          onClearSelectedStations={() => setSelectedStations([])}
+          stations={stations}
+          newStation={stationToEdit ? null : newStation}
+          stationToEdit={stationToEdit ? stationToEdit : null}
+          polylines={polylines}
+          setPolylines={handlePolylines}
+          showToast={showToast}
+        />
+      )}
+    </Modal >
+  );
 };
 
 export default AddEditStationDialog;

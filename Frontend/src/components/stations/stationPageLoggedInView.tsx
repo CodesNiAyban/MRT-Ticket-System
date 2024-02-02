@@ -38,7 +38,7 @@ const StationPageLoggedInView = () => {
 	const [polylines, setPolylines] = useState<ReactElement[]>([]);
 	const [newStation, setNewStation] = useState<StationsModel | null>(null);
 	const [activeTab, setActiveTab] = useState<string | null>('map');
-
+	const [draggedCoords, setDraggedCoords] = useState<[number, number] | null>(null);
 
 	const newCustomIcon = L.icon({
 		iconUrl: '/newMarker.png',
@@ -60,6 +60,17 @@ const StationPageLoggedInView = () => {
 		shadowAnchor: [10, 46],
 	});
 
+	const handleMarkerDragEnd = (event: any, station: StationsModel) => {
+		const { lat, lng } = event.target.getLatLng();
+		const updatedStations = stations.map((existingStation) =>
+			existingStation._id === station._id
+				? { ...existingStation, coords: [lng, lat] }
+				: existingStation
+		);
+		setStations(updatedStations);
+		setFilteredStations(updatedStations);
+		setDraggedCoords([lat, lng]);
+	};
 
 	useEffect(() => {
 		async function loadStations() {
@@ -126,7 +137,11 @@ const StationPageLoggedInView = () => {
 				const markers = stations.map((station) => (
 					<Marker key={station._id} position={[station.coords[0], station.coords[1]]} icon={customIcon} eventHandlers={{
 						mouseover: (event) => event.target.openPopup(),
-					}}>
+						dragend: (event) => handleMarkerDragEnd(event, station),
+					}}
+						draggable={true}
+
+					>
 						<Popup eventHandlers={{
 							mouseout: (event) => event.target.closePopup(),
 						}}>
@@ -452,6 +467,7 @@ const StationPageLoggedInView = () => {
 							showAlertMessage('Station updated successfully', 'success');
 						}}
 						newStation={null}
+						coordinates={clickedCoords || draggedCoords}
 					/>
 				)}
 
