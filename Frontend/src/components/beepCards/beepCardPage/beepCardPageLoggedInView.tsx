@@ -155,7 +155,7 @@ const BeepCardPageLoggedInView = () => {
   return (
     <Container>
       <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
-        <h2 className={`${styles.textCenter} mb-4`}>BEEP CARDS</h2>
+        <h1 className={`${styles.textCenter} mb-4`}>BEEP CARDS</h1>
       </div>
 
       <Toast

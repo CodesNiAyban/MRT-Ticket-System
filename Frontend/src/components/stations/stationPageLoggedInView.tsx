@@ -1,7 +1,7 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css'; // Ensure this import for Leaflet styles
-import { ReactElement, useEffect, useState } from 'react';
-import { Alert, Button, Col, Container, Modal, Row, Spinner, Table } from 'react-bootstrap';
+import { ReactElement, SetStateAction, useEffect, useState } from 'react';
+import { Alert, Button, Col, Container, Modal, Row, Spinner, Tab, Table, Tabs } from 'react-bootstrap';
 import { FaPencilAlt, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
 import { Stations as StationsModel } from '../../model/stationsModel';
@@ -30,12 +30,15 @@ const StationPageLoggedInView = () => {
 	const [alertVariant, setAlertVariant] = useState<'success' | 'danger'>('success');
 	const [isModalClosed, setIsModalClosed] = useState(false);
 
+	const [mapCenter, setMapCenter] = useState<[number, number]>([14.550561416466541, 121.02785649562283]);
 	const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
 	const [newMapMarker, setNewMapMarker] = useState<ReactElement[]>([]);
 	const [selectedMarker, setSelectedMarker] = useState<StationsModel | null>(null);
 	const [clickedCoords, setClickedCoords] = useState<[number, number] | null>(null);
 	const [polylines, setPolylines] = useState<ReactElement[]>([]);
 	const [newStation, setNewStation] = useState<StationsModel | null>(null);
+	const [activeTab, setActiveTab] = useState<string | null>('map');
+
 
 	const newCustomIcon = L.icon({
 		iconUrl: '/newMarker.png',
@@ -56,6 +59,7 @@ const StationPageLoggedInView = () => {
 		shadowSize: [40, 40],
 		shadowAnchor: [10, 46],
 	});
+
 
 	useEffect(() => {
 		async function loadStations() {
@@ -151,27 +155,41 @@ const StationPageLoggedInView = () => {
 
 				setMapMarkers(markers);
 
-				// Create polylines based on connectedTo information
+				// Calculate average coordinates for the center of the map
+				const totalCoords = stations.reduce((acc, station) => {
+					return [acc[0] + station.coords[0], acc[1] + station.coords[1]];
+				}, [0, 0]);
+
+				setMapCenter([totalCoords[0] / stations.length, totalCoords[1] / stations.length]);
+
 				setPolylines([]);
 				const lines: ReactElement[] = [];
+				const processedConnections: Set<string> = new Set();
+
 				stations.forEach((station) => {
 					station.connectedTo.forEach((connectedStationId) => {
 						const connectedStation = stations.find((s) => s._id === connectedStationId);
 						if (connectedStation) {
-							const line = (
-								<Polyline
-									key={`${station._id}-${connectedStation._id}`}
-									positions={[
-										[station.coords[0], station.coords[1]],
-										[connectedStation.coords[0], connectedStation.coords[1]],
-									]}
-									color="black"
-									weight={3}
-									opacity={0.7}
-									dashArray="5, 10"
-								/>
-							);
-							lines.push(line);
+							const connectionKey = [station._id, connectedStation._id].sort().join('-');
+
+							// Check if the connection has been processed to avoid duplicates
+							if (!processedConnections.has(connectionKey)) {
+								const line = (
+									<Polyline
+										key={connectionKey}
+										positions={[
+											[station.coords[0], station.coords[1]],
+											[connectedStation.coords[0], connectedStation.coords[1]],
+										]}
+										color="black"
+										weight={3}
+										opacity={0.7}
+										dashArray="5, 10"
+									/>
+								);
+								lines.push(line);
+								processedConnections.add(connectionKey);
+							}
 						}
 					});
 				});
@@ -267,114 +285,140 @@ const StationPageLoggedInView = () => {
 
 	return (
 		<>
-			<Container>
-				<h1 className={`${styles.blockCenter} mb-4`}>STATIONS</h1>
-
+			<Container fluid className="h-100">
+				<div className={`${styles.containerMiddle} ${styles.textShadow}`}>
+					<h1 className={`${styles.textCenter} mb-4`}>STATIONS</h1>
+				</div>
 				{showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
-
-				<Row className="mb-4">
-					<Col xs={12} sm={6} lg={4}>
-						<Button
-							className={`mb-4 ${styles.blockStart} ${styles.flexCenter}`}
-							onClick={() => setShowAddStationDialog(true)}
-						>
-							<FaPlus />
-							Add New Station
-						</Button>
-					</Col>
-
-					<Col xs={12} sm={6} lg={4}>
-					</Col>
-
-					<Col xs={12} sm={6} lg={4} className="text-end">
-						<div className="input-group">
-							<input
-								type="text"
-								className="form-control"
-								placeholder="Search"
-								value={searchTerm}
-								onChange={(e) => handleSearch(e.target.value)}
-							/>
-							<div className="input-group-append">
-								<Button variant="outline-secondary" onClick={() => handleSearch(searchTerm)}>
-									<FaSearch />
-								</Button>
-							</div>
-						</div>
-					</Col>
-				</Row>
-
-				{/* Loading Spinner */}
-				{stationsLoading && (
-					<div className={`${styles.flexCenterLoading} ${styles.blockCenterLoading}`}>
-						<Spinner animation="border" role="status">
-							<span className="visually-hidden">Loading...</span>
-						</Spinner>
-					</div>
-				)}
-
 				{showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
 
-				{!stationsLoading && !showStationsLoadingError && (
-					<>
-						{filteredStations.length > 0 ? (
-							<Table striped bordered responsive className="text-center">
-								<thead>
-									<tr>
-										<th>Name</th>
-										<th>Latitude</th>
-										<th>Longitude</th>
-										<th>Connected To</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									{filteredStations.map((station) => (
-										<tr key={station._id}>
-											<td>{station.stationName}</td>
-											<td>{station.coords[1]}</td>
-											<td>{station.coords[0]}</td>
-											<td>{station.connectedTo.map((connectedStationId, index) => {
-												const connectedStation = stations.find(s => s._id === connectedStationId);
-												return (
-													<span key={index}>
-														{connectedStation ? connectedStation.stationName : 'Unknown Station'}
-														{index < station.connectedTo.length - 1 && ', '}
-													</span>
-												);
-											})}
-											</td>
-											<td>
-												<Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
-													<FaTrash /> DELETE
-												</Button>{' '}
-												<Button variant="primary" onClick={() => setStationToEdit(station)}>
-													<FaPencilAlt /> UPDATE
-												</Button>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</Table>
-						) : (
-							<p>No matching stations found</p>
+				<Tabs activeKey={activeTab || undefined} onSelect={(tab: string | null | undefined) => tab && setActiveTab(tab)}>
+					<Tab eventKey="map" title="Map">
+						<div
+							id="map"
+							className={`${styles.mapContainer} border rounded`}
+							style={{
+								width: '100%',
+								height: `calc(100vh - 56px)`, // Adjusted to accommodate tabs
+								position: "relative"
+							}}
+						>
+							<div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)' }}>
+								<div className={`${styles.containerMiddle} ${styles.textShadow}`}>
+									<h1 className={`${styles.textCenter} mb-4`}>STATIONS</h1> {/* PUT TABLE DROPDOWN HERE */}
+								</div>
+							</div>
+							<MapContainer
+								center={mapCenter}
+								zoomControl={false}
+								zoom={13}
+								scrollWheelZoom={true}
+								style={{ width: '100%', height: '100%' }}
+							>
+								<TileLayer
+									url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`}
+								/>
+								<MapEventHandler onClick={handleMapClick} />
+
+								{/* <Marker key={1234} position={mapCenter}
+									icon={L.divIcon({
+										className: '',
+										html: `<span className=""> Pepe Station</span>`
+									})}>
+
+								</Marker> */}
+								{mapMarkers}
+								{newMapMarker}
+								{polylines}
+							</MapContainer>
+						</div>
+					</Tab>
+					<Tab eventKey="table" title="Table">
+						{stationsLoading && (
+							<div className={`${styles.flexCenterLoading} ${styles.blockCenterLoading}`}>
+								<Spinner animation="border" role="status">
+									<span className="visually-hidden">Loading...</span>
+								</Spinner>
+							</div>
 						)}
-					</>
-				)}
+						{!stationsLoading && (
+							<>
+								<h2 className={`${styles.blockCenter} mb-4`}>TABLE</h2>
+								<Row className="mb-4">
+									<Col xs={12} sm={6} lg={4} className="text-end">
+										<div className="input-group">
+											<input
+												type="text"
+												className="form-control"
+												placeholder="Search"
+												value={searchTerm}
+												onChange={(e) => handleSearch(e.target.value)}
+											/>
+										</div>
+									</Col>
+								</Row>
+								{filteredStations.length > 0 ? (
+									<Table striped bordered responsive className="text-center">
+										<thead>
+											<tr>
+												<th>Name</th>
+												<th>Latitude</th>
+												<th>Longitude</th>
+												<th>Connected To</th>
+												<th>Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											{filteredStations.map((station) => (
+												<tr key={station._id}>
+													<td>{station.stationName}</td>
+													<td>{station.coords[1]}</td>
+													<td>{station.coords[0]}</td>
+													<td>
+														{station.connectedTo.map((connectedStationId, index) => {
+															const connectedStation = stations.find(s => s._id === connectedStationId);
+															return (
+																<span key={index}>
+																	{connectedStation ? connectedStation.stationName : 'Unknown Station'}
+																	{index < station.connectedTo.length - 1 && ', '}
+																</span>
+															);
+														})}
+													</td>
+													<td>
+														<Button className="mx-auto" variant="danger" onClick={() => handleConfirmation(() => deleteStation(station), station)}>
+															DELETE
+														</Button>{' '}
+														<Button variant="primary" onClick={() => setStationToEdit(station)}>
+															UPDATE
+														</Button>
+													</td>
+												</tr>
+											))}
+										</tbody>
+									</Table>
+								) : (
+									<p>No matching stations found</p>
+								)}
+							</>
+						)}
+					</Tab>
+				</Tabs>
 
 				{showAddStationDialog && (
 					<AddEditStationDialog
-						stationToEdit={selectedMarker} // Pass the selectedMarker as stationToEdit
-						coordinates={clickedCoords} // Pass the clicked coordinates as a prop
+						stations={stations}
+						stationToEdit={selectedMarker || undefined}
+						coordinates={clickedCoords}
 						onDismiss={() => {
-							// setNewMapMarker([]);
+							setNewMapMarker([]);
 							setShowAddStationDialog(false);
 							refresh();
 						}}
 						onStationSaved={() => {
 							setShowAddStationDialog(false);
 							showAlertMessage('Station saved successfully', 'success');
-							setSelectedMarker(null); // Reset selectedMarker after 
+							setSelectedMarker(null);
 							refresh();
 							setNewMapMarker([]);
 						}}
@@ -382,16 +426,18 @@ const StationPageLoggedInView = () => {
 					/>
 				)}
 
-
 				{stationToEdit && (
 					<AddEditStationDialog
+						stations={stations}
 						stationToEdit={stationToEdit}
 						onDismiss={() => {
 							setStationToEdit(null);
-							refresh(); // Call refresh() when dismissing the dialog
+							refresh();
+							setNewMapMarker([]);
 						}}
 						onStationSaved={(updateStation) => {
 							refresh();
+							setNewMapMarker([]);
 							setStations(
 								stations.map((existingStation) =>
 									existingStation._id === updateStation._id ? updateStation : existingStation
@@ -408,16 +454,6 @@ const StationPageLoggedInView = () => {
 						newStation={null}
 					/>
 				)}
-
-				<div id="map" className={`${styles.mapContainer} border rounded`} style={{ width: '100%', height: '500px' }}>
-					<MapContainer center={[14.550561416466541, 121.02785649562283]} zoomControl={false} zoom={13} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
-						<TileLayer
-							url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`} //https://www.jawg.io/lab/access-tokens
-						/>
-						<MapEventHandler onClick={handleMapClick} />
-						{mapMarkers}{newMapMarker}{polylines}
-					</MapContainer>
-				</div>
 
 				<Modal show={showConfirmation} onHide={closeConfirmation}>
 					<Modal.Header closeButton>

@@ -100,7 +100,7 @@ const FarePageLoggedInView = () => {
   return (
     <Container className={styles.settingsContainer}>
       <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
-        <h2 className={`${styles.textCenter} mb-4`}>OFFICIAL FARES</h2>
+        <h1 className={`${styles.textCenter} mb-4`}>OFFICIAL FARES</h1>
       </div>
       {faresLoading && (
         <div

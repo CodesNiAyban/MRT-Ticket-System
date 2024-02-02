@@ -53,13 +53,11 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div>
         <NavBar
           loggedInAdmin={loggedInAdmin}
           onLoginClicked={() => setShowLoginModal(true)}
           onLogoutSuccessful={onLogout}
         />
-        <Container className={styles.pageContainer}>
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route
@@ -76,7 +74,6 @@ function App() {
             />
             <Route path="/*" element={<PageNotFound />} />
           </Routes>
-        </Container>
         {showLoginModal && (
           <LoginModal
             onDismiss={() => setShowLoginModal(false)}
@@ -86,7 +83,6 @@ function App() {
             }}
           />
         )}
-      </div>
     </BrowserRouter>
   );
 }

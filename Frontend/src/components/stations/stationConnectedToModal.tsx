@@ -20,6 +20,7 @@ interface StationConnectedToModalProps {
 	polylines: ReactElement[];
 	setPolylines: React.Dispatch<React.SetStateAction<ReactElement[]>>;
 	showToast: any;
+	stations: StationsModel[];
 }
 
 const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
@@ -33,12 +34,12 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 	stationToEdit,
 	polylines,
 	setPolylines,
-	showToast
+	showToast,
+	stations
 }: StationConnectedToModalProps) => {
 	const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
 	const [newMapMarker, setNewMapMarker] = useState<ReactElement[]>([]);
-	const [clickedMarkerCoordinates, setClickedMarkerCoordinates] = useState<[number, number] | null>(null); // Track the clicked marker's coordinates
-	const [mapLoading, setMapLoading] = useState(true);
+	const [top, setTop] = useState(false); // Track the clicked marker's coordinates
 	const [mapPolylines, setMapPolylines] = useState<ReactElement[]>([]);
 
 	const customIcon = L.icon({
@@ -84,53 +85,84 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 			setNewMapMarker([newMarker]);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [newStation]);
+	}, []);
 
 	useEffect(() => {
-		setMapLoading(true);
-		async function loadStationsAndMarkers() {
-			try {
-				const stations = await StationApi.fetchStations();
-				const markers = stations.map((station, index) => (
+		function loadStationsAndMarkers() {
+			const markers = stations.map((station) => {
+				const isConnectedToStation = station.connectedTo.includes(stationToEdit?._id || "");
+
+				return (
 					<Marker
 						key={`${station._id}-${Math.random()}`}
 						position={[station.coords[0], station.coords[1]]}
-						icon={customIcon}
+						icon={station === stationToEdit ? newCustomIcon : customIcon}
 						eventHandlers={{
 							click: () => {
 								onStationSelection(station);
 							},
 							mouseover: (event) => event.target.openPopup(),
 							mouseout: (event) => event.target.closePopup(),
-						}
-						}
+						}}
 					>
 						<Popup>
-							<span
-								className={`${styles.badge} badge badge-pill badge-primary mr-2`}
-								style={{
-									background: '#0275d8',
-									color: 'white',
-									padding: '8px 16px',
-									borderRadius: '20px',
-									boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-								}}
-							>
-								{station.stationName}
-							</span>
-						</Popup>
-					</Marker >
-				));
+							<div className={styles.popupContainer}>
+								<span className={styles.popupTitle}>
+									{station === stationToEdit ? <>STATION UPDATE <br /> </> : <> STATION INFO <br /></>}
+								</span>
+								<span className={styles.popupContent}>
+									<strong>Station:</strong> {station.stationName}<br />
+									<strong>Latitude:</strong> {station.coords[1]}<br />
+									<strong>Longitude:</strong> {station.coords[0]}<br />
+									<>
+									{station === stationToEdit ? <><strong>CONNECTION LOGS:</strong> <br /> </> : <> STATION INFO <br /></>}
+										{station.connectedTo.map((connectedStationId) => {
+											const connectedStation = stations.find((s) => s._id === connectedStationId);
+											const connectedDistance =
+												connectedStation &&
+												L.latLng(station.coords[0], station.coords[1]).distanceTo(
+													L.latLng(connectedStation.coords[0], connectedStation.coords[1])
+												);
 
-				// Create polylines based on connectedTo information
-				const lines: ReactElement[] = [];
-				stations.forEach((station) => {
-					station.connectedTo.forEach((connectedStationId) => {  // Use station IDs instead of names
-						const connectedStation = stations.find((s) => s._id === connectedStationId);
-						if (connectedStation) {
+											return connectedStation ? (
+												<span key={connectedStationId}>
+													<br />
+													{connectedStation.stationName}
+													(Distance: {connectedDistance?.toFixed(2)} meters)
+												</span>
+											) : null;
+										})}
+									</>
+								</span>
+							</div>
+						</Popup>
+					</Marker>
+				);
+			});
+
+			setMapMarkers(markers);
+			setTop(true);
+		}
+
+		loadStationsAndMarkers();
+	}, [onStationSelection, stations, stationToEdit]);
+
+	useEffect(() => {
+		function loadPolylines() {
+			const lines: ReactElement[] = [];
+			const processedConnections: Set<string> = new Set();
+
+			stations.forEach((station) => {
+				station.connectedTo.forEach((connectedStationId) => {
+					const connectedStation = stations.find((s) => s._id === connectedStationId);
+					if (connectedStation) {
+						const connectionKey = [station._id, connectedStation._id].sort().join('-');
+
+						// Check if the connection has been processed to avoid duplicates
+						if (!processedConnections.has(connectionKey)) {
 							const line = (
 								<Polyline
-									key={`${station._id}-${connectedStation._id}`}
+									key={connectionKey}
 									positions={[
 										[station.coords[0], station.coords[1]],
 										[connectedStation.coords[0], connectedStation.coords[1]],
@@ -142,23 +174,59 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 								/>
 							);
 							lines.push(line);
+							processedConnections.add(connectionKey);
 						}
-					});
+					}
+				});
+			});
+
+			const createPolyline = (station1: StationsModel, station2: StationsModel) => {
+				const connectionKey = [station1._id, station2._id].sort().join('-');
+				const line = (
+					<Polyline
+						key={`polyline-${connectionKey}`}
+						positions={[
+							[station1.coords[0], station1.coords[1]],
+							[station2.coords[0], station2.coords[1]],
+						]}
+						color="green"
+					/>
+				);
+				lines.push(line);
+				processedConnections.add(connectionKey);
+				setPolylines((prevPolylines) => [
+					...prevPolylines,
+					line,
+				]);
+			};
+
+			// Create polylines based on selectedStations
+			if (stationToEdit) {
+				selectedStations.forEach((selectedStation) => {
+					const connectionKey = [stationToEdit?._id, selectedStation._id].sort().join('-');
+
+					// Check if the connection has been processed to avoid duplicates
+					if (!processedConnections.has(connectionKey)) {
+						createPolyline(stationToEdit!, selectedStation);
+					}
 				});
 
-				setMapPolylines(lines);
-
-				setMapMarkers(markers);
-			} catch (error) {
-				console.error(error);
-			} finally {
-				setMapLoading(false);
+				// Create polylines based on stationToEdit
+				if (stationToEdit) {
+					stationToEdit.connectedTo.forEach((connectedStationId) => {
+						const connectedStation = stations.find((s) => s._id === connectedStationId);
+						if (connectedStation) {
+							createPolyline(stationToEdit, connectedStation);
+						}
+					});
+				}
 			}
+
+
+			setMapPolylines(lines);
 		}
-
-		loadStationsAndMarkers();
-	}, [clickedMarkerCoordinates, onStationSelection, newStation, stationToEdit, selectedStations]);
-
+		loadPolylines();
+	}, []);
 
 	useEffect(() => {
 		if (newStation) {
@@ -184,7 +252,6 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [newStation]);
-
 	const handleRemoveStationName = (stationName: string, stationId: string) => {
 		// Find the clicked station in selectedStations array
 		const stationToRemove = selectedStations.find(
@@ -194,19 +261,16 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 		if (stationToRemove) {
 			onRemoveStation(stationToRemove);
 
-			// Remove the corresponding polyline when a station is removed
-			const polylineToRemove = polylines.find((polyline) =>
-				polyline.key?.includes(stationId || "")
+			// Remove the corresponding polylines when a station is removed
+			setPolylines((prevPolylines) =>
+				prevPolylines.filter((polyline) => {
+					const polylineStationIds = polyline.key?.split('-');
+					return !polylineStationIds?.includes(stationId || "");
+				})
 			);
-
-			if (polylineToRemove) {
-				setPolylines((prevPolylines) =>
-					prevPolylines.filter((polyline) => polyline !== polylineToRemove)
-				);
-			}
-			setClickedMarkerCoordinates(null);
 		}
 	};
+
 
 	return (
 		<>
@@ -215,22 +279,12 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 					<Modal.Title>Connect Stations</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					{mapLoading && (
-						<div className={styles.loadingOverlay}>
-							{/* Display a loading spinner */}
-							<div className={`spinner-border text-primary ${styles.spinner}`} role="status">
-								<span className="sr-only">Loading...</span>
-							</div>
-							{/* Block clicks with a low-opacity component */}
-							<div className={styles.blockingComponent} />
-						</div>
-					)}
 					<div id="map" className={`${styles.mapContainer} border rounded`} style={{ width: '100%', height: '400px' }}>
 						<MapContainer center={[14.550561416466541, 121.02785649562283]} zoom={13} zoomControl={false} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
 							<TileLayer
 								url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`}
 							/>
-							{mapMarkers}{newMapMarker}{polylines}{mapPolylines}
+							{mapMarkers}{newMapMarker}{mapPolylines}{polylines}
 						</MapContainer>
 					</div>
 					<div className="mt-3">

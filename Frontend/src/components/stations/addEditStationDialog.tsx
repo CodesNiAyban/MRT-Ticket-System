@@ -11,11 +11,12 @@ import { Polyline } from 'react-leaflet';
 import L from 'leaflet';
 
 interface AddEditStationDialogProps {
-	stationToEdit?: Stations | null;
+	stationToEdit?: Stations;
 	onDismiss: () => void;
 	onStationSaved: (station: Stations) => void;
 	coordinates?: [number, number] | null;
 	newStation: StationsModel | null;
+	stations: StationsModel[];
 }
 
 const AddEditStationDialog = ({
@@ -24,7 +25,7 @@ const AddEditStationDialog = ({
 	onStationSaved,
 	coordinates,
 	newStation,
-
+	stations
 }: AddEditStationDialogProps) => {
 	const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<StationInput>({
 		defaultValues: {
@@ -50,7 +51,7 @@ const AddEditStationDialog = ({
 		'coords.1': stationToEdit ? stationToEdit.coords[1].toString() : initialLongitude.toString(),
 	});
 
-	const setDefaultValues = async () => {
+	const setDefaultValues = () => {
 		setValue('stationName', stationToEdit?.stationName || '');
 		setValue('coords.0', stationToEdit?.coords[0] || initialLatitude);
 		setValue('coords.1', stationToEdit?.coords[1] || initialLongitude);
@@ -63,8 +64,7 @@ const AddEditStationDialog = ({
 		let i: number = 0;
 		for (const connectedStation of connectedToStations) {
 			try {
-				const stationDetailsArray = await StationsApi.fetchStations();
-				const stationDetails = stationDetailsArray.find(station => station._id === connectedStation);
+				const stationDetails = stations.find(station => station._id === connectedStation);
 
 				if (stationDetails) {
 					const connectedStationDetails: Stations = {
@@ -161,95 +161,79 @@ const AddEditStationDialog = ({
 	}
 
 	const handleStationSelection = async (station: StationsModel) => {
-		// Check if the station is already in the selected stations list
-		const isStationSelected = selectedStations.some(
-			(selectedStation) => selectedStation._id === station._id
-		);
+		const isCurrentStationToEdit = stationToEdit && stationToEdit.stationName === station.stationName;
+		if (!isCurrentStationToEdit) {
+			if (!selectedStations.some((selectedStation) => selectedStation._id === station._id)) {
+				// Update connectedTo for the selected station
+				const updatedSelectedStation: StationsModel = {
+					...station,
+					connectedTo: [...station.connectedTo, stationToEdit?._id || ''],
+				};
 
-		// Check if the station already exists in the list
-		const isStationInList = selectedStations.some(
-			(selectedStation) => selectedStation._id === station._id
-		);
+				// Update connectedTo for other stations in selectedStations
+				const updatedStations = selectedStations.map((selectedStation) => ({
+					...selectedStation,
+					connectedTo: [...selectedStation.connectedTo, station._id],
+				}));
 
-		// Check if the stationName of the marker is the same as the current station's stationName
-		const isSameStation = stationToEdit && station._id === stationToEdit._id;
+				// If stationToEdit is present, update its connectedTo
+				if (stationToEdit) {
+					stationToEdit.connectedTo.push(station._id);
+				}
 
-		// If the station is not already selected, doesn't exist in the list, and is not the same station, add it to the list
-		if (!isStationSelected && !isStationInList && !isSameStation) {
-			// Update connectedTo for the selected station
-			const updatedSelectedStation: StationsModel = {
-				...station,
-				connectedTo: [...station.connectedTo, stationToEdit?._id || ''],
-			};
+				// Set the updated selected stations and update connectedTo for other stations
+				setSelectedStations([updatedSelectedStation, ...updatedStations]);
 
-			// Update connectedTo for other stations in selectedStations
-			const updatedStations = selectedStations.map((selectedStation) => ({
-				...selectedStation,
-				connectedTo: [...selectedStation.connectedTo, station._id],
-			}));
-
-			// If stationToEdit is present, update its connectedTo
-			if (stationToEdit) {
-				stationToEdit.connectedTo.push(station._id);
-			}
-
-			// Set the updated selected stations and update connectedTo for other stations
-			setSelectedStations([updatedSelectedStation, ...updatedStations]);
-		}
-
-		if (!selectedStations.some((selectedStation) => selectedStation._id === station._id)) {
-			if (stationToEdit && station._id !== stationToEdit._id) {
-				const distance = L.latLng(stationToEdit.coords[0], stationToEdit.coords[1]).distanceTo(
-					L.latLng(station.coords[0], station.coords[1])
-				);
-
-				if (distance > 500) {
-					const polyline = (
-						<Polyline
-							key={`polyline-${station._id}`}
-							positions={[
-								[
-									stationToEdit.coords[0],
-									stationToEdit.coords[1],
-								],
-								[station.coords[0], station.coords[1]],
-							]}
-						/>
+				if (stationToEdit && station._id !== stationToEdit._id) {
+					const distance = L.latLng(stationToEdit.coords[0], stationToEdit.coords[1]).distanceTo(
+						L.latLng(station.coords[0], station.coords[1])
 					);
 
-					setPolylines((prevPolylines) => [
-						...prevPolylines,
-						polyline,
-					]);
-				} else {
-					setShowToast(true);
-				}
-			} else if (newStation && station._id !== newStation._id) {
-				const distance = L.latLng(newStation.coords[0], newStation.coords[1]).distanceTo(
-					L.latLng(station.coords[0], station.coords[1])
-				);
+					if (distance > 500) {
+						const polyline = (
+							<Polyline
+								key={`polyline-${station._id}`}
+								positions={[
+									[stationToEdit.coords[0], stationToEdit.coords[1],],
+									[station.coords[0], station.coords[1]],
+								]}
+							/>
+						);
 
-				if (distance > 500) {
-					const polyline = (
-						<Polyline
-							key={`polyline-${station._id}`}
-							positions={[
-								[newStation.coords[0], newStation.coords[1]],
-								[station.coords[0], station.coords[1]],
-							]}
-						/>
+						setPolylines((prevPolylines) => [
+							...prevPolylines,
+							polyline,
+						]);
+					} else {
+						setShowToast(true);
+					}
+				} else if (newStation && station._id !== newStation._id) {
+					const distance = L.latLng(newStation.coords[0], newStation.coords[1]).distanceTo(
+						L.latLng(station.coords[0], station.coords[1])
 					);
 
-					setPolylines((prevPolylines) => [
-						...prevPolylines,
-						polyline,
-					]);
-				} else {
-					setShowToast(true);
+					if (distance > 500) {
+						const polyline = (
+							<Polyline
+								key={`polyline-${station._id}`}
+								positions={[
+									[newStation.coords[0], newStation.coords[1]],
+									[station.coords[0], station.coords[1]],
+								]}
+							/>
+						);
+
+						setPolylines((prevPolylines) => [
+							...prevPolylines,
+							polyline,
+						]);
+					} else {
+						setShowToast(true);
+					}
 				}
+				setSelectedStations([...selectedStations, station]);
 			}
 		}
-		setSelectedStations([...selectedStations, station]);
 	};
 
 	const handleRemoveStation = (station: StationsModel) => {
@@ -345,21 +329,22 @@ const AddEditStationDialog = ({
 					Save
 				</Button>
 			</Modal.Footer>
-
-			<StationConnectedToModal
-				show={showConnectedToModal}
-				onHide={closeConnectedToModal}
-				onStationSelection={handleStationSelection}
-				selectedStations={selectedStations}
-				onRemoveStation={handleRemoveStation}
-				onClearSelectedStations={() => setSelectedStations([])}
-				newStation={stationToEdit ? null : newStation}
-				stationToEdit={stationToEdit ? stationToEdit : null}
-				polylines={polylines}
-				setPolylines={handlePolylines}
-				showToast={showToast}
-
-			/>
+			{showConnectedToModal && (
+				<StationConnectedToModal
+					show={showConnectedToModal}
+					onHide={closeConnectedToModal}
+					onStationSelection={handleStationSelection}
+					selectedStations={selectedStations}
+					onRemoveStation={handleRemoveStation}
+					onClearSelectedStations={() => setSelectedStations([])}
+					stations={stations}
+					newStation={stationToEdit ? null : newStation}
+					stationToEdit={stationToEdit ? stationToEdit : null}
+					polylines={polylines}
+					setPolylines={handlePolylines}
+					showToast={showToast}
+				/>
+			)}
 		</Modal >
 	);
 };
