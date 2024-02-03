@@ -1,23 +1,25 @@
-// EditFareDialogProps.tsx
-import React, { useEffect, useState } from "react";
-import { Button, Form, Modal, Spinner, Toast } from "react-bootstrap";
+/* eslint-disable @typescript-eslint/no-redeclare */
+// UpdateFareDialog.tsx
+import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { Fare } from "../../model/fareModel";
 import * as FaresApi from "../../network/fareAPI";
 import TextInputField from "../form/textInputFields";
 import styles from "./fare.module.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-interface EditFareDialogProps {
+interface UpdateFareDialog {
     fareToEdit?: Fare;
     onDismiss: () => void;
     onFareSaved: (fare: Fare) => void;
 }
 
-const EditFareDialogProps: React.FC<EditFareDialogProps> = ({
+const UpdateFareDialog: React.FC<UpdateFareDialog> = ({
     fareToEdit,
     onDismiss,
     onFareSaved,
-}: EditFareDialogProps) => {
+}: UpdateFareDialog) => {
     const {
         register,
         handleSubmit,
@@ -29,34 +31,33 @@ const EditFareDialogProps: React.FC<EditFareDialogProps> = ({
         },
     });
 
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState<string | null>(null);
-    const [toastVariant, setToastVariant] = useState<"success" | "danger">("success");
-
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            setShowToast(false);
-            setToastMessage(null);
-        }, 1300);
-
-        return () => clearTimeout(timeoutId);
-    }, [showToast]);
-
     async function onSubmit(input: Fare) {
         try {
-            if (input.price < 0 || input.price > 5000) {
-                setToastVariant("danger");
-                setToastMessage("Please enter a valid price between 0 and 5000.");
-                setShowToast(true);
+            if (input.price < 10 || input.price > 5000) {
+                toast.error(`Prices are only limited to 10 and 5000.`, {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
                 return;
             }
 
             let fareResponse: Fare;
             if (fareToEdit) {
                 if (!isDirty) {
-                    setToastVariant("danger");
-                    setToastMessage("Update is unchanged.");
-                    setShowToast(true);
+                    toast.error(`Error saving ${input.fareType.toLocaleLowerCase()}. Please change price on update.`, {
+                        position: "top-center",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                    });
                     return;
                 }
 
@@ -68,97 +69,81 @@ const EditFareDialogProps: React.FC<EditFareDialogProps> = ({
             console.error(error);
 
             if (error.message === "Network Error") {
-                setToastVariant("danger");
-                setToastMessage(
-                    "No connection. Please check your internet connection."
-                );
-            } else if (error.response && error.response.status === 409) {
-                setToastVariant("danger");
-                setToastMessage(
-                    "Error: Duplicate fare. Please use a different fare."
-                );
+                toast.error(`No connection or authentication expired, please reload page.`, {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
             } else {
-                setToastVariant("danger");
-                setToastMessage("Error saving Beep Card. Please try again.");
+                toast.error(`Error saving ${input.fareType.toLocaleLowerCase()}. Please try again.`, {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
             }
-            setShowToast(true);
         }
     }
 
     return (
-        <Modal show onHide={onDismiss} centered className={`${styles.modalContent}`}>
-            <Modal.Header closeButton className={styles.confirmationModalHeader}>
-                <Modal.Title className={`${styles.modalTitle} modal-title`}>
-                    Edit Fare
-                </Modal.Title>
-            </Modal.Header>
+        <>
+            <ToastContainer limit={3} />
+            <Modal show onHide={onDismiss} centered className={`${styles.modalContent}`}>
+                <Modal.Header closeButton className={styles.confirmationModalHeader}>
+                    <Modal.Title className={`${styles.modalTitle} modal-title`} style={{ textTransform: 'capitalize' }}>
+                        <Modal.Title className={`${styles.modalTitle} modal-title`} style={{ textTransform: 'capitalize' }}>
+                            {`Edit ${fareToEdit?.fareType.split(' ').map(word => word.charAt(0).toUpperCase() + word.toLocaleLowerCase().slice(1)).join(' ')}`}
+                        </Modal.Title>
+                    </Modal.Title>
+                </Modal.Header>
 
-            <Modal.Body className={styles.modalBody}>
-                <Form id="editFareForm" onSubmit={handleSubmit(onSubmit)}>
-                    <TextInputField
-                        name="price"
-                        label="Price"
-                        type="number"
-                        placeholder="Enter Fare:"
-                        register={register}
-                        registerOptions={{ required: "Required" }}
-                        errors={errors.price}
+                <Modal.Body className={styles.modalBody}>
+                    <Form id="editFareForm" onSubmit={handleSubmit(onSubmit)}>
+                        <TextInputField
+                            name="price"
+                            label="Price"
+                            type="number"
+                            placeholder="Enter Fare:"
+                            register={register}
+                            registerOptions={{ required: "Required" }}
+                            errors={errors.price}
+                            disabled={isSubmitting}
+                        />
+                    </Form>
+                </Modal.Body>
+
+                <Modal.Footer className={styles.modalFooter}>
+                    <Button
+                        type="submit"
+                        form="editFareForm"
                         disabled={isSubmitting}
-                    />
-                </Form>
-            </Modal.Body>
-
-            <Modal.Footer className={styles.modalFooter}>
-                <Button
-                    type="submit"
-                    form="editFareForm"
-                    disabled={isSubmitting}
-                    className={`btn-primary ${styles.primaryButton} d-flex align-items-center`}
-                    style={{ pointerEvents: isSubmitting ? 'none' : 'auto' }}
-                >
-                    {isSubmitting && (
-                        <>
-                            <Spinner
-                                animation="border"
-                                variant="secondary"
-                                size="sm"
-                                className={`${styles.loadingcontainer}`}
-                            />
-                            <span className="ml-2">Updating Fare...</span>
-                        </>
-                    )}
-                    {!isSubmitting && 'Save'}
-                </Button>
-            </Modal.Footer>
-
-            <Toast
-                show={showToast}
-                onClose={() => {
-                    setShowToast(false);
-                    onDismiss(); // Dismiss modal when toast is closed
-                }}
-                delay={3000}
-                autohide
-                style={{
-                    position: 'fixed',
-                    top: 16,
-                    right: 16,
-                    zIndex: 9999,
-                    width: '300px',
-                    background: toastVariant === "success" ? "#28a745" : "#dc3545",
-                    color: "#fff",
-                }}
-                className={`position-fixed top-20 start-50 translate-middle-x ${styles.toast}`}
-            >
-                <Toast.Header>
-                    <strong className={`me-auto`}>
-                        {toastVariant === "success" ? "Success" : "Error"}
-                    </strong>
-                </Toast.Header>
-                <Toast.Body>{toastMessage}</Toast.Body>
-            </Toast>
-        </Modal>
+                        className={`btn-primary ${styles.primaryButton} d-flex align-items-center`}
+                        style={{ pointerEvents: isSubmitting ? 'none' : 'auto' }}
+                    >
+                        {isSubmitting && (
+                            <>
+                                <Spinner
+                                    animation="border"
+                                    variant="secondary"
+                                    size="sm"
+                                    className={`${styles.loadingcontainer}`}
+                                />
+                                <span className="ml-2">Updating Fare...</span>
+                            </>
+                        )}
+                        {!isSubmitting && 'Save'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
     );
 };
 
-export default EditFareDialogProps;
+export default UpdateFareDialog;

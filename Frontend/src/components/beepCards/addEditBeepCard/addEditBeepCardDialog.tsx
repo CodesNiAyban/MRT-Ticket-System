@@ -2,17 +2,19 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { useForm } from "react-hook-form";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { BeepCard } from "../../../model/beepCardModel";
 import * as BeepCardsApi from "../../../network/beepCardAPI";
 import { BeepCardInput } from "../../../network/beepCardAPI";
 import styles from "././addEditBeepCardDialog.module.css";
-import ConfirmationModal from "./addEditCardConfirmModal";
 import {
   generateDefaultNumber,
   getDefaultLoadPrice,
 } from "./addEditBeepCardConstants";
 import BeepCardFormFields from "./addEditBeepCardFormFields";
-import AlertComponent from "./addEditBeepCardAlert";
+import ConfirmationModal from "./addEditCardConfirmModal";
+
 
 interface AddEditBeepCardDialogProps {
   beepCardToEdit?: BeepCard;
@@ -42,14 +44,16 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
+
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [previousBalance, setPreviousBalance] = useState<number | null>(null);
   const [addedValue, setAddedValue] = useState<number | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [generatedNumber, setGeneratedNumber] = useState<string>()
+
+  useEffect(() => {
+    return () => toast.dismiss();
+  }, []);
 
   useEffect(() => {
     setIsLoading(true);
@@ -69,27 +73,11 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     setDefaultValues();
   }, [beepCardToEdit, setValue, editMode]);
 
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setShowAlert(false);
-      setAlertMessage(null);
-    }, 3000);
-
-    return () => clearTimeout(timeoutId);
-  }, [showAlert]);
-
   const setDefaultBalance = async () => {
     if (!beepCardToEdit) {
       const defaultLoadPrice = await getDefaultLoadPrice();
       setValue("balance", defaultLoadPrice);
     }
-  };
-
-  const showAlertMessage = (variant: "success" | "danger", message: string) => {
-    setAlertVariant(variant);
-    setAlertMessage(message);
-    setShowAlert(true);
   };
 
   const showConfirmation = () => {
@@ -113,7 +101,16 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
 
   const onSubmit = async (input: BeepCardInput) => {
     if (editMode && !isDirty) {
-      showAlertMessage("danger", "No changes made. Please modify the beep card data.");
+      // showAlertMessage("danger", "No changes made. Please modify the beep card data.");
+      toast.error ("No changes made.", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       return;
     }
 
@@ -122,20 +119,30 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     try {
       if (!beepCardToEdit) {
         if (!input.UUIC || !/^\d{15}$/.test(input.UUIC)) {
-          showAlertMessage(
-            "danger",
-            "Invalid Beep Card ID format. Please enter 15 digits."
-          );
+          toast.error("Invalid Beep Card ID format. Please enter 15 digits.", {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
           return;
         }
 
         input.balance = await getDefaultLoadPrice();
       } else {
         if (!/^637805\d{9}$/.test(input.UUIC)) {
-          showAlertMessage(
-            "danger",
-            "Invalid Beep Card ID format. Must start with '637805' and have 15 digits."
-          );
+          toast.error("Invalid Beep Card ID format. Must start with '637805' and have 15 digits.", {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
           return;
         }
       }
@@ -146,10 +153,15 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
         balanceValue < defaultLoadPrice ||
         balanceValue > 5000
       ) {
-        showAlertMessage(
-          "danger",
-          `Invalid balance. It should be between ${defaultLoadPrice} and 5000.`
-        );
+        toast.error(`Invalid balance. It should be between ${defaultLoadPrice} and 5000.`, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
         setShowConfirmationModal(false);
         return;
       }
@@ -177,20 +189,35 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       console.error(error);
 
       if (error.message === "Network Error") {
-        showAlertMessage(
-          "danger",
-          "No connection. Please check your internet connection."
-        );
+        toast.error("No connection. Please check your internet connection.", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       } else if (error.response && error.response.status === 409) {
-        showAlertMessage(
-          "danger",
-          "Error: Duplicate Beep Card ID. Please use a different Beep Card ID."
-        );
+        toast.error("Duplicate Beep Card ID. Please use a different Beep Card ID.", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       } else {
-        showAlertMessage(
-          "danger",
-          "Error saving Beep Card. Please try again. Make sure that input ID's are unique."
-        );
+        toast.error("Error saving Beep Card. Please try again. Make sure that input ID's are unique.", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       }
     } finally {
       setIsLoading(false);
@@ -199,40 +226,78 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   };
 
   return (
-    <Modal show onHide={onDismiss} centered className={styles.modalContent}>
-      <Modal.Header closeButton className={styles.modalHeader}>
-        <Modal.Title className={`${styles.modalTitle} modal-title`}>
-          {beepCardToEdit
-            ? editMode
-              ? "Edit Beep Card"
-              : "Load Beep Card"
-            : "Add Beep Card"}
-        </Modal.Title>
-      </Modal.Header>
+    <>
+      <ToastContainer limit={3} />
+      <Modal show onHide={onDismiss} centered className={styles.modalContent}>
+        <Modal.Header closeButton className={styles.modalHeader}>
+          <Modal.Title className={`${styles.modalTitle} modal-title`}>
+            {beepCardToEdit
+              ? editMode
+                ? "Edit Beep Card"
+                : "Load Beep Card"
+              : "Add Beep Card"}
+          </Modal.Title>
+        </Modal.Header>
 
-      <Modal.Body className={`${styles.modalBody} modal-body`}>
-        {isLoading ? (
-          <div className={styles.loadingcontainer}>
-           <Spinner animation="border" variant="secondary" />
-          </div>
-        ) : (
-          <Form id="addEditBeepCardForm" onSubmit={handleSubmit(onSubmit)}>
-            <BeepCardFormFields
-              editMode={editMode}
-              beepCardToEdit={beepCardToEdit}
-              register={register}
-              errors={errors}
-              generateNumber={generateNumber}
-              isSubmitting={isSubmitting}
-              confirming={confirming}
-            />
-          </Form>
-        )}
-      </Modal.Body>
+        <Modal.Body className={`${styles.modalBody} modal-body`}>
+          {isLoading ? (
+            <div className={styles.loadingcontainer}>
+              <Spinner animation="border" variant="secondary" />
+            </div>
+          ) : (
+            <Form id="addEditBeepCardForm" onSubmit={handleSubmit(onSubmit)}>
+              <BeepCardFormFields
+                editMode={editMode}
+                beepCardToEdit={beepCardToEdit}
+                register={register}
+                errors={errors}
+                generateNumber={generateNumber}
+                isSubmitting={isSubmitting}
+                confirming={confirming}
+              />
+            </Form>
+          )}
+        </Modal.Body>
 
-      <Modal.Footer className={`${styles.modalFooter} modal-footer`}>
-        {beepCardToEdit ? (
-          editMode ? (
+        <Modal.Footer className={`${styles.modalFooter} modal-footer`}>
+          {beepCardToEdit ? (
+            editMode ? (
+              <Button
+                type="submit"
+                form="addEditBeepCardForm"
+                disabled={isSubmitting}
+                onClick={setDefaultBalance}
+                className={`btn-primary ${styles.primaryButton} d-flex align-items-center`}
+              >
+                {isSubmitting && (
+                  <>
+                    <Spinner
+                      animation="border"
+                      variant="secondary"
+                      size="sm"
+                      className={`${styles.loadingcontainer}`}
+                    />
+                    <span className="ml-2">Updating...</span>
+                  </>
+                )}
+                {!isSubmitting && 'Update'}
+              </Button>
+            ) : (
+              !isLoading ? (
+                <Button
+                  variant="primary"
+                  onClick={showConfirmation}
+                  disabled={isSubmitting || confirming}
+                  className={`btn-primary ${styles.primaryButton} d-flex align-items-center`}
+                >
+                  {confirming && (
+                    <>Updating...</>
+                  )}
+                  {!confirming && 'Show Confirmation'}
+                </Button>
+              ) : null
+            )
+          ) : (
             <Button
               type="submit"
               form="addEditBeepCardForm"
@@ -248,68 +313,25 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
                     size="sm"
                     className={`${styles.loadingcontainer}`}
                   />
-                  <span className="ml-2">Updating...</span>
+                  <span className="ml-2">Creating Beep Card...</span>
                 </>
               )}
-              {!isSubmitting && 'Update'}
+              {!isSubmitting && 'Create'}
             </Button>
-          ) : (
-            !isLoading ? (
-              <Button
-                variant="primary"
-                onClick={showConfirmation}
-                disabled={isSubmitting || confirming}
-                className={`btn-primary ${styles.primaryButton} d-flex align-items-center`}
-              >
-                {confirming && (
-                  <>Updating...</>
-                )}
-                {!confirming && 'Show Confirmation'}
-              </Button>
-            ) : null
-          )
-        ) : (
-          <Button
-            type="submit"
-            form="addEditBeepCardForm"
-            disabled={isSubmitting}
-            onClick={setDefaultBalance}
-            className={`btn-primary ${styles.primaryButton} d-flex align-items-center`}
-          >
-            {isSubmitting && (
-              <>
-                <Spinner
-                  animation="border"
-                  variant="secondary"
-                  size="sm"
-                  className={`${styles.loadingcontainer}`}
-                />
-                <span className="ml-2">Creating Beep Card...</span>
-              </>
-            )}
-            {!isSubmitting && 'Create'}
-          </Button>
-        )}
-      </Modal.Footer>
+          )}
+        </Modal.Footer>
 
-      {showAlert && (
-        <AlertComponent
-          variant={alertVariant}
-          message={alertMessage}
-          onClose={() => setShowAlert(false)}
+        <ConfirmationModal
+          show={showConfirmationModal}
+          onHide={() => setShowConfirmationModal(false)}
+          previousBalance={previousBalance}
+          addedValue={addedValue}
+          onConfirmation={handleConfirmation}
+          isSubmitting={isSubmitting}
+          isLoading={isLoading}
         />
-      )}
-
-      <ConfirmationModal
-        show={showConfirmationModal}
-        onHide={() => setShowConfirmationModal(false)}
-        previousBalance={previousBalance}
-        addedValue={addedValue}
-        onConfirmation={handleConfirmation}
-        isSubmitting={isSubmitting}
-        isLoading={isLoading}
-      />
-    </Modal>
+      </Modal>
+    </>
   );
 };
 

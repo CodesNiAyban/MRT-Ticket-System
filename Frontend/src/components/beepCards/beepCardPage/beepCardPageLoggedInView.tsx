@@ -1,7 +1,7 @@
 // BeepCardPageLoggedInView.tsx
 
 import React, { useEffect, useState } from "react";
-import { Button, Spinner, Modal, Container, Card, Pagination, Alert, Toast } from "react-bootstrap";
+import { Button, Spinner, Modal, Container, Card, Pagination, Alert } from "react-bootstrap";
 import { BeepCard as BeepCardsModel } from "../../../model/beepCardModel";
 import * as BeepCardApi from "../../../network/beepCardAPI";
 import styles from "././beepCardPageLoggedInView.module.css";
@@ -9,6 +9,8 @@ import AddEditBeepCardDialog from "../addEditBeepCard/addEditBeepCardDialog";
 import { formatDate } from "../../../utils/formatDate";
 import Buttons from "./beepCardPageButtons";
 import BeepCardsGrid from "./beepCardPageGrid";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface ConfirmationModalState {
   show: boolean;
@@ -31,11 +33,7 @@ const BeepCardPageLoggedInView = () => {
     card: null,
   });
 
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
   const [editMode, setEditMode] = useState(false);
-  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     async function loadBeepCards() {
@@ -67,10 +65,26 @@ const BeepCardPageLoggedInView = () => {
               (existingBeepCard) => existingBeepCard._id !== beepCard._id
             )
           );
-          showCustomToast("success", "Beep Card deleted successfully.");
+          toast.success(`Beep Card ${beepCard.UUIC} deleted.`, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
         } catch (error) {
           console.error(error);
-          showCustomToast("danger", "Error deleting Beep Card. Please try again.");
+          toast.error("Error deleting Beep Card. Please try again. Make sure that input ID's are unique.", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
         } finally {
           setBeepCardsLoading(false);
           setConfirmationModal({
@@ -84,16 +98,6 @@ const BeepCardPageLoggedInView = () => {
       message: "Are you sure you want to delete this Beep Card?",
       card: beepCard,
     } as ConfirmationModalState));
-  };
-
-  const showCustomToast = (variant: "success" | "danger", message: string) => {
-    setAlertVariant(variant);
-    setAlertMessage(message);
-    setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-      setAlertMessage(null);
-    }, 3000);
   };
 
   const filteredBeepCards = beepCards.filter(
@@ -153,229 +157,220 @@ const BeepCardPageLoggedInView = () => {
   }
 
   return (
-    <Container>
-      <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
-        <h1 className={`${styles.textCenter} mb-4`}>BEEP CARDS</h1>
-      </div>
-
-      <Toast
-        show={showToast}
-        onClose={() => setShowToast(false)}
-        delay={3000}
-        autohide
-        style={{
-          position: 'fixed',
-          top: 16,
-          right: 16,
-          zIndex: 9999,
-          width: '300px', // Set the width as needed
-          background: alertVariant === "success" ? "#28a745" : "#dc3545", // Background color
-          color: "#fff", // Text color
-        }}
-        className={`${styles.customToast}`}
-      >
-        <Toast.Header>
-          <strong className={`me-auto`}>
-            {alertVariant === "success" ? "Success" : "Error"}
-          </strong>
-        </Toast.Header>
-        <Toast.Body>{alertMessage}</Toast.Body>
-      </Toast>
-
-      {beepCardsLoading && (
-        <div
-          className={`${styles.flexCenterLoading} ${styles.blockCenterLoading}`}
-        >
-          <Spinner animation="border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
-        </div>
-      )}
-
-      {showBeepCardsLoadingError && (
-        <Alert
-          variant="danger"
-          onClose={() => setShowBeepCardsLoadingError(false)}
-          dismissible
-        >
-          Something went wrong. Please refresh the page.
-        </Alert>
-      )}
-
-      {!beepCardsLoading && !showBeepCardsLoadingError && (
-        <Buttons
-          editMode={editMode}
-          setSearchQuery={setSearchQuery}
-          setShowAddBeepCardDialog={setShowAddBeepCardDialog}
-          setEditMode={setEditMode}
-        />
-      )}
-
-      {!beepCardsLoading && !showBeepCardsLoadingError && (
-        <BeepCardsGrid
-          filteredBeepCards={filteredBeepCards}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          handlePageChange={handlePageChange}
-          deleteBeepCard={deleteBeepCard}
-          editMode={editMode}
-          setBeepCardToEdit={setBeepCardToEdit}
-        />
-      )}
-
-      {!beepCardsLoading && (
-        filteredBeepCards.length === 0 && (
-          <div className={`${styles.containerMiddle} ${styles.textShadow}`} style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <h4>No results found</h4>
-          </div>
-        )
-      )}
-
-      {!beepCardsLoading && (
-        beepCards.length === 0 && !beepCardsLoading && (
-          <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
-            <h4>No beep cards generated</h4>
-          </div>
-        )
-      )}
-
-
-      {showAddBeepCardDialog && (
-        <AddEditBeepCardDialog
-          onDismiss={() => setShowAddBeepCardDialog(false)}
-          editMode={editMode}
-          onBeepCardSaved={(newBeepCard) => {
-            setBeepCards([...beepCards, newBeepCard]);
-            setShowAddBeepCardDialog(false);
-            showCustomToast("success", "Beep Card added successfully.");
-          }}
-        />
-      )}
-
-      {beepCardToEdit && (
-        <AddEditBeepCardDialog
-          beepCardToEdit={beepCardToEdit}
-          onDismiss={() => setBeepCardToEdit(null)}
-          editMode={editMode}
-          onBeepCardSaved={(updateBeepCard) => {
-            setBeepCards(
-              beepCards.map((existingBeepCard) =>
-                existingBeepCard._id === updateBeepCard._id
-                  ? updateBeepCard
-                  : existingBeepCard
-              )
-            );
-            setBeepCardToEdit(null);
-            showCustomToast("success", "Beep Card updated successfully.");
-          }}
-        />
-      )}
-
-      <Modal
-        show={confirmationModal.show}
-        onHide={() => setConfirmationModal({
-          show: false,
-          action: () => { },
-          message: "",
-          card: null,
-        } as ConfirmationModalState)}
-        className={`${styles.modalContent} beep-card-modal`} // Add beep-card-modal class
-        centered
-      >
-        <Modal.Header closeButton className={`${styles.modalHeader} modal-header`}>
-          <Modal.Title className={`${styles.modalTitle} modal-title`}>
-            Delete Confirmation
-          </Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <Card className={`${styles.beepCard} beep-card`}>
-            <Card.Body className={styles.cardBody}>
-              <Card.Title className={styles.flexCenter}>
-                CARD: {confirmationModal?.card?.UUIC || "N/A"}
-              </Card.Title>
-              <Card.Text className={styles.cardText}>
-                BALANCE: {confirmationModal?.card?.balance || "N/A"}
-              </Card.Text>
-            </Card.Body>
-            <Card.Footer className={`text-muted ${styles.cardFooter}`}>
-              {createdUpdatedText}
-            </Card.Footer>
-          </Card>
-
-          <p className={styles.confirmationMessage}>
-            Are you sure you want to delete this Beep Card?
-          </p>
-        </Modal.Body>
-
-        <Modal.Footer className={`${styles.modalFooter} modal-footer`}>
-          <Button
-            variant="secondary"
-            onClick={() => setConfirmationModal({
-              show: false,
-              action: () => { },
-              message: "",
-              card: null,
-            } as ConfirmationModalState)}
-            disabled={beepCardsLoading}
-            className={`btn-secondary ${styles.secondaryButton}`}
+    <>
+    <ToastContainer limit={3} />
+      <Container>
+        {beepCardsLoading && (
+          <div
+            className={`${styles.flexCenterLoading} ${styles.blockCenterLoading}`}
           >
-            Cancel
-          </Button>
-          <Button
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </div>
+        )}
+
+        {showBeepCardsLoadingError && (
+          <Alert
             variant="danger"
-            onClick={confirmationModal.action}
-            disabled={beepCardsLoading}
-            className={`btn-danger ${styles.primaryButton} d-flex align-items-center`}
+            onClose={() => setShowBeepCardsLoadingError(false)}
+            dismissible
           >
-            {beepCardsLoading && (
-              <>
-                <Spinner
-                  animation="border"
-                  variant="secondary"
-                  size="sm"
-                  className={`${styles.loadingcontainer}`}
-                />
-                <span className="ml-2">Deleting...</span>
-              </>
-            )}
-            {!beepCardsLoading && 'Delete'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            Something went wrong. Please refresh the page.
+          </Alert>
+        )}
 
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        visibility: showPagination ? 'visible' : 'hidden', // Hide or show based on showPagination
-      }}>
-        <Pagination>
-          <Pagination.First
-            onClick={() => handlePageChange(1)}
-            disabled={currentPage === 1}
+        {!beepCardsLoading && !showBeepCardsLoadingError && (
+          <Buttons
+            editMode={editMode}
+            setSearchQuery={setSearchQuery}
+            setShowAddBeepCardDialog={setShowAddBeepCardDialog}
+            setEditMode={setEditMode}
           />
-          <Pagination.Prev
-            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
+        )}
+
+        {!beepCardsLoading && !showBeepCardsLoadingError && (
+          <BeepCardsGrid
+            filteredBeepCards={filteredBeepCards}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            handlePageChange={handlePageChange}
+            deleteBeepCard={deleteBeepCard}
+            editMode={editMode}
+            setBeepCardToEdit={setBeepCardToEdit}
           />
-          {renderPaginationButtons()}
-          <Pagination.Next
-            onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
-            disabled={currentPage === totalPages}
+        )}
+
+        {!beepCardsLoading && (
+          filteredBeepCards.length === 0 && (
+            <div className={`${styles.containerMiddle} ${styles.textShadow}`} style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <h4>No results found</h4>
+            </div>
+          )
+        )}
+
+        {!beepCardsLoading && (
+          beepCards.length === 0 && !beepCardsLoading && (
+            <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
+              <h4>No beep cards generated</h4>
+            </div>
+          )
+        )}
+
+
+        {showAddBeepCardDialog && (
+          <AddEditBeepCardDialog
+            onDismiss={() => setShowAddBeepCardDialog(false)}
+            editMode={editMode}
+            onBeepCardSaved={(newBeepCard) => {
+              setBeepCards([...beepCards, newBeepCard]);
+              setShowAddBeepCardDialog(false);
+              toast.success(`Beep Card ${newBeepCard.UUIC} added successfully.`, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+              });
+            }}
           />
-          <Pagination.Last
-            onClick={() => handlePageChange(totalPages)}
-            disabled={currentPage === totalPages}
+        )}
+
+        {beepCardToEdit && (
+          <AddEditBeepCardDialog
+            beepCardToEdit={beepCardToEdit}
+            onDismiss={() => setBeepCardToEdit(null)}
+            editMode={editMode}
+            onBeepCardSaved={(updateBeepCard) => {
+              setBeepCards(
+                beepCards.map((existingBeepCard) =>
+                  existingBeepCard._id === updateBeepCard._id
+                    ? updateBeepCard
+                    : existingBeepCard
+                )
+              );
+              setBeepCardToEdit(null);
+              toast.success("Beep Card" + updateBeepCard.UUIC + "updated successfully Updated.", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+              });
+            }}
           />
-        </Pagination>
-      </div>
-    </Container>
+        )}
+
+        <Modal
+          show={confirmationModal.show}
+          onHide={() => setConfirmationModal({
+            show: false,
+            action: () => { },
+            message: "",
+            card: null,
+          } as ConfirmationModalState)}
+          className={`${styles.modalContent} beep-card-modal`} // Add beep-card-modal class
+          centered
+        >
+          <Modal.Header closeButton className={`${styles.modalHeader} modal-header`}>
+            <Modal.Title className={`${styles.modalTitle} modal-title`}>
+              Delete Confirmation
+            </Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <Card className={`${styles.beepCard} beep-card`}>
+              <Card.Body className={styles.cardBody}>
+                <Card.Title className={styles.flexCenter}>
+                  CARD: {confirmationModal?.card?.UUIC || "N/A"}
+                </Card.Title>
+                <Card.Text className={styles.cardText}>
+                  BALANCE: {confirmationModal?.card?.balance || "N/A"}
+                </Card.Text>
+              </Card.Body>
+              <Card.Footer className={`text-muted ${styles.cardFooter}`}>
+                {createdUpdatedText}
+              </Card.Footer>
+            </Card>
+
+            <p className={styles.confirmationMessage}>
+              Are you sure you want to delete this Beep Card?
+            </p>
+          </Modal.Body>
+
+          <Modal.Footer className={`${styles.modalFooter} modal-footer`}>
+            <Button
+              variant="secondary"
+              onClick={() => setConfirmationModal({
+                show: false,
+                action: () => { },
+                message: "",
+                card: null,
+              } as ConfirmationModalState)}
+              disabled={beepCardsLoading}
+              className={`btn-secondary ${styles.secondaryButton}`}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={confirmationModal.action}
+              disabled={beepCardsLoading}
+              className={`btn-danger ${styles.primaryButton} d-flex align-items-center`}
+            >
+              {beepCardsLoading && (
+                <>
+                  <Spinner
+                    animation="border"
+                    variant="secondary"
+                    size="sm"
+                    className={`${styles.loadingcontainer}`}
+                  />
+                  <span className="ml-2">Deleting...</span>
+                </>
+              )}
+              {!beepCardsLoading && 'Delete'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          visibility: showPagination ? 'visible' : 'hidden', // Hide or show based on showPagination
+        }}>
+          <Pagination>
+            <Pagination.First
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+            />
+            <Pagination.Prev
+              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+            />
+            {renderPaginationButtons()}
+            <Pagination.Next
+              onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            />
+            <Pagination.Last
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            />
+          </Pagination>
+        </div>
+      </Container>
+    </>
   );
 };
 

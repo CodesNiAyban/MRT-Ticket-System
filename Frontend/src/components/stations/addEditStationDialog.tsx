@@ -9,6 +9,7 @@ import { StationInput } from '../../network/stationsAPI';
 import TextInputField from '../form/textInputFields';
 import styles from './station.module.css';
 import StationConnectedToModal from './stationConnectedToModal';
+import { toast } from 'react-toastify';
 
 interface AddEditStationDialogProps {
   stationToEdit?: Stations;
@@ -48,7 +49,7 @@ const AddEditStationDialog = ({
 
   const [polylines, setPolylines] = useState<ReactElement[]>([]);
   const [showToast, setShowToast] = useState(false);
-
+  
   const setDefaultValues = () => {
     setValue('stationName', stationToEdit?.stationName || '');
 
@@ -230,12 +231,12 @@ const AddEditStationDialog = ({
   };
 
   return (
-    <Modal show onHide={onDismiss}>
+    <Modal show onHide={onDismiss} style={{}}>
       <Modal.Header closeButton>
-        <Modal.Title>{stationToEdit ? 'Edit station' : 'Add station'}</Modal.Title>
+        <Modal.Title>{stationToEdit ? 'Edit Station' : 'Add Station'}</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
+      <Modal.Body style={{ zIndex: "999" }}>
         <Form id="addEditStationForm" onSubmit={handleSubmit(onSubmit)}>
           <TextInputField
             name="stationName"

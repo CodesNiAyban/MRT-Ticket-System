@@ -53,36 +53,38 @@ function App() {
 
   return (
     <BrowserRouter>
-        <NavBar
-          loggedInAdmin={loggedInAdmin}
-          onLoginClicked={() => setShowLoginModal(true)}
-          onLogoutSuccessful={onLogout}
-        />
-          <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route
-              path="/stations"
-              element={<StationsPage loggedInAdmin={loggedInAdmin} />}
-            />
-            <Route
-              path="/beepcards"
-              element={<BeepCardPage loggedInAdmin={loggedInAdmin} />}
-            />
-            <Route
-              path="/fare"
-              element={<FarePage loggedInAdmin={loggedInAdmin} />}
-            />
-            <Route path="/*" element={<PageNotFound />} />
-          </Routes>
-        {showLoginModal && (
-          <LoginModal
-            onDismiss={() => setShowLoginModal(false)}
-            onLoginSuccessful={(admin) => {
-              setLoggedInAdmin(admin);
-              setShowLoginModal(false);
-            }}
+      <NavBar
+        loggedInAdmin={loggedInAdmin}
+        onLoginClicked={() => setShowLoginModal(true)}
+        onLogoutSuccessful={onLogout}
+      />
+      <Container style={{ }}>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route
+            path="/stations"
+            element={<StationsPage loggedInAdmin={loggedInAdmin} />}
           />
-        )}
+          <Route
+            path="/beepcards"
+            element={<BeepCardPage loggedInAdmin={loggedInAdmin} />}
+          />
+          <Route
+            path="/fare"
+            element={<FarePage loggedInAdmin={loggedInAdmin} />}
+          />
+          <Route path="/*" element={<PageNotFound />} />
+        </Routes>
+      </Container>
+      {showLoginModal && (
+        <LoginModal
+          onDismiss={() => setShowLoginModal(false)}
+          onLoginSuccessful={(admin) => {
+            setLoggedInAdmin(admin);
+            setShowLoginModal(false);
+          }}
+        />
+      )}
     </BrowserRouter>
   );
 }
