@@ -7,9 +7,15 @@ interface NavBarLoggedOutViewProps {
 const NavBarLoggedOutView = ({ onLoginClicked }: NavBarLoggedOutViewProps) => {
     return (
         <>
-            <Button onClick={onLoginClicked} className={`${"mb-1"} ${"ms-auto"}`}>Log In</Button>
+            <Button
+                className="mb-1 ms-auto btn-logout"
+                onClick={onLoginClicked}
+                style={{ display: "inline-block" }}
+            >
+                <h6 style={{ position: "static", textAlign: 'center', display: "inline-block" }}>Login</h6>
+            </Button>
         </>
-        
+
     );
 }
 

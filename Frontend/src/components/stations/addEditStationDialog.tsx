@@ -217,6 +217,26 @@ const AddEditStationDialog = ({
     }
   }; // FIX STRUCTURE //SIMPLIFY
 
+  const handleRemoveStationName = (stationName: string, stationId: string) => {
+    // Find the clicked station in selectedStations array
+    const stationToRemove = selectedStations.find(
+      (station) => station._id === stationId
+    );
+
+    if (stationToRemove) {
+      setSelectedStations(selectedStations.filter((s) => s._id !== stationId));
+
+      // Remove the corresponding polylines when a station is removed
+      setPolylines((prevPolylines) =>
+        prevPolylines.filter((polyline) => {
+          const polylineStationIds = polyline.key?.split('-');
+          return !polylineStationIds?.includes(stationId || "");
+        })
+      );
+    }
+  };
+
+
   const handleRemoveStation = (station: StationsModel) => {
     setSelectedStations(selectedStations.filter((s) => s._id !== station._id));
   };
@@ -230,12 +250,12 @@ const AddEditStationDialog = ({
   };
 
   return (
-    <Modal show onHide={onDismiss}>
+    <Modal show onHide={onDismiss} style={{}}>
       <Modal.Header closeButton>
-        <Modal.Title>{stationToEdit ? 'Edit station' : 'Add station'}</Modal.Title>
+        <Modal.Title>{stationToEdit ? 'Edit Station' : 'Add Station'}</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
+      <Modal.Body style={{ zIndex: "999" }}>
         <Form id="addEditStationForm" onSubmit={handleSubmit(onSubmit)}>
           <TextInputField
             name="stationName"
@@ -282,23 +302,30 @@ const AddEditStationDialog = ({
               {selectedStations.length > 0 ? <>Connected Stations</> : <>No Connecting Stations</>}
             </Form.Label>
 
-            <div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', margin: '8px' }}>
               {selectedStations.map((station) => (
                 <span
                   key={`${Math.random()}${station._id}`}
-                  className={`${styles.badge} badge badge-pill badge-primary mr-2`}
+                  className={`${styles.badge} badge badge-pill mr-2`}
                   style={{
-                    background: '#0275d8',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    background: '#4CAF50', // Change the background color
+                    color: '#FFFFFF', // Change the text color
+                    padding: '10px 20px', // Adjust padding
+                    borderRadius: '25px', // Adjust border radius
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Adjust box shadow
+                    border: '2px solid #4CAF50', // Adjust border color and width
+                    display: 'flex',
+                    cursor: 'pointer', 
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                   }}
+                  onClick={() => handleRemoveStationName(station.stationName, station._id)}
                 >
-                  {station.stationName}
+                  <span>{station.stationName}</span>
                 </span>
               ))}
             </div>
+
             <div className="mt-3">
               <Button variant="primary" onClick={openConnectedToModal} className='ms-auto'>
                 {selectedStations.length > 0 ? <>Edit Connecting Stations</> : <>Add Connecting Station/s</>}

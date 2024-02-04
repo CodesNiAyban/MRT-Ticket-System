@@ -73,7 +73,7 @@ const FarePageLoggedInView = () => {
       setFareToEdit(null);
       setUpdateText("");
       setShowEditForm(false);
-      showToastMessage("success", "Fare updated successfully.");
+      showToastMessage("success",  `${updatedFare.fareType.charAt(0).toUpperCase() + updatedFare.fareType.slice(1)} updated successfully.`);
     } catch (error) {
       console.error(error);
       showToastMessage("danger", "Error updating fare. Please try again.");
@@ -98,10 +98,7 @@ const FarePageLoggedInView = () => {
     );
 
   return (
-    <Container className={styles.settingsContainer}>
-      <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
-        <h1 className={`${styles.textCenter} mb-4`}>OFFICIAL FARES</h1>
-      </div>
+    <Container>
       {faresLoading && (
         <div
           className={`${styles.flexCenterLoading} ${styles.blockCenterLoading}`}

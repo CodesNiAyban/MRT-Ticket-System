@@ -34,27 +34,28 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
         <>
             <Nav.Item>
                 <Nav.Link as={Link} to="/beepcards">
-                    Beep Cards
+                <h5>Beep Cards</h5>
                 </Nav.Link>
             </Nav.Item>
             <Nav.Item>
                 <Nav.Link as={Link} to="/stations">
-                    Stations
+                <h5>Stations</h5>
                 </Nav.Link>
             </Nav.Item>
             <Nav.Item>
                 <Nav.Link as={Link} to="/fare">
-                    Fare
+                    <h5>Fare</h5>
                 </Nav.Link>
             </Nav.Item>
 
             <Nav.Item className="ms-auto d-lg-flex align-items-center me-4 center-content">
-                <Navbar.Text className="me-lg-2">Signed in as: {user.username}</Navbar.Text>
+                <Navbar.Text className="me-lg-2"><h5>Signed in as: <u>{user.username}</u></h5></Navbar.Text>
                 <Button
                     className="ms-lg-2 btn-logout"
                     onClick={() => setShowConfirmationModal(true)}
+                    style={{display: "inline-block"}}
                 >
-                    Log out
+                    <h6 style={{position: "static", textAlign: 'center', display: "inline-block" }}>Logout</h6>
                 </Button>
             </Nav.Item>
 

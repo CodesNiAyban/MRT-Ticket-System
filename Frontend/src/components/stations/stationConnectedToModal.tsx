@@ -5,7 +5,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Button, Modal, Toast } from 'react-bootstrap';
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
 import { Stations as StationsModel } from '../../model/stationsModel';
-import * as StationApi from '../../network/stationsAPI';
+import Select from "react-select";
 import styles from './station.module.css';
 
 interface StationConnectedToModalProps {
@@ -39,8 +39,8 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 }: StationConnectedToModalProps) => {
 	const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
 	const [newMapMarker, setNewMapMarker] = useState<ReactElement[]>([]);
-	const [top, setTop] = useState(false); // Track the clicked marker's coordinates
 	const [mapPolylines, setMapPolylines] = useState<ReactElement[]>([]);
+	const [prevPolylines, setPrevPolylines] = useState<ReactElement[]>([]);
 
 	const customIcon = L.icon({
 		iconUrl: 'https://react-component-depot.netlify.app/static/media/marker.a3b2d28b.png',
@@ -90,8 +90,6 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 	useEffect(() => {
 		function loadStationsAndMarkers() {
 			const markers = stations.map((station) => {
-				const isConnectedToStation = station.connectedTo.includes(stationToEdit?._id || "");
-
 				return (
 					<Marker
 						key={`${station._id}-${Math.random()}`}
@@ -115,7 +113,7 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 									<strong>Latitude:</strong> {station.coords[1]}<br />
 									<strong>Longitude:</strong> {station.coords[0]}<br />
 									<>
-									{station === stationToEdit ? <><strong>CONNECTION LOGS:</strong> <br /> </> : <> STATION INFO <br /></>}
+										{station === stationToEdit ? <><strong>CONNECTION LOGS:</strong> <br /> </> : <> STATION INFO <br /></>}
 										{station.connectedTo.map((connectedStationId) => {
 											const connectedStation = stations.find((s) => s._id === connectedStationId);
 											const connectedDistance =
@@ -141,7 +139,6 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 			});
 
 			setMapMarkers(markers);
-			setTop(true);
 		}
 
 		loadStationsAndMarkers();
@@ -181,10 +178,9 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 			});
 
 			const createPolyline = (station1: StationsModel, station2: StationsModel) => {
-				const connectionKey = [station1._id, station2._id].sort().join('-');
 				const line = (
 					<Polyline
-						key={`polyline-${connectionKey}`}
+						key={`polyline-${station2._id}`}
 						positions={[
 							[station1.coords[0], station1.coords[1]],
 							[station2.coords[0], station2.coords[1]],
@@ -192,26 +188,13 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 						color="green"
 					/>
 				);
-				lines.push(line);
-				processedConnections.add(connectionKey);
-				setPolylines((prevPolylines) => [
+				setPrevPolylines((prevPolylines) => [
 					...prevPolylines,
 					line,
 				]);
 			};
 
-			// Create polylines based on selectedStations
-			if (stationToEdit) {
-				selectedStations.forEach((selectedStation) => {
-					const connectionKey = [stationToEdit?._id, selectedStation._id].sort().join('-');
-
-					// Check if the connection has been processed to avoid duplicates
-					if (!processedConnections.has(connectionKey)) {
-						createPolyline(stationToEdit!, selectedStation);
-					}
-				});
-
-				// Create polylines based on stationToEdit
+			// Create polylines based on stationToEdit
 				if (stationToEdit) {
 					stationToEdit.connectedTo.forEach((connectedStationId) => {
 						const connectedStation = stations.find((s) => s._id === connectedStationId);
@@ -220,9 +203,6 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 						}
 					});
 				}
-			}
-
-
 			setMapPolylines(lines);
 		}
 		loadPolylines();
@@ -252,10 +232,18 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [newStation]);
+
 	const handleRemoveStationName = (stationName: string, stationId: string) => {
 		// Find the clicked station in selectedStations array
 		const stationToRemove = selectedStations.find(
 			(station) => station._id === stationId
+		);
+
+		setPrevPolylines((prevPolylines) =>
+			prevPolylines.filter((polyline) => {
+				const polylineStationIds = polyline.key?.split('-');
+				return !polylineStationIds?.includes(stationId || "");
+			})
 		);
 
 		if (stationToRemove) {
@@ -271,7 +259,6 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 		}
 	};
 
-
 	return (
 		<>
 			<Modal show={show} onHide={onHide} size="lg">
@@ -284,37 +271,51 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 							<TileLayer
 								url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`}
 							/>
-							{mapMarkers}{newMapMarker}{mapPolylines}{polylines}
+							{mapMarkers}{newMapMarker}{mapPolylines}{polylines}{prevPolylines}
 						</MapContainer>
 					</div>
 					<div className="mt-3">
-						Selected Stations:
-						{selectedStations.length > 0 && (
-							<>
-								{selectedStations.map((selectedStation) => (
-									<span
-										key={`${selectedStation._id}${Math.random()}`}
-										className={`${styles.badge} badge badge-pill badge-primary mr-2`}
-										style={{
-											background: '#0275d8',
-											color: 'white',
-											padding: '8px 16px',
-											borderRadius: '20px',
-											boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-											cursor: 'pointer', // Add cursor style to indicate clickability
-										}}
-										onClick={() => handleRemoveStationName(selectedStation.stationName, selectedStation._id)} // Add click handler
-									>
-										{selectedStation.stationName}
-									</span>
-								))}
-							</>
-						)}
+						<div className="mt-3">
+							<div className="field-body">
+								<div className="field">
+									<div className="control">
+										<Select
+											isMulti
+											name="stations"
+											options={stations.map((station) => ({
+												label: station.stationName,
+												value: station._id,
+											}))}
+											value={selectedStations.map((station) => ({
+												label: station.stationName,
+												value: station._id,
+											}))}
+											onChange={(selectedOptions) => {
+												const selectedStationIds = selectedOptions.map((option) => option.value);
+												const updatedSelectedStations = stations.filter((station) =>
+													selectedStationIds.includes(station._id)
+												);
+												onClearSelectedStations();
+												updatedSelectedStations.forEach((station) => onStationSelection(station));
+											}}
+											isClearable={false} // Disable the clear option
+											placeholder="Select stations"
+											components={{
+												MultiValueRemove: ({ innerProps, data }) => (
+													<span {...innerProps} onClick={() => handleRemoveStationName(data.label, data.value)}>
+														&times;
+													</span>
+												),
+											}}
+										/>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</Modal.Body>
 				<Modal.Footer>
-					<Button variant="primary" onClick={onHide}
-					// disabled={selectedStations.length === 0}
+					<Button variant="primary" onClick={onHide}// disabled={selectedStations.length === 0}
 					>
 						Confirm
 					</Button>

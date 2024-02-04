@@ -32,7 +32,6 @@ const BeepCardPageLoggedInView = () => {
   });
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
   const [editMode, setEditMode] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -67,7 +66,7 @@ const BeepCardPageLoggedInView = () => {
               (existingBeepCard) => existingBeepCard._id !== beepCard._id
             )
           );
-          showCustomToast("success", "Beep Card deleted successfully.");
+          showCustomToast("danger", `Beep Card ${beepCard.UUIC} deleted.`);
         } catch (error) {
           console.error(error);
           showCustomToast("danger", "Error deleting Beep Card. Please try again.");
@@ -154,10 +153,6 @@ const BeepCardPageLoggedInView = () => {
 
   return (
     <Container>
-      <div className={`${styles.containerMiddle} ${styles.textShadow}`}>
-        <h1 className={`${styles.textCenter} mb-4`}>BEEP CARDS</h1>
-      </div>
-
       <Toast
         show={showToast}
         onClose={() => setShowToast(false)}
@@ -252,7 +247,7 @@ const BeepCardPageLoggedInView = () => {
           onBeepCardSaved={(newBeepCard) => {
             setBeepCards([...beepCards, newBeepCard]);
             setShowAddBeepCardDialog(false);
-            showCustomToast("success", "Beep Card added successfully.");
+            showCustomToast("success", `Beep Card ${newBeepCard} created successfully.`);
           }}
         />
       )}
@@ -271,7 +266,7 @@ const BeepCardPageLoggedInView = () => {
               )
             );
             setBeepCardToEdit(null);
-            showCustomToast("success", "Beep Card updated successfully.");
+            showCustomToast("success", `Beep Card ${updateBeepCard} updated successfully.`);
           }}
         />
       )}

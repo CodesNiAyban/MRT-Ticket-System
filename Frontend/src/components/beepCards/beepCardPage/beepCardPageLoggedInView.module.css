@@ -10,6 +10,14 @@
   transition: transform 0.5s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 }
 
+.react-toastify {
+  z-index: 10000; /* Set a high z-index value for React Toastify */
+}
+
+.modal {
+  z-index: 1050; /* Set a high z-index value for Bootstrap Modals */
+}
+
 .cardTitle {
   display: flex;
   align-items: center;
