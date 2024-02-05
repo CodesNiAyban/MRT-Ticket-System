@@ -8,8 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Stations as StationsModel } from '../../model/stationsModel';
 import * as StationApi from '../../network/stationsAPI';
-import AddEditStationDialog from './addEditStationDialog';
-import styles from './station.module.css';
+// import styles from './station.module.css';
 import MapEventHandler from './stationsCoordinates';
 
 const StationPageLoggedInView = () => {
@@ -118,7 +117,7 @@ const StationPageLoggedInView = () => {
 						mouseout: (event) => event.target.closePopup(),
 					}}
 				>
-					<Popup className={`${styles.customPopup} rounded-lg shadow-lg`} >
+					<Popup className={`rounded-lg shadow-lg`} >
 						<h2 className="font-bold">NEW STATION</h2><br />
 						Click to create to coords <br />
 						Latitude: {clickedCoords[1]}<br />
@@ -193,14 +192,14 @@ const StationPageLoggedInView = () => {
 							<br />
 							<div className="d-flex align-items-center justify-content-center space-x-2">
 								<Button
-									className={`ms-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"} button2`}
+									// className={`ms-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"} button2`}
 									variant="primary"
 									onClick={() => setStationToEdit(station)}
 								>
 									<FaPencilAlt />
 								</Button>
 								<Button
-									className={`ms-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"} button2`}
+									// className={`ms-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"} button2`}
 									variant="danger"
 									onClick={() => handleConfirmation(() => deleteStation(station), station)}
 								>
@@ -372,276 +371,62 @@ const StationPageLoggedInView = () => {
 
 	return (
 		<>
-			<ToastContainer limit={3} />
-			<Container>
-				{showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
-				{isMapView &&
-					<Button
-						variant="primary"
-						onClick={toggleView}
-						className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"} button2`}
-						style={{ zIndex: 999, position: "absolute" }}
-					>
-						{isMapView ? <FaTable /> : <FaMap />}
-					</Button>
-				}
-				{isMapView ? (
-					<div ref={mapContainerRef} id="map" className="map">
-						<MapContainer
-							center={mapCenter}
-							zoomControl={false}
-							zoom={13}
-							scrollWheelZoom={true}
-							style={{ width: '100%', height: '100%', position: 'absolute', left: 0 }}
-						>
-							<TileLayer
-								url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`}
-							/>
-							<MapEventHandler onClick={handleMapClick} />
-							{mapMarkers}
-							{newMapMarker}
-							{polylines}
-						</MapContainer>
+			<div className="flex flex-col lg:flex-row h-screen">
+				<div className="lg:w-3/4 bg-gray-200 p-4 lg:p-8 h-full">
+					<h1 className="text-2xl lg:text-4xl font-bold text-gray-800 border-b-2 border-gray-400 pb-4 lg:pb-2 flex items-center lg:gap-2">
+						<div className="text-gray-800"></div>
+						AYALA STATION{"\n              "}
+					</h1>
+					<div className="mt-4">
+						<div id="map" className={`border rounded`} style={{ width: '100%', height: '400px' }}>
+							<MapContainer center={[14.550561416466541, 121.02785649562283]} zoom={13} zoomControl={false} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
+								<TileLayer
+									url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`}
+								/>
+							</MapContainer>
+						</div>
 					</div>
-				) : (
-					<>
-						{stationsLoading && (
-							<div className={`${styles.flexCenterLoading} ${styles.blockCenterLoading}`} style={{ paddingTop: 30 }}>
-								<Spinner animation="border" role="status">
-									<span className="visually-hidden">Loading...</span>
-								</Spinner>
-							</div>
-						)}
-						{!stationsLoading && (
-							<>
-								<Container>
-									<div className='d-flex' style={{ paddingBottom: '10px', paddingTop: '10px' }}>
-										<Button
-											variant="primary"
-											onClick={toggleView}
-											className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} btn-success button2`}
-										>
-											{isMapView ? <FaTable /> : <FaMap />}
-										</Button>
-										<Form style={{ paddingBottom: '30px'}} className="d-flex col-md-4 row-md-10 ms-auto">
-											<div className="d-flex align-items-center">
-												<Form.Select
-													value={perPage}
-													onChange={(e) => handlePerPageChange(Number(e.target.value))}
-													style={{ width: "80px" }}
-												>
-													{[5, 10, 15, 30, 50].map((value) => (
-														<option key={value} value={value}>
-															{value}
-														</option>
-													))}
-												</Form.Select>
-											</div>
-											<div className="input-group ms-2">
-												<input
-													type="text"
-													className="form-control smaller-search-input"
-													placeholder="Search"
-													value={searchTerm}
-													onChange={(e) => handleSearch(e.target.value)}
-												/>
-											</div>
-										</Form>
-									</div>
-
-									{filteredStations.length > 0 ? (
-										<>
-
-											<Table striped bordered responsive className="text-center">
-												<thead>
-													<tr>
-														<th>Name</th>
-														<th>Latitude</th>
-														<th>Longitude</th>
-														<th>Connected To</th>
-														<th>Actions</th>
-													</tr>
-												</thead>
-												<tbody>
-													{paginatedStations.map((station) => (
-														<tr key={station._id}>
-															<td>{station.stationName}</td>
-															<td>{station.coords[1]}</td>
-															<td>{station.coords[0]}</td>
-															<td>
-																{station.connectedTo.map((connectedStationId, index) => {
-																	const connectedStation = stations.find(
-																		(s) => s._id === connectedStationId
-																	);
-																	return (
-																		<span key={index}>
-																			{connectedStation
-																				? connectedStation.stationName
-																				: 'Unknown Station'}
-																			{index < station.connectedTo.length - 1 && ', '}
-																		</span>
-																	);
-																})}
-															</td>
-															<td>
-																<Button
-																	className={`mx-auto ${styles.button}`}
-																	variant="danger"
-																	onClick={() =>
-																		handleConfirmation(() => deleteStation(station), station)
-																	}
-																>
-																	<FaTrash />
-																</Button>
-																<Button
-																	className={`mx-auto ${styles.button}`}
-																	variant="primary"
-																	onClick={() => setStationToEdit(station)}
-																>
-																	<BiEdit />
-																</Button>
-															</td>
-														</tr>
-													))}
-												</tbody>
-											</Table>
-
-											{!stationsLoading && filteredStations.length > perPage && (
-												<Row className="justify-content-end">
-													<Col xs={12} className="text-end">
-														<div style={{
-															display: 'flex',
-															alignItems: 'center',
-															justifyContent: 'center',
-														}}>
-															<Pagination>
-																<Pagination.First
-																	onClick={handleFirstPage}
-																	disabled={currentPage === 1}
-																/>
-																<Pagination.Prev
-																	onClick={() => handlePageChange(currentPage - 1)}
-																	disabled={currentPage === 1}
-																/>
-																{[...Array(Math.min(5, totalPages)).keys()].map((page) => (
-																	<Pagination.Item
-																		key={page + 1}
-																		active={page + 1 === currentPage}
-																		onClick={() => handlePageChange(page + 1)}
-																	>
-																		{page + 1}
-																	</Pagination.Item>
-																))}
-																<Pagination.Next
-																	onClick={() => handlePageChange(currentPage + 1)}
-																	disabled={currentPage === totalPages}
-																/>
-																<Pagination.Last
-																	onClick={handleLastPage}
-																	disabled={currentPage === totalPages}
-																/>
-															</Pagination>
-														</div>
-													</Col>
-												</Row>
-											)}
-										</>
-									) : (
-										<p className="text-center">No matching stations found</p>
-									)}
-								</Container>
-							</>
-						)}
-
-					</>
-				)}
-				{showAddStationDialog && (
-					<AddEditStationDialog
-
-						stations={stations}
-						stationToEdit={selectedMarker || undefined}
-						coordinates={clickedCoords}
-						onDismiss={() => {
-							setNewMapMarker([]);
-							setShowAddStationDialog(false);
-							refresh();
-						}}
-						onStationSaved={(newStation) => {
-							setShowAddStationDialog(false);
-							setSelectedMarker(null);
-							refresh();
-							setNewMapMarker([]);
-							toast.success(`Station ${newStation.stationName} successfully created.`, {
-								position: "top-right",
-								autoClose: 5000,
-								hideProgressBar: false,
-								closeOnClick: true,
-								pauseOnHover: true,
-								draggable: true,
-								progress: undefined,
-							});
-						}}
-						newStation={newStation}
-						isDragged={false}
-
-					/>
-				)}
-
-				{stationToEdit && (
-					<AddEditStationDialog
-						stations={stations}
-						stationToEdit={stationToEdit}
-						onDismiss={() => {
-							setStationToEdit(null);
-							refresh();
-							setNewMapMarker([]);
-						}}
-						onStationSaved={(updateStation) => {
-							refresh();
-							setNewMapMarker([]);
-							setStations(
-								stations.map((existingStation) =>
-									existingStation._id === updateStation._id ? updateStation : existingStation
-								)
-							);
-							setFilteredStations(
-								filteredStations.map((existingStation) =>
-									existingStation._id === updateStation._id ? updateStation : existingStation
-								)
-							);
-							setStationToEdit(null);
-							toast.success(`Station ${updateStation.stationName} successfully updated.`, {
-								position: "top-right",
-								autoClose: 5000,
-								hideProgressBar: false,
-								closeOnClick: true,
-								pauseOnHover: true,
-								draggable: true,
-								progress: undefined,
-							});
-						}}
-						newStation={null}
-						coordinates={draggedCoords}
-						isDragged={isDragged}
-
-					/>
-				)}
-
-				<Modal show={showConfirmation} onHide={closeConfirmation}>
-					<Modal.Header closeButton>
-						<Modal.Title>Confirmation</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>Are you sure you want to delete this station?</Modal.Body>
-					<Modal.Footer>
-						<Button variant="secondary" onClick={closeConfirmation}>
-							No
-						</Button>
-						<Button variant="danger" onClick={() => confirmationAction && confirmationTarget && confirmationAction()}>
-							Yes
-						</Button>
-					</Modal.Footer>
-				</Modal>
-			</Container >
+				</div>
+				<div className="lg:w-1/4 bg-gray-800 p-4 lg:p-8 text-white flex flex-col items-start h-full">
+					<h2 className="text-xl lg:text-2xl font-semibold mb-2 lg:mb-6 text-white flex items-center lg:gap-2">
+						<div className="text-white"></div>
+						TAP-IN{"\n              "}
+					</h2>
+					<div className="flex items-center gap-2 w-full mb-2 lg:mb-6">
+						<div className="text-white"></div>
+						<Form.Control className="bg-gray-600 h-10 lg:h-12 w-full text-sm lg:text-base text-white px-2" placeholder="Enter text here" type="text" />
+					</div>
+					<p className="text-base lg:text-lg mb-2 lg:mb-4 flex items-center gap-2">
+						<div className="text-white"></div>
+						CURRENT BALANCE: <span className="font-bold">400.00</span>
+					</p>
+					<p className="text-base lg:text-lg mb-2 lg:mb-4 flex items-center gap-2">
+						<div className="text-white"></div>
+						TRANSACTION DATE:
+						<br />
+						<span className="font-bold">2024-02-04T12:30:00</span>
+					</p>
+					<p className="text-base lg:text-lg mb-2 lg:mb-4 flex items-center gap-2">
+						<div className="text-white"></div>
+						CURRENT LOCATION:
+						<br />
+						<span className="font-bold">AYALA STATION</span>
+					</p>
+					<p className="text-base lg:text-lg mb-2 lg:mb-4 flex items-center gap-2">
+						<div className="text-white"></div>
+						LONGITUDE:
+						<br />
+						<span className="font-bold">121.02786549652283</span>
+					</p>
+					<p className="text-base lg:text-lg mb-4 lg:mb-6 flex items-center gap-2">
+						<div className="text-white"></div>
+						LATITUDE:
+						<br />
+						<span className="font-bold">14.550516141646541</span>
+					</p>
+					<Button className="w-full mt-2 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base">TAP-IN NOW</Button>
+				</div>
+			</div>
 		</>
 	);
 };

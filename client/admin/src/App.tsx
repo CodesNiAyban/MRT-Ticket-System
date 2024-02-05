@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import LoginModal from "./components/adminLogin";
 import NavBar from "./components/navbar/NavBar";
 import { Admin } from "./model/adminModel";
@@ -11,6 +11,7 @@ import FarePage from "./pages/farePage";
 import LoginPage from "./pages/loginPage";
 import PageNotFound from "./pages/pageNotFound";
 import StationsPage from "./pages/stationsPage";
+import MrtTapPage from "./pages/mrtTapPage"
 import styles from "./styles/app.module.css";
 
 function App() {
@@ -19,7 +20,7 @@ function App() {
 
   async function onLogout() {
     try {
-      await AdminApi.logout;
+      await AdminApi.logout();
       setLoggedInAdmin(null);
     } catch (error) {
       console.error(error);
@@ -43,23 +44,27 @@ function App() {
       try {
         fetchLoggedInAdmin();
       } catch (error) {
-
         console.error(error);
       }
     }
-
-  }, []); // The empty dependency array ensures that this effect runs only once on mount
-
+  }, []);
 
   return (
     <BrowserRouter>
-      <NavBar
-        loggedInAdmin={loggedInAdmin}
-        onLoginClicked={() => setShowLoginModal(true)}
-        onLogoutSuccessful={onLogout}
-      />
-      <Container style={{ }}>
-        <Routes>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+            <NavBar
+              loggedInAdmin={loggedInAdmin}
+              onLoginClicked={() => setShowLoginModal(true)}
+              onLogoutSuccessful={onLogout}
+            />
+             <Outlet />
+            </>
+          }
+        >
           <Route path="/" element={<LoginPage />} />
           <Route
             path="/stations"
@@ -73,9 +78,15 @@ function App() {
             path="/fare"
             element={<FarePage loggedInAdmin={loggedInAdmin} />}
           />
-          <Route path="/*" element={<PageNotFound />} />
-        </Routes>
-      </Container>
+        </Route>
+
+        {/* Route for MRT page without Navbar */}
+        <Route path="/mrt" element={<MrtTapPage loggedInAdmin={loggedInAdmin}/>} />
+
+        {/* Fallback route */}
+        <Route path="/*" element={<PageNotFound />} />
+      </Routes>
+
       {showLoginModal && (
         <LoginModal
           onDismiss={() => setShowLoginModal(false)}
