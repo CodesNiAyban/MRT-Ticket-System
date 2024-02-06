@@ -22,6 +22,7 @@ const StationPageLoggedInView = () => {
 	// Load Stations
 	const [stations, setStations] = useState<StationsModel[]>([]);
 	const [fares, setFares] = useState<FareModel[]>([]);
+	const [tapInDetails, setTapInDetails] = useState<BeepCardsModel | null>(null);
 
 	const [showStationsLoadingError, setShowStationsLoadingError] = useState(false);
 	const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
@@ -29,9 +30,9 @@ const StationPageLoggedInView = () => {
 	const [beepCardNumber, setBeepCardNumber] = useState('637805');
 	const [beepCard, setBeepCard] = useState<BeepCardsModel | null>(null);
 
+	const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
 	const { stationName } = useParams();
 	const navigate = useNavigate();
-
 
 	const newCustomIcon = L.icon({
 		iconUrl: '/newMarker.png',
@@ -60,6 +61,7 @@ const StationPageLoggedInView = () => {
 				setShowStationsLoadingError(false);
 				const stations = await StationApi.fetchStations();
 				const fares = await StationApi.fetchFares();
+
 				setStations(stations)
 				setFares(fares)
 
@@ -159,7 +161,11 @@ const StationPageLoggedInView = () => {
 		try {
 			if (beepCard?.UUIC) {
 				// Call tapInBeepCard with the beepCard UUIC
-				const updatedBeepCard = await StationApi.tapInBeepCard(beepCard.UUIC);
+				const tapInDetailsResponse = await StationApi.tapInBeepCard(beepCard.UUIC);
+
+				// Update the local state with the latest beep card details and tap-in details
+				setBeepCard(tapInDetailsResponse);
+				setTapInDetails(tapInDetailsResponse);
 
 				// Notify the user with React Toastify
 				toast.success('Tap-in successful!', {
@@ -170,9 +176,6 @@ const StationPageLoggedInView = () => {
 					pauseOnHover: true,
 					draggable: true,
 				});
-
-				// Update the local state with the latest beep card details
-				setBeepCard(updatedBeepCard);
 			} else {
 				// Notify the user if beepCard is not available
 				toast.error('Beep card not found!', {
@@ -199,7 +202,6 @@ const StationPageLoggedInView = () => {
 		}
 	};
 
-
 	useEffect(() => {
 		const loadBeepCardDetails = async () => {
 			try {
@@ -218,9 +220,9 @@ const StationPageLoggedInView = () => {
 	}, [beepCardNumber]);
 
 	return (
-		<> 
-		<ToastContainer limit={3} />
-		{showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
+		<>
+			<ToastContainer limit={3} />
+			{showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
 			<div className="flex flex-col lg:flex-row h-screen">
 				<MapContainer center={mapCenter} zoom={13} zoomControl={false} scrollWheelZoom={true} style={{ width: '100%', height: '100vh' }}>
 					<TileLayer
@@ -280,6 +282,15 @@ const StationPageLoggedInView = () => {
 									placeholder="Enter Beep Card Number"
 									className="text-xl lg:text-2xl text-black mb-5 p-2 border rounded"
 								/>
+								{tapInDetails && (
+									<div className="mb-5">
+										<p className="text-xl lg:text-2xl text-white mb-1">Initial Value: {beepCard?.balance ? beepCard.balance + (minimumFare?.price || 0) : 0}</p>
+										<p className="text-xl lg:text-2xl text-white mb-1">Current Station: {stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase())}</p>
+										<p className="text-xl lg:text-2xl text-white mb-1">Date of Tap-in: {formatDate(tapInDetails.updatedAt)}</p>
+										<p className="text-xl lg:text-2xl text-white mb-1">Deducted Minimum Fare: {minimumFare?.price}</p>
+										<p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapInDetails.balance}</p>
+									</div>
+								)}
 								<Button
 									className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
 									disabled={!beepCard?.UUIC} // Disable the button if beepCard is null
@@ -304,7 +315,7 @@ const StationPageLoggedInView = () => {
 							{beepCard && (
 								<>
 									<h2 className="text-3xl lg:text-4xl font-semibold mb-2 lg:mb-10 text-white flex items-center lg:gap-2 justify-center" style={{ marginTop: '15px' }}>
-										TAP-IN DETAILS
+										Beep Card Info
 									</h2>
 
 									<p className="text-2xl lg:text-3xl text-white mb-1">Beep Card ID:</p>
