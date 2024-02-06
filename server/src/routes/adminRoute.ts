@@ -1,6 +1,6 @@
 import express from "express";
 import * as AdminController from "../controllers/adminController";
-import authenticateToken from "../middleware/authMiddleware"; // Update this with the correct path
+import authenticateToken from "../middleware/authMiddleware"; 
 
 const router = express.Router();
 

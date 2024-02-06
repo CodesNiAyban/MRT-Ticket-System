@@ -1,8 +1,9 @@
 import { RequestHandler } from "express";
-import beepCardsModel from "../models/beepCardModel";
-import * as beepCardinterface from "../interfaces/beepCardInterface";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
+import * as beepCardinterface from "../interfaces/beepCardInterface";
+import beepCardsModel from "../models/beepCardModel";
+import faresModel from "../models/fareModel";
 
 export const getBeepCards: RequestHandler = async (req, res, next) => {
 	try {
@@ -25,6 +26,17 @@ export const getBeepCard: RequestHandler = async (req, res, next) => {
 		if (!beepCards)
 			throw createHttpError(404, "beepCards not found.");
 		res.status(200).json(beepCards);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const getBeepCardByUUIC: RequestHandler = async (req, res, next) => {
+	const UUIC = req.params.UUIC;
+
+	try {
+		const beepCard = await beepCardsModel.findOne({ UUIC }).exec();
+		res.status(200).json(beepCard);
 	} catch (error) {
 		next(error);
 	}
@@ -89,6 +101,45 @@ export const deleteBeepCard: RequestHandler = async (req, res, next) => {
 		await beepCards.deleteOne();
 
 		res.sendStatus(204);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const deductMinimumFare: RequestHandler = async (req, res, next) => {
+	const UUIC = req.params.UUIC;
+
+	try {
+		// Fetch the BeepCard by UUIC
+		const beepCard = await beepCardsModel.findOne({ UUIC }).exec();
+
+		if (!beepCard) {
+			throw createHttpError(404, "Beep card not found.");
+		}
+
+		// Fetch the minimum fare
+		const minimumFare = await faresModel.findOne({ fareType: "MINIMUM FARE" }).exec();
+
+		if (!minimumFare) {
+			throw createHttpError(404, "Minimum fare not found.");
+		}
+
+		// Deduct the minimum fare from the BeepCard balance
+		let newBalance = beepCard.balance - minimumFare.price;
+		newBalance = Math.max(newBalance, 0); // Ensure the new balance is not negative
+
+		// Update the BeepCard with the new balance
+		const updatedBeepCard = await beepCardsModel.findOneAndUpdate(
+			{ UUIC },
+			{ $set: { balance: newBalance } },
+			{ new: true }
+		).exec();
+
+		if (!updatedBeepCard) {
+			throw createHttpError(500, "Failed to update Beep card balance.");
+		}
+
+		res.status(200).json(updatedBeepCard);
 	} catch (error) {
 		next(error);
 	}

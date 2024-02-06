@@ -1,13 +1,13 @@
 import { RequestHandler } from "express";
-import faresModel from "../models/fareModel";
-import * as fareinterface from "../interfaces/fareInterface";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
+import * as fareinterface from "../interfaces/fareInterface";
+import faresModel from "../models/fareModel";
 
 export const getFares: RequestHandler = async (req, res, next) => {
 	try {
-		const beepCards = await faresModel.find().exec();
-		res.status(200).json(beepCards);
+		const fares = await faresModel.find().exec();
+		res.status(200).json(fares);
 	} catch (error) {
 		next(error);
 	}
@@ -45,7 +45,7 @@ export const updateFare: RequestHandler<fareinterface.UpdateFareParams, unknown,
 
 		if (!fares) throw createHttpError(404, "fare not found.");
 
-		fares.fareType= newfareType;
+		fares.fareType = newfareType;
 		fares.price = newPrice;
 
 		const updateFares = await fares.save();
@@ -56,3 +56,4 @@ export const updateFare: RequestHandler<fareinterface.UpdateFareParams, unknown,
 
 	}
 };
+

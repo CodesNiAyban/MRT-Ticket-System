@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/", BeepCardsController.getBeepCards);
 
-router.get("/:beepCardId", BeepCardsController.getBeepCards);
+router.get("/:beepCardId", BeepCardsController.getBeepCard);
 
 router.post("/", BeepCardsController.createBeepCard);
 

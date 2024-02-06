@@ -247,7 +247,7 @@ const BeepCardPageLoggedInView = () => {
           onBeepCardSaved={(newBeepCard) => {
             setBeepCards([...beepCards, newBeepCard]);
             setShowAddBeepCardDialog(false);
-            showCustomToast("success", `Beep Card ${newBeepCard} created successfully.`);
+            showCustomToast("success", `Beep Card ${newBeepCard.UUIC} created successfully.`);
           }}
         />
       )}
@@ -266,7 +266,7 @@ const BeepCardPageLoggedInView = () => {
               )
             );
             setBeepCardToEdit(null);
-            showCustomToast("success", `Beep Card ${updateBeepCard} updated successfully.`);
+            showCustomToast("success", `Beep Card ${updateBeepCard.UUIC} updated successfully.`);
           }}
         />
       )}

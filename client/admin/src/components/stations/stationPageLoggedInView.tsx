@@ -81,29 +81,34 @@ const StationPageLoggedInView = () => {
 		shadowAnchor: [10, 46],
 	});
 
-	const handleMarkerDragEnd = (event: any, station: StationsModel) => {
-		const { lat, lng } = event.target.getLatLng();
-		setIsDragged(true)
-		setDraggedCoords([lat, lng]);
-	};
-
-	useEffect(() => {
-		async function loadStations() {
-			try {
-				setShowStationsLoadingError(false);
-				setStationsLoading(true);
-				const stations = await StationApi.fetchStations();
-				setStations(stations);
-				setFilteredStations(stations);
-			} catch (error) {
-				console.error(error);
-				setShowStationsLoadingError(true);
-			} finally {
-				setStationsLoading(false);
-			}
+	const handleMarkerDragEnd = async(event: any, station: StationsModel) => {
+	const isExceedingLimit = station.connectedTo.some((connectedStationId) => {
+		const connectedStation = stations.find(s => s._id === connectedStationId);
+		if (connectedStation) {
+			const distance = event.target.getLatLng().distanceTo([connectedStation.coords[0], connectedStation.coords[1]]);
+			return distance > 500;
 		}
-		loadStations();
-	}, []);
+	});
+
+	if (!isExceedingLimit) {
+		toast.error("Stations cannot be placed less than 500m from connected stations.", {
+			position: "top-right",
+			autoClose: 3000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: true,
+			draggable: true,
+			progress: undefined,
+		});
+		setIsDragged(false);
+		refresh()
+		return;
+	}
+
+	const { lat, lng } = event.target.getLatLng();
+	setDraggedCoords([lat, lng]);
+	setIsDragged(true);
+};
 
 	useEffect(() => {
 		if (clickedCoords) {
@@ -141,7 +146,7 @@ const StationPageLoggedInView = () => {
 				Click it again to save.`,
 				{
 					position: "top-right",
-					autoClose: 5000,
+					autoClose: 1500,
 					hideProgressBar: false,
 					closeOnClick: true,
 					pauseOnHover: true,
@@ -193,7 +198,7 @@ const StationPageLoggedInView = () => {
 							<br />
 							<div className="d-flex align-items-center justify-content-center space-x-2">
 								<Button
-									className={`ms-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"} button2`}
+									className={`ms-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-primary" : "btn-primary"} button2`}
 									variant="primary"
 									onClick={() => setStationToEdit(station)}
 								>
@@ -291,7 +296,7 @@ const StationPageLoggedInView = () => {
 			refresh();
 			toast.error(`Station ${station.stationName} Deleted.`, {
 				position: "top-right",
-				autoClose: 5000,
+				autoClose: 1500,
 				hideProgressBar: false,
 				closeOnClick: true,
 				pauseOnHover: true,
@@ -301,7 +306,7 @@ const StationPageLoggedInView = () => {
 		} catch (error) {
 			toast.error("Delete Failed, Please Try Again.", {
 				position: "top-right",
-				autoClose: 5000,
+				autoClose: 1500,
 				hideProgressBar: false,
 				closeOnClick: true,
 				pauseOnHover: true,
@@ -573,7 +578,7 @@ const StationPageLoggedInView = () => {
 							setNewMapMarker([]);
 							toast.success(`Station ${newStation.stationName} successfully created.`, {
 								position: "top-right",
-								autoClose: 5000,
+								autoClose: 1500,
 								hideProgressBar: false,
 								closeOnClick: true,
 								pauseOnHover: true,
@@ -612,7 +617,7 @@ const StationPageLoggedInView = () => {
 							setStationToEdit(null);
 							toast.success(`Station ${updateStation.stationName} successfully updated.`, {
 								position: "top-right",
-								autoClose: 5000,
+								autoClose: 1500,
 								hideProgressBar: false,
 								closeOnClick: true,
 								pauseOnHover: true,

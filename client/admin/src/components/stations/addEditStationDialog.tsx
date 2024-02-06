@@ -9,6 +9,8 @@ import { StationInput } from '../../network/stationsAPI';
 import TextInputField from '../form/textInputFields';
 import styles from './station.module.css';
 import StationConnectedToModal from './stationConnectedToModal';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface AddEditStationDialogProps {
   stationToEdit?: Stations;
@@ -47,7 +49,6 @@ const AddEditStationDialog = ({
   const [runOnce, setRunOnce] = useState(true)
 
   const [polylines, setPolylines] = useState<ReactElement[]>([]);
-  const [showToast, setShowToast] = useState(false);
 
   const setDefaultValues = () => {
     setValue('stationName', stationToEdit?.stationName || '');
@@ -186,7 +187,15 @@ const AddEditStationDialog = ({
             ]);
             setSelectedStations([...selectedStations, station]);
           } else {
-            setShowToast(true);
+            toast.error("Stations cannot be connected less than 500m.", {
+              position: "top-right",
+              autoClose: 1500,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
           }
         } else if (newStation && station._id !== newStation._id) {
           const distance = L.latLng(newStation.coords[0], newStation.coords[1]).distanceTo(
@@ -210,7 +219,15 @@ const AddEditStationDialog = ({
             ]);
             setSelectedStations([...selectedStations, station]);
           } else {
-            setShowToast(true);
+            toast.error("Stations cannot be connected less than 500m.", {
+              position: "top-right",
+              autoClose: 1500,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
           }
         }
       }
@@ -315,7 +332,7 @@ const AddEditStationDialog = ({
                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Adjust box shadow
                     border: '2px solid #4CAF50', // Adjust border color and width
                     display: 'flex',
-                    cursor: 'pointer', 
+                    cursor: 'pointer',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                   }}
@@ -352,7 +369,6 @@ const AddEditStationDialog = ({
           stationToEdit={stationToEdit ? stationToEdit : null}
           polylines={polylines}
           setPolylines={handlePolylines}
-          showToast={showToast}
         />
       )}
     </Modal >

@@ -11,7 +11,6 @@ import FarePage from "./pages/farePage";
 import LoginPage from "./pages/loginPage";
 import PageNotFound from "./pages/pageNotFound";
 import StationsPage from "./pages/stationsPage";
-import MrtTapPage from "./pages/mrtTapPage"
 import styles from "./styles/app.module.css";
 
 function App() {
@@ -79,9 +78,6 @@ function App() {
             element={<FarePage loggedInAdmin={loggedInAdmin} />}
           />
         </Route>
-
-        {/* Route for MRT page without Navbar */}
-        <Route path="/mrt" element={<MrtTapPage loggedInAdmin={loggedInAdmin}/>} />
 
         {/* Fallback route */}
         <Route path="/*" element={<PageNotFound />} />

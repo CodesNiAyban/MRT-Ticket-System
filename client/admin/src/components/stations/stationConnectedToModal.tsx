@@ -3,10 +3,13 @@ import L, { } from 'leaflet'
 import 'leaflet/dist/leaflet.css'; // Ensure this import for Leaflet styles
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Button, Modal, Toast } from 'react-bootstrap';
+import { Button, Modal} from 'react-bootstrap';
 import { Stations as StationsModel } from '../../model/stationsModel';
 import Select from "react-select";
 import styles from './station.module.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 interface StationConnectedToModalProps {
 	show: boolean;
@@ -19,7 +22,6 @@ interface StationConnectedToModalProps {
 	stationToEdit?: StationsModel | null;
 	polylines: ReactElement[];
 	setPolylines: React.Dispatch<React.SetStateAction<ReactElement[]>>;
-	showToast: any;
 	stations: StationsModel[];
 }
 
@@ -34,7 +36,6 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 	stationToEdit,
 	polylines,
 	setPolylines,
-	showToast,
 	stations
 }: StationConnectedToModalProps) => {
 	const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
@@ -261,6 +262,7 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 
 	return (
 		<>
+		<ToastContainer limit={3} style={{zIndex: 9999}}/>
 			<Modal show={show} onHide={onHide} size="lg">
 				<Modal.Header closeButton>
 					<Modal.Title>Connect Stations</Modal.Title>
@@ -321,25 +323,6 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 					</Button>
 				</Modal.Footer>
 			</Modal>
-			{showToast && (
-				<div
-					style={{
-						position: 'fixed',
-						top: '10px',
-						right: '10px',
-						zIndex: 1000,
-					}}
-				>
-					<Toast autohide onClose={() => null}>
-						<Toast.Header>
-							<strong className="mr-auto">Distance Violation</strong>
-						</Toast.Header>
-						<Toast.Body>
-							The selected station must be at least 500 meters away from existing stations.
-						</Toast.Body>
-					</Toast>
-				</div>
-			)}
 		</>
 	);
 };

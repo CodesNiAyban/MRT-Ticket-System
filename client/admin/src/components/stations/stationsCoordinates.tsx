@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useMapEvents } from 'react-leaflet';
 import { LatLngLiteral } from 'leaflet';
 

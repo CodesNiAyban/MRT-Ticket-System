@@ -11,6 +11,7 @@ import adminRoute from "./routes/adminRoute";
 import beepCardRoute from "./routes/beepCardsRoute";
 import fareRoute from "./routes/fareRoutes";
 import stationRoute from "./routes/stationsRoute";
+import mrtRoute from "./routes/mrtRoute";
 import env from "./utils/validateENV";
 import MongoStore from "connect-mongo";
 import authenticateToken from "./middleware/authMiddleware"; 
@@ -27,7 +28,7 @@ app.use(morgan("dev"));
 
 // Set the origin based on deployment
 const corsOptions = {
-	origin: isProduction ? env.API_CONNECTION_STRING : "http://localhost:3000",
+	origin: isProduction ? env.API_CONNECTION_STRING : ["http://localhost:3000", "http://localhost:3001"],
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	optionsSuccessStatus: 204,
@@ -55,6 +56,7 @@ app.use("/api/stations", authenticateToken, stationRoute);
 app.use("/api/beepCards", authenticateToken, beepCardRoute);
 app.use("/api/fare", authenticateToken, fareRoute);
 app.use("/api/admin", adminRoute);
+app.use("/api/mrt", mrtRoute);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {

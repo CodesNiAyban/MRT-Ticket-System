@@ -19,7 +19,10 @@ export const getDefaultLoadPrice = async () => {
     const defaultLoadFare = fares.find(
       (fare) => fare.fareType === "DEFAULT LOAD"
     );
-    return defaultLoadFare!.price;
+    const minimumFare = fares.find(
+      (fare) => fare.fareType === "MINIMUM FARE"
+    );
+    return defaultLoadFare!.price + minimumFare!.price;
   } catch (error) {
     console.error(error);
     return DEFAULT_LOAD_MIN;
