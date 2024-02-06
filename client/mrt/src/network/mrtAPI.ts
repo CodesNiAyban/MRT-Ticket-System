@@ -1,6 +1,7 @@
 import { Stations } from "../model/stationsModel";
 import { BeepCard } from "../model/beepCardModel";
 import { Fare } from "../model/fareModel";
+import { TapInTransaction } from '../model/tapInTransactionModel'
 // import { logout } from "./adminAPI"; // Make sure to import your logout function
 import { fetchData } from "./fetcher";
 
@@ -52,5 +53,17 @@ export async function tapInBeepCard(beepCardUUIC: string): Promise<BeepCard> {
         body: JSON.stringify({ beepCardUUIC }), // Pass an object here
     });
 
+    return await response.json();
+}
+
+export async function createTapInTransaction(transaction: TapInTransaction): Promise<TapInTransaction> {
+    const response = await fetchData(`${MRT_API}/api/mrt/transactions/create`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(transaction),
+        });
     return await response.json();
 }

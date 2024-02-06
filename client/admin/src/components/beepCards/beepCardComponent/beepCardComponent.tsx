@@ -20,7 +20,7 @@ const BeepCard: React.FC<BeepCardProps> = ({
   className,
   editMode,
 }: BeepCardProps) => {
-  const { UUIC, balance, createdAt, updatedAt } = beepCard;
+  const { UUIC, balance, isActive, createdAt, updatedAt } = beepCard;
 
   let createdUpdatedText: string;
   if (updatedAt > createdAt) {
@@ -43,8 +43,10 @@ const BeepCard: React.FC<BeepCardProps> = ({
           />
         </Card.Title>
         <Card.Text className={styles.cardText}>
-          BALANCE: {balance}
+          BALANCE: {balance}<br/>
+          TAPPED IN: {isActive ? "Yes" : "No"}
         </Card.Text>
+  
       </Card.Body>
       <Card.Footer className={`text-muted ${styles.cardFooter}`}>
         {createdUpdatedText}

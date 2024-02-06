@@ -27,7 +27,8 @@ export async function fetchBeepCard(): Promise<BeepCard[]> {
 
 export interface BeepCardInput {
     UUIC: string,
-    balance: number
+    balance: number,
+    isActive: boolean
 }
 
 export async function createBeepCard(beepCard: BeepCardInput): Promise<BeepCard> {

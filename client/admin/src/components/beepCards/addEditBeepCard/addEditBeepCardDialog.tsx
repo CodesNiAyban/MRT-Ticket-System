@@ -40,10 +40,12 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     defaultValues: {
       UUIC: beepCardToEdit?.UUIC || generateDefaultNumber(),
       balance: editMode ? beepCardToEdit?.balance : 0,
+      isActive: editMode ? beepCardToEdit?.isActive : false,
     },
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isActive, setisActive] = useState<boolean>(false);
 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [previousBalance, setPreviousBalance] = useState<number | null>(null);
@@ -55,6 +57,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     return () => toast.dismiss();
   }, []);
 
+
   useEffect(() => {
     setIsLoading(true);
     const setDefaultValues = async () => {
@@ -62,9 +65,11 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       if (beepCardToEdit?.balance !== undefined) {
         if (editMode) {
           setValue("balance", beepCardToEdit.balance);
+          setisActive(beepCardToEdit?.isActive || false);
         } else {
           const defaultBalance = await getDefaultLoadPrice();
           setValue("balance", defaultBalance);
+          setValue("isActive", false);
         }
       }
       setIsLoading(false);
@@ -102,7 +107,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   const onSubmit = async (input: BeepCardInput) => {
     if (editMode && !isDirty) {
       // showAlertMessage("danger", "No changes made. Please modify the beep card data.");
-      toast.error ("No changes made.", {
+      toast.error("No changes made.", {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,

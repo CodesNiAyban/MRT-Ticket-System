@@ -54,35 +54,39 @@ const BeepCardPageLoggedInView = () => {
   }, []);
 
   const deleteBeepCard = (beepCard: BeepCardsModel) => {
-    setConfirmationModal((prevModal: ConfirmationModalState) => ({
-      ...prevModal,
-      show: true,
-      action: async () => {
-        try {
-          setBeepCardsLoading(true);
-          await BeepCardApi.deleteBeepCard(beepCard._id);
-          setBeepCards(
-            beepCards.filter(
-              (existingBeepCard) => existingBeepCard._id !== beepCard._id
-            )
-          );
-          showCustomToast("danger", `Beep Card ${beepCard.UUIC} deleted.`);
-        } catch (error) {
-          console.error(error);
-          showCustomToast("danger", "Error deleting Beep Card. Please try again.");
-        } finally {
-          setBeepCardsLoading(false);
-          setConfirmationModal({
-            show: false,
-            action: () => { },
-            message: "",
-            card: null,
-          });
-        }
-      },
-      message: "Are you sure you want to delete this Beep Card?",
-      card: beepCard,
-    } as ConfirmationModalState));
+    if (!beepCard.isActive) {
+      setConfirmationModal((prevModal: ConfirmationModalState) => ({
+        ...prevModal,
+        show: true,
+        action: async () => {
+          try {
+            setBeepCardsLoading(true);
+            await BeepCardApi.deleteBeepCard(beepCard._id);
+            setBeepCards(
+              beepCards.filter(
+                (existingBeepCard) => existingBeepCard._id !== beepCard._id
+              )
+            );
+            showCustomToast("danger", `Beep Card ${beepCard.UUIC} deleted.`);
+          } catch (error) {
+            console.error(error);
+            showCustomToast("danger", "Error deleting Beep Card. Please try again.");
+          } finally {
+            setBeepCardsLoading(false);
+            setConfirmationModal({
+              show: false,
+              action: () => { },
+              message: "",
+              card: null,
+            });
+          }
+        },
+        message: "Are you sure you want to delete this Beep Card?",
+        card: beepCard,
+      } as ConfirmationModalState));
+    } else {
+      showCustomToast("danger", "Beep Card is currently active.");
+    }
   };
 
   const showCustomToast = (variant: "success" | "danger", message: string) => {
@@ -102,7 +106,8 @@ const BeepCardPageLoggedInView = () => {
       formatDate(beepCard.createdAt).toLowerCase().includes(searchQuery.toLowerCase()) ||
       formatDate(beepCard.updatedAt).toLowerCase().includes(searchQuery.toLowerCase()) ||
       beepCard.createdAt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      beepCard.updatedAt.toLowerCase().includes(searchQuery.toLowerCase())
+      beepCard.updatedAt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      beepCard.isActive.toString().toLowerCase().includes(searchQuery.toLowerCase()) // Include isActive in filtering
   );
 
   const itemsPerPage = 9;
@@ -295,7 +300,8 @@ const BeepCardPageLoggedInView = () => {
                 CARD: {confirmationModal?.card?.UUIC || "N/A"}
               </Card.Title>
               <Card.Text className={styles.cardText}>
-                BALANCE: {confirmationModal?.card?.balance || "N/A"}
+                BALANCE: {confirmationModal?.card?.balance || "N/A"}<br />
+                TAPPED IN: {confirmationModal.card?.isActive ? "Yes" : "No" || "N/A"}
               </Card.Text>
             </Card.Body>
             <Card.Footer className={`text-muted ${styles.cardFooter}`}>

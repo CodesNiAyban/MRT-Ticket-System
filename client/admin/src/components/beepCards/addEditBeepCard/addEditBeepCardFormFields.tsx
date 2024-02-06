@@ -1,6 +1,6 @@
 // BeepCardFormFields.tsx
 import React from "react";
-import { Button } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 import { BeepCard } from "../../../model/beepCardModel";
 import TextInputField from "../../form/textInputFields";
 
@@ -70,16 +70,27 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
           )}
 
           {beepCardToEdit && (
-            <TextInputField
-              name="balance"
-              label="Balance"
-              type="number"
-              placeholder="balance"
-              register={register}
-              registerOptions={{ required: "Required " }}
-              errors={errors.balance}
-              disabled={isSubmitting}
-            />
+            <>
+              <TextInputField
+                name="balance"
+                label="Balance"
+                type="number"
+                placeholder="balance"
+                register={register}
+                registerOptions={{ required: "Required " }}
+                errors={errors.balance}
+                disabled={isSubmitting}
+              />
+
+
+              <Form.Group controlId="formIsActive">
+                <Form.Check
+                  type="checkbox"
+                  label="Tapped In"
+                  {...register("isActive")} // Register isActive field
+                />
+              </Form.Group>
+            </>
           )}
         </>
       )}

@@ -16,7 +16,6 @@ export const getBeepCards: RequestHandler = async (req, res, next) => {
 
 export const getBeepCard: RequestHandler = async (req, res, next) => {
 	const beepCardId = req.params.beepCardId;
-
 	try {
 		const beepCards = await beepCardsModel.findById(beepCardId).exec();
 
@@ -45,14 +44,17 @@ export const getBeepCardByUUIC: RequestHandler = async (req, res, next) => {
 export const createBeepCard: RequestHandler<unknown, unknown, beepCardinterface.CreateBeepCardsBody, unknown> = async (req, res, next) => {
 	const UUIC = req.body.UUIC;
 	const balance = req.body.balance;
+	const isActive = req.body.isActive;
 
 	try {
 		if (!UUIC) { throw createHttpError(400, "beepCards must have a UUIC"); }
 		if (!balance) { throw createHttpError(400, "beepCards must have a balance"); }
+		if (isActive === undefined) { throw createHttpError(400, "beepCards must have a isActive"); }
 
 		const newBeepCards = await beepCardsModel.create({
 			UUIC: UUIC,
 			balance: balance,
+			isActive: false
 		});
 
 		res.status(201).json(newBeepCards);
@@ -65,12 +67,13 @@ export const updateBeepCard: RequestHandler<beepCardinterface.UpdateBeepCardsPar
 	const beepCardId = req.params.beepCardId;
 	const newUUIC = req.body.UUIC;
 	const newBalance = req.body.balance;
+	const isActive = req.body.isActive; // Added isActive property
 
 	try {
-		// Error handling
 		if (!mongoose.isValidObjectId(beepCardId)) throw createHttpError(400, "Invalid beepCards id.");
 		if (!newUUIC) { throw createHttpError(400, "Beep card must have a UUIC"); }
 		if (!newBalance) { throw createHttpError(400, "Beep card must have a balance"); }
+		if (isActive === undefined) { throw createHttpError(400, "Beep card must have an isActive"); }
 
 		const beepCards = await beepCardsModel.findById(beepCardId).exec();
 
@@ -78,15 +81,16 @@ export const updateBeepCard: RequestHandler<beepCardinterface.UpdateBeepCardsPar
 
 		beepCards.UUIC = newUUIC;
 		beepCards.balance = newBalance;
+		beepCards.isActive = isActive; // Set isActive property
 
 		const updateBeepCards = await beepCards.save();
 
 		res.status(200).json(updateBeepCards);
 	} catch (error) {
 		next(error);
-
 	}
 };
+
 
 export const deleteBeepCard: RequestHandler = async (req, res, next) => {
 	try {
@@ -128,10 +132,10 @@ export const deductMinimumFare: RequestHandler = async (req, res, next) => {
 		let newBalance = beepCard.balance - minimumFare.price;
 		newBalance = Math.max(newBalance, 0); // Ensure the new balance is not negative
 
-		// Update the BeepCard with the new balance
+		// Update the BeepCard with the new balance and set isActive to true
 		const updatedBeepCard = await beepCardsModel.findOneAndUpdate(
 			{ UUIC },
-			{ $set: { balance: newBalance } },
+			{ $set: { balance: newBalance, isActive: true } }, // Set isActive to true
 			{ new: true }
 		).exec();
 

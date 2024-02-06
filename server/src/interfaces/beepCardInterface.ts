@@ -1,6 +1,7 @@
 export interface CreateBeepCardsBody {
 	UUIC?: number,
 	balance?: number,
+	isActive?: boolean
 }
 
 export interface UpdateBeepCardsParams {
@@ -10,4 +11,5 @@ export interface UpdateBeepCardsParams {
 export interface UpdateBeepCardsBody {
 	UUIC?: number,
 	balance?: number,
+	isActive?: boolean
 }
