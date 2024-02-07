@@ -110,7 +110,7 @@ export const deleteBeepCard: RequestHandler = async (req, res, next) => {
 	}
 };
 
-export const deductMinimumFare: RequestHandler = async (req, res, next) => {
+export const tapIn: RequestHandler = async (req, res, next) => {
 	const UUIC = req.params.UUIC;
 
 	try {
@@ -137,6 +137,39 @@ export const deductMinimumFare: RequestHandler = async (req, res, next) => {
 			{ UUIC },
 			{ $set: { balance: newBalance, isActive: true } }, // Set isActive to true
 			{ new: true }
+		).exec();
+
+		if (!updatedBeepCard) {
+			throw createHttpError(500, "Failed to update Beep card balance.");
+		}
+
+		res.status(200).json(updatedBeepCard);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const tapOut: RequestHandler = async (req, res, next) => {
+	const UUIC = req.params.UUIC;
+	const amountToDeduct = req.body.amount; // Assuming the amount to deduct is provided in the request body
+
+	try {
+		// Fetch the BeepCard by UUIC
+		const beepCard = await beepCardsModel.findOne({ UUIC }).exec();
+
+		if (!beepCard) {
+			throw createHttpError(404, "Beep card not found.");
+		}
+
+		// Deduct the specified amount from the BeepCard balance
+		let newBalance = beepCard.balance - amountToDeduct;
+		newBalance = Math.max(newBalance, 0); // Ensure the new balance is not negative
+
+		// Update the BeepCard with the new balance and set isActive to true
+		const updatedBeepCard = await beepCardsModel.findOneAndUpdate(
+			{ UUIC },
+			{ $set: { balance: newBalance, isActive: false } }, // Set isActive to true
+			{ new: false }
 		).exec();
 
 		if (!updatedBeepCard) {

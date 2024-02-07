@@ -1,6 +1,6 @@
-export interface CreateTapInTransactionBody {
+export interface CreateTapOutTransactionBody {
 	UUIC?: string,
-	tap?: boolean,
+	tapIn?: boolean,
 	initialBalance?: number,
 	prevStation?: string,
 	currStation?: string,

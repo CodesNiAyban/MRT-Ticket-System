@@ -56,6 +56,20 @@ export async function tapInBeepCard(beepCardUUIC: string): Promise<BeepCard> {
     return await response.json();
 }
 
+export async function tapOutBeepCard(beepCardUUIC: string, amountToDeduct: number): Promise<BeepCard> {
+    const response = await fetchData(`${MRT_API}/api/mrt/beepCard/tapOut/${beepCardUUIC}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            // Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Comment this line
+        },
+        credentials: 'include',
+        body: JSON.stringify({ amount: amountToDeduct }), // Pass the amount to deduct
+    });
+
+    return await response.json();
+}
+
 export async function createTapInTransaction(transaction: TapInTransaction): Promise<TapInTransaction> {
     const response = await fetchData(`${MRT_API}/api/mrt/transactions/create`,
         {
@@ -66,4 +80,35 @@ export async function createTapInTransaction(transaction: TapInTransaction): Pro
             body: JSON.stringify(transaction),
         });
     return await response.json();
+}
+
+export async function createTapOutTransaction(transaction: TapInTransaction): Promise<TapInTransaction> {
+    const response = await fetchData(`${MRT_API}/api/mrt/transactions/create`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(transaction),
+        });
+    return await response.json();
+}
+
+export async function getTapInTransactionByUUIC(transaction: string): Promise<TapInTransaction | null> {
+    try {
+        const response = await fetchData(`${MRT_API}/api/mrt/transactions/${transaction}`, {
+            method: "GET",
+        });
+
+        if (response.status === 404) {
+            // Beep card not found, return null
+            return null;
+        }
+
+        return await response.json();
+    } catch (error) {
+        // Handle other errors if needed
+        console.error("Error fetching transaction:", error);
+        throw error; // You can choose to throw or handle the error based on your requirements
+    }
 }

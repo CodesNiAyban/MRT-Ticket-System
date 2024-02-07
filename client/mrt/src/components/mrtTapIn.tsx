@@ -1,4 +1,4 @@
-import { faBalanceScale, faCreditCard, faHandPointer, faTrain } from '@fortawesome/free-solid-svg-icons'; // Import the icons you need
+import { faBalanceScale, faCreditCard, faHandPointer, faTrain } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from 'flowbite-react';
 import * as L from 'leaflet';
@@ -8,17 +8,16 @@ import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet'
 import { useNavigate, useParams } from 'react-router-dom';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import { ToastContainer, toast } from 'react-toastify'; // Import React Toastify
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { formatDate } from "..//utils/formatDate";
+import { formatDate } from "../utils/formatDate";
 import { BeepCard as BeepCardsModel } from "../model/beepCardModel";
 import { Fare as FareModel } from "../model/fareModel";
 import { Stations as StationsModel } from "../model/stationsModel";
 import { TapInTransaction as TapInTransactionModel } from "../model/tapInTransactionModel";
-
 import * as StationApi from '../network/mrtAPI';
 
-const StationPageLoggedInView = () => {
+const MrtTapIn = () => {
     const [mapCenter, setMapCenter] = useState<[number, number]>([14.550561416466541, 121.02785649562283]);
 
     // Load Stations
@@ -34,7 +33,7 @@ const StationPageLoggedInView = () => {
     const [beepCard, setBeepCard] = useState<BeepCardsModel | null>(null);
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
-    const { stationName, tap } = useParams();
+    const { stationName } = useParams();
     const navigate = useNavigate();
 
     const newCustomIcon = L.icon({
@@ -56,7 +55,6 @@ const StationPageLoggedInView = () => {
         shadowSize: [40, 40],
         shadowAnchor: [10, 46],
     });
-
 
     useEffect(() => {
         const loadStationsAndMarkers = async () => {
@@ -175,9 +173,11 @@ const StationPageLoggedInView = () => {
 							
 							const tapInTransaction: TapInTransactionModel = {
 								UUIC: beepCard.UUIC,
+                                tapIn: true,
 								initialBalance: beepCard.balance,
 								currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
-								fare: minimumFare.price,
+								prevStation: "",
+                                fare: minimumFare.price,
 								currBalance: beepCardResponse.balance, // Update current balance after tap-in
 								createdAt: new Date().toISOString(), // Set current timestamp as creation time
 								updatedAt: new Date().toISOString(), // Set current timestamp as update time
@@ -251,7 +251,6 @@ const StationPageLoggedInView = () => {
 		}
 	};
 	
-
     useEffect(() => {
         const loadBeepCardDetails = async () => {
             try {
@@ -269,13 +268,6 @@ const StationPageLoggedInView = () => {
             setBeepCard(null);
         }
     }, [beepCardNumber]);
-
-    // Check for valid tap mode
-    useEffect(() => {
-        if (tap !== 'in' && tap !== 'out') {
-            navigate('/');
-        }
-    }, [tap]);
 
     return (
         <>
@@ -354,7 +346,7 @@ const StationPageLoggedInView = () => {
                                     disabled={!beepCard?.UUIC} // Disable the button if beepCard is null
                                     onClick={handleTapIn} // Call handleTapIn when the button is clicked
                                 >
-                                    TAP-{tap?.toLocaleUpperCase()}
+                                    TAP-IN
                                 </Button>
                             </div>
                         </TabPanel>
@@ -398,4 +390,4 @@ const StationPageLoggedInView = () => {
     );
 };
 
-export default StationPageLoggedInView;
+export default MrtTapIn;

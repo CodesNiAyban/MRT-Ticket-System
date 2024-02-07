@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import MrtTapPage from "./pages/mrtTapPage";
+import MrtTapIn from "./components/mrtTapIn";
+import MrtTapOut from "./components/mrtTapOut";
 import PageNotFound from "./pages/pageNotFound";
 function App() {
   return (
@@ -7,7 +8,9 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Route for MRT page without Navbar */}
-          <Route path="/:stationName/:tap" element={<MrtTapPage />} />
+          <Route path="/:stationName/in" element={<MrtTapIn />} />
+
+          <Route path="/:stationName/out" element={<MrtTapOut />} />
 
           {/* Fallback route */}
           <Route path="/*" element={<PageNotFound />} />

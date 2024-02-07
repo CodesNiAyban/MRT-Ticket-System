@@ -81,34 +81,47 @@ const StationPageLoggedInView = () => {
 		shadowAnchor: [10, 46],
 	});
 
-	const handleMarkerDragEnd = async(event: any, station: StationsModel) => {
-	const isExceedingLimit = station.connectedTo.some((connectedStationId) => {
-		const connectedStation = stations.find(s => s._id === connectedStationId);
-		if (connectedStation) {
-			const distance = event.target.getLatLng().distanceTo([connectedStation.coords[0], connectedStation.coords[1]]);
-			return distance > 500;
+
+	const handleMarkerDragEnd = (event: any, station: StationsModel) => {
+		if (!station.connectedTo) {
+			// If the station is not connected to any other stations, allow dragging
+			const { lat, lng } = event.target.getLatLng();
+			setDraggedCoords([lat, lng]);
+			setIsDragged(true);
+			return;
 		}
-	});
 
-	if (!isExceedingLimit) {
-		toast.error("Stations cannot be placed less than 500m from connected stations.", {
-			position: "top-right",
-			autoClose: 3000,
-			hideProgressBar: false,
-			closeOnClick: true,
-			pauseOnHover: true,
-			draggable: true,
-			progress: undefined,
+		// If the station is connected to other stations, check if dragging would exceed the limit
+		const isExceedingLimit = station.connectedTo.some((connectedStationId) => {
+			const connectedStation = stations.find(s => s._id === connectedStationId);
+			if (connectedStation) {
+				const connectedLatLng = L.latLng(connectedStation.coords[0], connectedStation.coords[1]); // Provide latitude and longitude separately
+				const distance = event.target.getLatLng().distanceTo(connectedLatLng);
+				return distance < 500;
+			}
 		});
-		setIsDragged(false);
-		refresh()
-		return;
-	}
 
-	const { lat, lng } = event.target.getLatLng();
-	setDraggedCoords([lat, lng]);
-	setIsDragged(true);
-};
+		if (!isExceedingLimit) {
+			// If dragging would not exceed the limit, allow dragging
+			const { lat, lng } = event.target.getLatLng();
+			setDraggedCoords([lat, lng]);
+			setIsDragged(true);
+		} else {
+			// If dragging would exceed the limit, show a warning toast
+			toast.warn("Stations cannot be placed less than 500m from connected stations.", {
+				position: "top-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				progress: undefined,
+			});
+			// Reset dragging state and refresh the station marker
+			setIsDragged(false);
+			refresh();
+		}
+	};
 
 	useEffect(() => {
 		if (clickedCoords) {
@@ -277,46 +290,39 @@ const StationPageLoggedInView = () => {
 
 	const deleteStation = async (station: StationsModel) => {
 		try {
-			// Remove the station from connectedTo of other stations
-			const updatedStations = stations.map((existingStation) => {
-				return {
-					...existingStation,
-					connectedTo: existingStation.connectedTo.filter((connectedStationId) => connectedStationId !== station._id),
-				};
-			});
-
-			if (station.connectedTo.length > 0) await StationApi.updateStations(updatedStations);
-
 			await StationApi.deleteStation(station._id);
-
-			// Update the local state after successful deletion
-			setStations(updatedStations);
 			setFilteredStations(filteredStations.filter((existingStation) => existingStation._id !== station._id));
 			setShowConfirmation(false);
 			refresh();
-			toast.error(`Station ${station.stationName} Deleted.`, {
-				position: "top-right",
-				autoClose: 1500,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				progress: undefined,
+			await new Promise<void>((resolve: () => void) => {
+				toast.warn(`Station ${station.stationName} Deleted.`, {
+					position: "top-right",
+					autoClose: 1500,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					progress: undefined,
+					onClose: resolve,
+				});
 			});
+
 		} catch (error) {
-			toast.error("Delete Failed, Please Try Again.", {
-				position: "top-right",
-				autoClose: 1500,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				progress: undefined,
+			await new Promise<void>((resolve: () => void) => {
+				toast.error("Delete Failed, Please Try Again.", {
+					position: "top-right",
+					autoClose: 1500,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					progress: undefined,
+					onClose: resolve,
+				});
 			});
 			console.error("An error occurred while deleting the station:", error)
 		}
 	};
-
 
 	const handleSearch = (searchTerm: string) => {
 		setSearchTerm(searchTerm);
@@ -428,7 +434,7 @@ const StationPageLoggedInView = () => {
 										>
 											{isMapView ? <FaTable /> : <FaMap />}
 										</Button>
-										<Form style={{ paddingBlock: "15px"}} className="d-flex col-md-4 row-md-10 ms-auto">
+										<Form style={{ paddingBlock: "15px" }} className="d-flex col-md-4 row-md-10 ms-auto">
 											<div className="d-flex align-items-center">
 												<Form.Select
 													value={perPage}

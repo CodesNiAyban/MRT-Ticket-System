@@ -1,8 +1,8 @@
 import express from "express";
-import { deductMinimumFare, getBeepCardByUUIC } from "../controllers/beepCardsController";
+import { tapIn, tapOut, getBeepCardByUUIC } from "../controllers/beepCardsController";
 import { getFares } from "../controllers/fareController";
 import { getStation, getStations } from "../controllers/stationsController";
-import { createTapInTransaction } from "../controllers/transactionController";
+import { createTapInTransaction, getTapInTransactionByUUIC } from "../controllers/transactionController";
 
 const router = express.Router();
 
@@ -14,7 +14,11 @@ router.get("/beepCard/:UUIC", getBeepCardByUUIC);
 
 router.get("/fares/getAllFares", getFares);
 
-router.patch("/beepCard/tapIn/:UUIC", deductMinimumFare);
+router.get("/transactions/:UUIC", getTapInTransactionByUUIC);
+
+router.patch("/beepCard/tapIn/:UUIC", tapIn);
+
+router.patch("/beepCard/tapOut/:UUIC", tapOut);
 
 router.post("/transactions/create", createTapInTransaction);
 

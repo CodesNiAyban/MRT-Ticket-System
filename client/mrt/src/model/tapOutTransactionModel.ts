@@ -1,8 +1,8 @@
-export interface TapInTransaction {
+export interface TapOutTransaction {
     UUIC?: string,
-	tapIn: boolean,
+    tapIn: boolean,
 	initialBalance?: number,
-	prevStation?: string,
+    prevStation?: string,
 	currStation?: string,
 	fare?: number,
 	currBalance?: number,

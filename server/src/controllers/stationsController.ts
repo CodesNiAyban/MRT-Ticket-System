@@ -36,16 +36,23 @@ export const createStation: RequestHandler<unknown, unknown, stationsInterface.C
 	const connectedTo = req.body.connectedTo;
 
 	try {
-		if (!stationName) { throw createHttpError(400, "Station must have a staionName"); }
-		if (!coords) { throw createHttpError(400, "Station must have a coords"); }
-		if (!connectedTo) { throw createHttpError(400, "Station must have a connectedTo"); }
+		if (!stationName) { throw createHttpError(400, "Station must have a stationName"); }
+		if (!coords) { throw createHttpError(400, "Station must have coords"); }
+		if (!connectedTo) { throw createHttpError(400, "Station must have connectedTo"); }
 
+		// Create the new station
 		const newStation = await StationModel.create({
 			stationName: stationName,
 			coords: coords,
 			connectedTo: connectedTo
 		});
 
+		// Append the ID of the new station to the connectedTo arrays of other stations
+		await Promise.all(connectedTo.map(async (stationId: string) => {
+			await StationModel.findByIdAndUpdate(stationId, { $push: { connectedTo: newStation._id } });
+		}));
+
+		// Respond with the newly created station
 		res.status(201).json(newStation);
 	} catch (error) {
 		next(error);
@@ -69,61 +76,37 @@ export const updateStation: RequestHandler<stationsInterface.UpdateStationParams
 
 		if (!station) throw createHttpError(404, "Station not found.");
 
-		// Remove connections that are not present in the updated connectedTo field
-		const removedConnections = station.connectedTo.filter(
-			(connectedStationId) => !newConnectedTo.includes(connectedStationId)
-		);
+		// Compare previous connectedTo array with newConnectedTo array
+		const prevConnectedTo = station.connectedTo;
 
-		// Update the connectedTo field for stations that are affected by removed connections
-		if (removedConnections && removedConnections.length > 0) {
-			await Promise.all(
-				removedConnections.map(async (removedStationId) => {
-					const removedStation = await StationModel.findById(removedStationId).exec();
-					if (removedStation) {
-						removedStation.connectedTo = removedStation.connectedTo.filter(
-							(connectedStationId) => connectedStationId !== stationId
-						);
-						await removedStation.save();
-					}
-				})
-			);
-		}
+		// Remove stations that were disconnected
+		await Promise.all(prevConnectedTo.map(async (prevConnectedStationId: string) => {
+			if (!newConnectedTo.includes(prevConnectedStationId)) {
+				// Remove the station from the connectedTo array of other stations
+				await StationModel.findByIdAndUpdate(prevConnectedStationId, { $pull: { connectedTo: stationId } });
+			}
+		}));
 
+		// Reconnect existing stations and update the connected stations
+		await Promise.all(newConnectedTo.map(async (newConnectedStationId: string) => {
+			if (newConnectedStationId !== stationId && !prevConnectedTo.includes(newConnectedStationId)) {
+				// Add the station to the connectedTo array of other stations
+				await StationModel.findByIdAndUpdate(newConnectedStationId, { $push: { connectedTo: stationId } });
+
+				// Update the station's connectedTo array with the new connection
+				await StationModel.findByIdAndUpdate(stationId, { $push: { connectedTo: newConnectedStationId } });
+			}
+		}));
+
+		// Update the station details
 		station.stationName = newStationName;
 		station.coords = newCoords;
 		station.connectedTo = newConnectedTo;
 
-		const updateStation = await station.save();
+		const updatedStation = await station.save();
 
-		res.status(200).json(updateStation);
+		res.status(200).json(updatedStation);
 	} catch (error) {
-		next(error);
-	}
-};
-
-export const updateStations: RequestHandler<unknown, unknown, stationsInterface.UpdateStationsBody, unknown> = async (req, res, next) => {
-	try {
-		const { stations: updatedStations } = req.body;
-
-		const bulkUpdateOps = updatedStations.map((updatedStation) => {
-			const { _id, stationName, coords, connectedTo } = updatedStation;
-
-			// Ensure that the own ID is not in the connectedTo array
-			const filteredConnectedTo = connectedTo.filter(id => id !== _id);
-
-			return {
-				updateOne: {
-					filter: { _id: new mongoose.Types.ObjectId(_id) },
-					update: { $set: { stationName, coords, connectedTo: filteredConnectedTo } },
-				},
-			};
-		});
-
-		const result = await StationModel.bulkWrite(bulkUpdateOps);
-
-		res.status(200).json({ updatedCount: result.modifiedCount });
-	} catch (error) {
-		console.error("An error occurred while updating stations:", error);
 		next(error);
 	}
 };
@@ -138,11 +121,19 @@ export const deleteStation: RequestHandler = async (req, res, next) => {
 
 		if (!station) throw createHttpError(404, "Station not found.");
 
+		// Remove the station ID from the connectedTo arrays of other stations
+		const connectedStations = await StationModel.find({ connectedTo: stationId }).exec();
+
+		await Promise.all(connectedStations.map(async (connectedStation) => {
+			connectedStation.connectedTo = connectedStation.connectedTo.filter(id => id !== stationId);
+			await connectedStation.save();
+		}));
+
+		// Delete the station
 		await station.deleteOne();
 
 		res.sendStatus(204);
 	} catch (error) {
 		next(error);
 	}
-
 };
