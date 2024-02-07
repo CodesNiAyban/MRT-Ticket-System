@@ -16,6 +16,7 @@ import { Fare as FareModel } from "../model/fareModel";
 import { Stations as StationsModel } from "../model/stationsModel";
 import { TapInTransaction as TapInTransactionModel } from "../model/tapInTransactionModel";
 import * as StationApi from '../network/mrtAPI';
+import { Graph, alg } from 'graphlib';
 
 const MrtTapIn = () => {
     const [mapCenter, setMapCenter] = useState<[number, number]>([14.550561416466541, 121.02785649562283]);
@@ -29,7 +30,7 @@ const MrtTapIn = () => {
     const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
     const [polylines, setPolylines] = useState<ReactElement[]>([]);
     const [beepCardNumber, setBeepCardNumber] = useState('637805');
-	const [beepCardNumberCheck, setBeepCardNumberCheck] = useState(false);
+    const [beepCardNumberCheck, setBeepCardNumberCheck] = useState(false);
     const [beepCard, setBeepCard] = useState<BeepCardsModel | null>(null);
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
@@ -55,6 +56,36 @@ const MrtTapIn = () => {
         shadowSize: [40, 40],
         shadowAnchor: [10, 46],
     });
+
+    useEffect(() => {
+        document.title = 'MRT ONLINE TAP-IN'; // Set the title dynamically
+    }, []);
+
+    const findShortestPath = (stations: StationsModel[], startStationId: string, endStationId: string): string[] => {
+        const graph = new Graph();
+
+        // Add stations and their connections to the graph
+        stations.forEach(station => {
+            graph.setNode(station._id);
+            station.connectedTo.forEach(connectedStationId => {
+                graph.setEdge(station._id, connectedStationId);
+            });
+        });
+
+        // Find the shortest path using Dijkstra's algorithm
+        const shortestPath = alg.dijkstra(graph, startStationId);
+
+        // Get the shortest path as an array of station IDs
+        const path: string[] = [];
+        let currentStationId = endStationId;
+        while (currentStationId !== startStationId) {
+            path.push(currentStationId);
+            currentStationId = shortestPath[currentStationId].predecessor;
+        }
+        path.push(startStationId); // Add the start station ID
+        path.reverse(); // Reverse the array to get the correct order from start to end
+        return path;
+    };
 
     useEffect(() => {
         const loadStationsAndMarkers = async () => {
@@ -154,111 +185,111 @@ const MrtTapIn = () => {
     }, []);
 
     const handleBeepCardNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const newValue = event.target.value.startsWith('637805') ? event.target.value : '637805';
-		setBeepCardNumber(newValue);
-	
-		// Reset tap-in details when changing the beep card number
-		setTapInDetails(null);
-	};
+        const newValue = event.target.value.startsWith('637805') ? event.target.value : '637805';
+        setBeepCardNumber(newValue);
+
+        // Reset tap-in details when changing the beep card number
+        setTapInDetails(null);
+    };
 
     const handleTapIn = async () => {
-		try {
-			if (beepCard?.UUIC) {
-				if (beepCard?.balance !== undefined && minimumFare?.price !== undefined) {
-					if (beepCard.balance >= minimumFare.price) {
-						// Sufficient balance, proceed with tap-in
-						if (!beepCard.isActive) {
-							// Construct tap-in transaction object
-							const beepCardResponse = await StationApi.tapInBeepCard(beepCard.UUIC);
-							
-							const tapInTransaction: TapInTransactionModel = {
-								UUIC: beepCard.UUIC,
+        try {
+            if (beepCard?.UUIC) {
+                if (beepCard?.balance !== undefined && minimumFare?.price !== undefined) {
+                    if (beepCard.balance >= minimumFare.price) {
+                        // Sufficient balance, proceed with tap-in
+                        if (!beepCard.isActive) {
+                            // Construct tap-in transaction object
+                            const beepCardResponse = await StationApi.tapInBeepCard(beepCard.UUIC);
+
+                            const tapInTransaction: TapInTransactionModel = {
+                                UUIC: beepCard.UUIC,
                                 tapIn: true,
-								initialBalance: beepCard.balance,
-								currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
-								prevStation: "",
+                                initialBalance: beepCard.balance,
+                                currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
+                                prevStation: "",
                                 fare: minimumFare.price,
-								currBalance: beepCardResponse.balance, // Update current balance after tap-in
-								createdAt: new Date().toISOString(), // Set current timestamp as creation time
-								updatedAt: new Date().toISOString(), // Set current timestamp as update time
-							};
-	
-							// Send tap-in transaction to API
-							const tapInDetailsResponse = await StationApi.createTapInTransaction(tapInTransaction);
-							
-							setBeepCard(beepCardResponse);
-	
-							// Update beep card details and tap-in details
-							setTapInDetails(tapInDetailsResponse);
-	
-							// Show success message
-							toast.success('Tap-in successful!', {
-								position: 'top-right',
-								autoClose: 2000,
-								hideProgressBar: false,
-								closeOnClick: true,
-								pauseOnHover: true,
-								draggable: true,
-							});
-						} else {
-							// Beep card is already tapped in
-							toast.warn('Beep Card Already Tapped In.', {
-								position: 'top-right',
-								autoClose: 2000,
-								hideProgressBar: false,
-								closeOnClick: true,
-								pauseOnHover: true,
-								draggable: true,
-							});
-						}
-					} else {
-						// Insufficient balance
-						toast.error('Insufficient balance. Please top up your beep card.', {
-							position: 'top-right',
-							autoClose: 2000,
-							hideProgressBar: false,
-							closeOnClick: true,
-							pauseOnHover: true,
-							draggable: true,
-						});
-					}
-				} else {
-					// Handle case where balance or price is undefined
-					console.error('Beep card balance or minimum fare price is undefined');
-				}
-			} else {
-				// Beep card not found
-				toast.error('Beep card not found!', {
-					position: 'top-right',
-					autoClose: 2000,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-				});
-			}
-		} catch (error) {
-			console.error(error);
-			// Show error message
-			toast.error('Tap-in failed. Please try again.', {
-				position: 'top-right',
-				autoClose: 2000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-			});
-		}
-	};
-	
+                                currBalance: beepCardResponse.balance, // Update current balance after tap-in
+                                createdAt: new Date().toISOString(), // Set current timestamp as creation time
+                                updatedAt: new Date().toISOString(), // Set current timestamp as update time
+                            };
+
+                            // Send tap-in transaction to API
+                            const tapInDetailsResponse = await StationApi.createTapInTransaction(tapInTransaction);
+
+                            setBeepCard(beepCardResponse);
+
+                            // Update beep card details and tap-in details
+                            setTapInDetails(tapInDetailsResponse);
+
+                            // Show success message
+                            toast.success('Tap-in successful!', {
+                                position: 'top-right',
+                                autoClose: 2000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                            });
+                        } else {
+                            // Beep card is already tapped in
+                            toast.warn('Beep Card Already Tapped In.', {
+                                position: 'top-right',
+                                autoClose: 2000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                            });
+                        }
+                    } else {
+                        // Insufficient balance
+                        toast.error('Insufficient balance. Please top up your beep card.', {
+                            position: 'top-right',
+                            autoClose: 2000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                        });
+                    }
+                } else {
+                    // Handle case where balance or price is undefined
+                    console.error('Beep card balance or minimum fare price is undefined');
+                }
+            } else {
+                // Beep card not found
+                toast.error('Beep card not found!', {
+                    position: 'top-right',
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            // Show error message
+            toast.error('Tap-in failed. Please try again.', {
+                position: 'top-right',
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+        }
+    };
+
     useEffect(() => {
         const loadBeepCardDetails = async () => {
             try {
                 const cardDetails = await StationApi.getBeepCard(beepCardNumber);
                 setBeepCard(cardDetails);
-				setBeepCardNumberCheck(true)
+                setBeepCardNumberCheck(true)
             } catch (error) {
-				setBeepCardNumberCheck(false)
+                setBeepCardNumberCheck(false)
             }
         };
 

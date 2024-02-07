@@ -34,6 +34,7 @@ const MrtTapOut = () => {
     const [beepCardNumber, setBeepCardNumber] = useState('637805');
     const [beepCard, setBeepCard] = useState<BeepCardsModel | null>(null);
     const [transactionResponse, setTransactionResponse] = useState<TapInTransactionModel | null>(null);
+    const [farePerMeters, setFarePerMeters] = useState(Number)
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
     const { stationName } = useParams();
@@ -58,6 +59,10 @@ const MrtTapOut = () => {
         shadowSize: [40, 40],
         shadowAnchor: [10, 46],
     });
+
+    useEffect(() => {
+        document.title = 'MRT ONLINE TAP-OUT'; // Set the title dynamically
+    }, []);
 
     useEffect(() => {
         const loadStationsAndMarkers = async () => {
@@ -152,7 +157,6 @@ const MrtTapOut = () => {
                 setShowStationsLoadingError(true);
             }
         }
-
         loadStationsAndMarkers();
     }, []);
 
@@ -163,6 +167,7 @@ const MrtTapOut = () => {
         // Reset tap-in details when changing the beep card number
         setTapOutDetails(null);
     };
+
 
     const findShortestPath = (stations: StationsModel[], startStationId: string, endStationId: string): string[] => {
         const graph = new Graph();
@@ -198,8 +203,7 @@ const MrtTapOut = () => {
                         // Sufficient balance, proceed with tap-in
                         if (beepCard.isActive) {
                             // Construct tap-in transaction object
-
-                            const beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, 10); //replace 0 with fare per km 
+                            const beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters); //replace 10 with minimumFare per 500m approximately then if not exact value, return approximate
 
                             const tapOutTransaction: TapOutTransactionModel = {
                                 UUIC: beepCard.UUIC,
@@ -207,8 +211,8 @@ const MrtTapOut = () => {
                                 initialBalance: beepCard.balance,
                                 prevStation: transactionResponse?.currStation,
                                 currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
-                                fare: minimumFare.price, //Change to per km fare 
-                                currBalance: transactionResponse?.currBalance,
+                                fare: farePerMeters, //Change to per km fare 
+                                currBalance: beepCardResponse?.balance,
                                 createdAt: new Date().toISOString(),
                                 updatedAt: new Date().toISOString(),
                             };
@@ -281,7 +285,22 @@ const MrtTapOut = () => {
         }
     };
 
+    const calculateFare = (pathDistance: number, minimumFare: FareModel | undefined) => {
+        const baseFare = minimumFare?.price;
+        const additionalMeters = pathDistance - 500; // Exclude the first 500 meters
+        const farePer500Meters = minimumFare?.price; // Adjust this value as needed
+
+        // Calculate the additional fare for every 500 meters beyond the first 500 meters
+        const additionalFare = Math.ceil(additionalMeters / 500) * farePer500Meters!;
+
+        // Total fare is the base fare plus additional fare
+        const totalFare = baseFare! + additionalFare;
+
+        return totalFare;
+    };
+
     useEffect(() => {
+        setPathPolylines([])
         const loadBeepCardDetails = async () => {
             try {
                 const cardDetails = await StationApi.getBeepCard(beepCardNumber);
@@ -289,7 +308,6 @@ const MrtTapOut = () => {
                     const transactionResponse = await StationApi.getTapInTransactionByUUIC(beepCardNumber);
                     setTransactionResponse(transactionResponse)
                     setBeepCard(cardDetails);
-
 
                     const prevStationId = stations.find(station => station.stationName === transactionResponse?.currStation)?._id;
                     const currStationId = stations.find(station => station.stationName.replace(/[\s-]+/g, '_').toLocaleLowerCase() === stationName)?._id;
@@ -308,14 +326,13 @@ const MrtTapOut = () => {
                             }
                             return acc;
                         }, 0);
+                        setFarePerMeters(calculateFare(pathDistance, minimumFare))
 
                         const pathPolylines = shortestPath.map((stationId, index) => {
                             if (index > 0) {
                                 const prevStation = stations.find(station => station._id === shortestPath[index - 1]);
                                 const currStation = stations.find(station => station._id === stationId);
                                 if (prevStation && currStation) {
-                                    const distance = L.latLng(prevStation.coords[0], prevStation.coords[1])
-                                        .distanceTo(L.latLng(currStation.coords[0], currStation.coords[1]));
                                     return (
                                         <Polyline
                                             key={`path-${prevStation._id}-${currStation._id}`}
@@ -323,10 +340,9 @@ const MrtTapOut = () => {
                                                 [prevStation.coords[0], prevStation.coords[1]],
                                                 [currStation.coords[0], currStation.coords[1]],
                                             ]}
-                                            color="blue"
-                                            weight={3}
+                                            color="red"
+                                            weight={5}
                                             opacity={0.7}
-                                            dashArray="5, 10"
                                         />
                                     );
                                 }
@@ -349,7 +365,6 @@ const MrtTapOut = () => {
 
                 }
             } catch (error) {
-                setPathPolylines([])
                 console.log(error)
             }
         };
@@ -431,7 +446,7 @@ const MrtTapOut = () => {
                                         <p className="text-xl lg:text-2xl text-white mb-1">Previous Station: {tapOutDetails.prevStation}</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Current Station: {stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase())}</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Date of Tap-in: {formatDate(tapOutDetails.updatedAt)}</p>
-                                        <p className="text-xl lg:text-2xl text-white mb-1">Deducted Minimum Fare: {minimumFare?.price}</p>
+                                        <p className="text-xl lg:text-2xl text-white mb-1">Fare: {farePerMeters}</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapOutDetails.currBalance}</p>
                                     </div>
                                 )}
