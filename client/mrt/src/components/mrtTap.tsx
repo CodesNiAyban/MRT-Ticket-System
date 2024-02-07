@@ -30,6 +30,7 @@ const StationPageLoggedInView = () => {
     const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
     const [polylines, setPolylines] = useState<ReactElement[]>([]);
     const [beepCardNumber, setBeepCardNumber] = useState('637805');
+	const [beepCardNumberCheck, setBeepCardNumberCheck] = useState(false);
     const [beepCard, setBeepCard] = useState<BeepCardsModel | null>(null);
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
@@ -155,9 +156,12 @@ const StationPageLoggedInView = () => {
     }, []);
 
     const handleBeepCardNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = event.target.value.startsWith('637805') ? event.target.value : '637805';
-        setBeepCardNumber(newValue);
-    };
+		const newValue = event.target.value.startsWith('637805') ? event.target.value : '637805';
+		setBeepCardNumber(newValue);
+	
+		// Reset tap-in details when changing the beep card number
+		setTapInDetails(null);
+	};
 
     const handleTapIn = async () => {
 		try {
@@ -167,22 +171,24 @@ const StationPageLoggedInView = () => {
 						// Sufficient balance, proceed with tap-in
 						if (!beepCard.isActive) {
 							// Construct tap-in transaction object
+							const beepCardResponse = await StationApi.tapInBeepCard(beepCard.UUIC);
+							
 							const tapInTransaction: TapInTransactionModel = {
 								UUIC: beepCard.UUIC,
 								initialBalance: beepCard.balance,
 								currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
 								fare: minimumFare.price,
-								currBalance: beepCard.balance - minimumFare.price, // Update current balance after tap-in
+								currBalance: beepCardResponse.balance, // Update current balance after tap-in
 								createdAt: new Date().toISOString(), // Set current timestamp as creation time
 								updatedAt: new Date().toISOString(), // Set current timestamp as update time
 							};
 	
 							// Send tap-in transaction to API
-							const beepCardResponse = await StationApi.tapInBeepCard(beepCard.UUIC);
 							const tapInDetailsResponse = await StationApi.createTapInTransaction(tapInTransaction);
+							
+							setBeepCard(beepCardResponse);
 	
 							// Update beep card details and tap-in details
-							setBeepCard(beepCardResponse);
 							setTapInDetails(tapInDetailsResponse);
 	
 							// Show success message
@@ -251,8 +257,9 @@ const StationPageLoggedInView = () => {
             try {
                 const cardDetails = await StationApi.getBeepCard(beepCardNumber);
                 setBeepCard(cardDetails);
+				setBeepCardNumberCheck(true)
             } catch (error) {
-                console.error(error);
+				setBeepCardNumberCheck(false)
             }
         };
 
@@ -335,7 +342,7 @@ const StationPageLoggedInView = () => {
                                 />
                                 {tapInDetails && (
                                     <div className="mb-5">
-                                        <p className="text-xl lg:text-2xl text-white mb-1">Initial Balance: {beepCard?.balance ? beepCard.balance + (minimumFare?.price || 0) : 0}</p>
+                                        <p className="text-xl lg:text-2xl text-white mb-1">Initial Balance: {tapInDetails.initialBalance}</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Current Station: {stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase())}</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Date of Tap-in: {formatDate(tapInDetails.updatedAt)}</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Deducted Minimum Fare: {minimumFare?.price}</p>
