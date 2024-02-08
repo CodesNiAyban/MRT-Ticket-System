@@ -19,7 +19,6 @@ interface AddEditStationDialogProps {
 	coordinates?: [number, number] | null;
 	newStation: StationsModel | null;
 	stations: StationsModel[];
-	isDragged: boolean;
 }
 
 const AddEditStationDialog = ({
@@ -29,7 +28,6 @@ const AddEditStationDialog = ({
 	coordinates,
 	newStation,
 	stations,
-	isDragged
 }: AddEditStationDialogProps) => {
 	const {
 		register,
@@ -53,14 +51,6 @@ const AddEditStationDialog = ({
 	const setDefaultValues = () => {
 		setValue('stationName', stationToEdit?.stationName || '');
 
-		// Set default values for coordinates
-		const defaultLatitude = coordinates?.[0] || 0;
-		const defaultLongitude = coordinates?.[1] || 0;
-
-		if (isDragged && coordinates) {
-			setValue('coords.0', defaultLatitude);
-			setValue('coords.1', defaultLongitude);
-		}
 		// Handle the connectedTo field
 		const connectedToStations = stationToEdit?.connectedTo || [];
 

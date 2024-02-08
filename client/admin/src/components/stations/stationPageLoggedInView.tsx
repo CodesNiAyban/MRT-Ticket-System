@@ -38,8 +38,6 @@ const StationPageLoggedInView = () => {
 	const [clickedCoords, setClickedCoords] = useState<[number, number] | null>(null);
 	const [polylines, setPolylines] = useState<ReactElement[]>([]);
 	const [newStation, setNewStation] = useState<StationsModel | null>(null);
-	const [draggedCoords, setDraggedCoords] = useState<[number, number] | null>(null);
-	const [isDragged, setIsDragged] = useState(false)
 	const mapContainerRef = useRef<HTMLDivElement>(null);
 
 	const [perPage, setPerPage] = useState(5);
@@ -81,34 +79,63 @@ const StationPageLoggedInView = () => {
 		shadowAnchor: [10, 46],
 	});
 
-
-	const handleMarkerDragEnd = (event: any, station: StationsModel) => {
+	const handleMarkerDragEnd = async (event: any, station: StationsModel) => {
 		if (!station.connectedTo) {
 			// If the station is not connected to any other stations, allow dragging
 			const { lat, lng } = event.target.getLatLng();
-			setDraggedCoords([lat, lng]);
-			setIsDragged(true);
+			// Update the station's coordinates
+			station.coords = [lat, lng];
+			// Update the station in the state
+			setStations(prevStations => {
+				const updatedStations = prevStations.map(s => {
+					if (s._id === station._id) {
+						return { ...s, coords: [lat, lng] };
+					}
+					return s;
+				});
+				return updatedStations;
+			});
 			return;
 		}
+
+		const stations = await StationApi.fetchStations();
+		setStations(stations);
+		let distance: number | undefined;
+		let stationConnectedName;
 
 		// If the station is connected to other stations, check if dragging would exceed the limit
 		const isExceedingLimit = station.connectedTo.some((connectedStationId) => {
 			const connectedStation = stations.find(s => s._id === connectedStationId);
 			if (connectedStation) {
-				const connectedLatLng = L.latLng(connectedStation.coords[0], connectedStation.coords[1]); // Provide latitude and longitude separately
-				const distance = event.target.getLatLng().distanceTo(connectedLatLng);
-				return distance < 500;
+				stationConnectedName = connectedStation.stationName; // Assign connected station's name
+				const connectedLatLng = L.latLng(connectedStation.coords[0], connectedStation.coords[1]);
+				distance = event.target.getLatLng().distanceTo(connectedLatLng);
+				return distance! < 500;
+			} else {
+				// Log a warning if the connected station cannot be found
+				console.warn(`Connected station with ID ${connectedStationId} not found.`);
+				return false;
 			}
 		});
 
 		if (!isExceedingLimit) {
 			// If dragging would not exceed the limit, allow dragging
 			const { lat, lng } = event.target.getLatLng();
-			setDraggedCoords([lat, lng]);
-			setIsDragged(true);
+			// Update the station's coordinates
+			station.coords = [lat, lng];
+			// Update the station in the state
+			setStations(prevStations => {
+				const updatedStations = prevStations.map(s => {
+					if (s._id === station._id) {
+						return { ...s, coords: [lat, lng] };
+					}
+					return s;
+				});
+				return updatedStations;
+			});
 		} else {
 			// If dragging would exceed the limit, show a warning toast
-			toast.warn("Stations cannot be placed less than 500m from connected stations.", {
+			toast.warn(station.stationName + " is " + Math.round(distance!) + "m to " + stationConnectedName + ", must be less than 500m from connected stations.", {
 				position: "top-right",
 				autoClose: 3000,
 				hideProgressBar: false,
@@ -118,7 +145,6 @@ const StationPageLoggedInView = () => {
 				progress: undefined,
 			});
 			// Reset dragging state and refresh the station marker
-			setIsDragged(false);
 			refresh();
 		}
 	};
@@ -179,7 +205,6 @@ const StationPageLoggedInView = () => {
 			try {
 				setShowStationsLoadingError(false);
 				setStationsLoading(true);
-				setIsDragged(false)
 
 				const stations = await StationApi.fetchStations();
 				setStations(stations);
@@ -399,6 +424,7 @@ const StationPageLoggedInView = () => {
 				{isMapView ? (
 					<div ref={mapContainerRef} id="map" className="map">
 						<MapContainer
+							key={isMapView ? 'map-view' : 'table-view'}
 							center={mapCenter}
 							zoomControl={false}
 							zoom={13}
@@ -593,8 +619,6 @@ const StationPageLoggedInView = () => {
 							});
 						}}
 						newStation={newStation}
-						isDragged={false}
-
 					/>
 				)}
 
@@ -632,9 +656,7 @@ const StationPageLoggedInView = () => {
 							});
 						}}
 						newStation={null}
-						coordinates={draggedCoords}
-						isDragged={isDragged}
-
+						coordinates={[stationToEdit.coords[0], stationToEdit.coords[1]]}
 					/>
 				)}
 

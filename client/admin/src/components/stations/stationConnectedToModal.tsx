@@ -3,7 +3,7 @@ import L, { } from 'leaflet'
 import 'leaflet/dist/leaflet.css'; // Ensure this import for Leaflet styles
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Button, Modal} from 'react-bootstrap';
+import { Button, Modal } from 'react-bootstrap';
 import { Stations as StationsModel } from '../../model/stationsModel';
 import Select from "react-select";
 import styles from './station.module.css';
@@ -178,10 +178,12 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 				});
 			});
 
+			setPrevPolylines([])
 			const createPolyline = (station1: StationsModel, station2: StationsModel) => {
+				const connectionKey = [station1, station2].sort().join('-');
 				const line = (
 					<Polyline
-						key={`polyline-${station2._id}`}
+						key={`prevPolyline-${connectionKey} ${Math.random()}`}
 						positions={[
 							[station1.coords[0], station1.coords[1]],
 							[station2.coords[0], station2.coords[1]],
@@ -196,14 +198,14 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 			};
 
 			// Create polylines based on stationToEdit
-				if (stationToEdit) {
-					stationToEdit.connectedTo.forEach((connectedStationId) => {
-						const connectedStation = stations.find((s) => s._id === connectedStationId);
-						if (connectedStation) {
-							createPolyline(stationToEdit, connectedStation);
-						}
-					});
-				}
+			if (stationToEdit) {
+				stationToEdit.connectedTo.forEach((connectedStationId) => {
+					const connectedStation = stations.find((s) => s._id === connectedStationId);
+					if (connectedStation) {
+						createPolyline(stationToEdit, connectedStation);
+					}
+				});
+			}
 			setMapPolylines(lines);
 		}
 		loadPolylines();
@@ -262,14 +264,14 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 
 	return (
 		<>
-		<ToastContainer limit={3} style={{zIndex: 9999}}/>
+			<ToastContainer limit={3} style={{ zIndex: 9999 }} />
 			<Modal show={show} onHide={onHide} size="lg">
 				<Modal.Header closeButton>
 					<Modal.Title>Connect Stations</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<div id="map" className={`${styles.mapContainer} border rounded`} style={{ width: '100%', height: '400px' }}>
-						<MapContainer center={[14.550561416466541, 121.02785649562283]} zoom={13} zoomControl={false} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
+						<MapContainer center={stationToEdit ? [stationToEdit.coords[0], stationToEdit.coords[1]] : (newStation ? [newStation.coords[0], newStation.coords[1]] : [14.550561416466541, 121.02785649562283])} zoom={12} zoomControl={false} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
 							<TileLayer
 								url={`https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=nPH7qRKnbY2zWEdTCjFRqXjz613lqVhL2znKd62LYJ4QkHdss41QY5FT4M75nCPv`}
 							/>
@@ -284,10 +286,13 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 										<Select
 											isMulti
 											name="stations"
-											options={stations.map((station) => ({
-												label: station.stationName,
-												value: station._id,
-											}))}
+											options={stations
+												.filter(station => station !== stationToEdit && station !== newStation) // Filter out stationToEdit and newStation
+												.map((station) => ({
+													label: station.stationName,
+													value: station._id,
+												}))
+											}
 											value={selectedStations.map((station) => ({
 												label: station.stationName,
 												value: station._id,
@@ -297,7 +302,7 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 												const updatedSelectedStations = stations.filter((station) =>
 													selectedStationIds.includes(station._id)
 												);
-												onClearSelectedStations();
+												//onClearSelectedStations(); // Clear the previous selections
 												updatedSelectedStations.forEach((station) => onStationSelection(station));
 											}}
 											isClearable={false} // Disable the clear option

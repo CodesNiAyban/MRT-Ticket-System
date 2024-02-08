@@ -108,6 +108,7 @@ export const logout: RequestHandler = (req, res, next) => {
 		if (error) {
 			next(error);
 		} else {
+			res.clearCookie("connect.sid"); 
 			res.sendStatus(200);
 		}
 	});
