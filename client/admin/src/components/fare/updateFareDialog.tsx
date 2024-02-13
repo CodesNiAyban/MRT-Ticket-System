@@ -33,8 +33,8 @@ const UpdateFareDialog: React.FC<UpdateFareDialog> = ({
 
     async function onSubmit(input: Fare) {
         try {
-            if (input.price < 10 || input.price > 5000) {
-                toast.error(`Prices are only limited to 10 and 5000.`, {
+            if (input.price < 1 || input.price > 5000) {
+                toast.error(`Prices are only limited to 1 and 5000.`, {
                     position: "top-center",
                     autoClose: 5000,
                     hideProgressBar: false,

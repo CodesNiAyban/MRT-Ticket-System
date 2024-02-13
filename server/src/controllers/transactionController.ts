@@ -30,7 +30,6 @@ export const createTapInTransaction: RequestHandler<unknown, unknown, TapInTrans
 	try {
 		if (!UUIC) { throw createHttpError(400, "Transaction must have a UUIC"); }
 		if (!initialBalance) { throw createHttpError(400, "Transaction must have a initialBalance"); }
-		if (!fare) { throw createHttpError(400, "Transaction must have a fare"); }
 		if (!currBalance) { throw createHttpError(400, "Transaction must have a currBalance"); }
 
 		const newTapInTransaction = await TapTransactionModel.create({

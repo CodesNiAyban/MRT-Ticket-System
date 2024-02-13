@@ -92,15 +92,16 @@ const AddEditStationDialog = ({
 
 	const onSubmit = async (input: StationInput) => {
 		try {
-			// Create a new input object with connectedTo as an array of strings
-			const updatedInput = { ...input, connectedTo: input.connectedTo };
+			const updatedInput = {
+				...input,
+				connectedTo: input.connectedTo,
+				stationName: input.stationName.toLowerCase(), // Convert station name to lowercase
+			};
 
 			let stationResponse: Stations;
 			if (stationToEdit) {
-				// Editing an existing station
 				stationResponse = await StationsApi.updateStation(stationToEdit._id, updatedInput);
 			} else {
-				// Adding a new station
 				stationResponse = await StationsApi.createStation(updatedInput);
 			}
 			onStationSaved(stationResponse);
@@ -109,7 +110,6 @@ const AddEditStationDialog = ({
 			alert(error);
 		}
 	};
-
 
 	const handlePolylines = (polylines: any) => {
 		setPolylines(polylines)
@@ -239,8 +239,16 @@ const AddEditStationDialog = ({
 						type="text"
 						placeholder="Title"
 						register={register}
-						registerOptions={{ required: 'Required' }}
+						registerOptions={{
+							required: 'Required',
+							maxLength: 50, // Limit to 10 characters
+							pattern: {
+								value: /^[a-zA-Z0-9\s]*$/, // Allow only alphanumeric characters and spaces
+								message: 'Invalid input. Only alphanumeric characters and spaces are allowed.',
+							},
+						}}
 						error={errors.stationName}
+						transformInput={(value: string) => value.toLowerCase()} // Transform input to lowercase
 					/>
 
 					{/* Latitude form input */}

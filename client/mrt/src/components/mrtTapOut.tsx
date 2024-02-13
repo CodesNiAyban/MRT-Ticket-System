@@ -22,6 +22,8 @@ import { formatDate } from "../utils/formatDate";
 const MrtTapOut = () => {
     const [mapCenter, setMapCenter] = useState<[number, number]>([14.550561416466541, 121.02785649562283]);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     // Load Stations
     const [stations, setStations] = useState<StationsModel[]>([]);
     const [fares, setFares] = useState<FareModel[]>([]);
@@ -35,6 +37,8 @@ const MrtTapOut = () => {
     const [beepCard, setBeepCard] = useState<BeepCardsModel | null>(null);
     const [transactionResponse, setTransactionResponse] = useState<TapInTransactionModel | null>(null);
     const [farePerMeters, setFarePerMeters] = useState(Number)
+    const [pathDistance, setPathDistance] = useState(Number)
+    const [resetBeepCard, setResetBeepCard] = useState(false)
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
     const { stationName } = useParams();
@@ -96,12 +100,12 @@ const MrtTapOut = () => {
                         >
                             {isCurrentStation ? (
                                 <Popup className={`text-center ${isCurrentStation ? 'rounded-lg shadow-lg' : ''}`}>
-                                    <h3 className="font-bold">{station.stationName}</h3>
-                                    YOU ARE CURRENTLY HERE ^^
+                                    <h3 className="font-bold">{toTitleCase(station.stationName)}</h3>
+                                    YOU ARE CURRENTLY HERE
                                 </Popup>
                             ) : (
                                 <Popup className={`text-center ${isCurrentStation ? 'rounded-lg shadow-lg' : ''}`}>
-                                    <h3 className="font-bold">{station.stationName}</h3>
+                                    <h3 className="font-bold">{toTitleCase(station.stationName)}</h3>
                                     <br />
                                 </Popup>
                             )}
@@ -155,19 +159,28 @@ const MrtTapOut = () => {
             } catch (error) {
                 console.error(error);
                 setShowStationsLoadingError(true);
+            }  finally {
+                setResetBeepCard(false)
             }
         }
         loadStationsAndMarkers();
-    }, []);
+    }, [resetBeepCard]);
 
     const handleBeepCardNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = event.target.value.startsWith('637805') ? event.target.value : '637805';
+        // Limit input to numbers only
+        const newValue = event.target.value.replace(/\D/g, '').startsWith('637805') ? event.target.value : '637805';
         setBeepCardNumber(newValue);
+        // Limit input to maximum of 15 characters
+        const maxLength = 15;
+        const truncatedValue = newValue.slice(0, maxLength);
+        console.log(truncatedValue)
+        console.log(truncatedValue.length === 14)
+        if(truncatedValue.length === 14)setResetBeepCard(true)
+        setBeepCardNumber(truncatedValue);
 
         // Reset tap-in details when changing the beep card number
         setTapOutDetails(null);
     };
-
 
     const findShortestPath = (stations: StationsModel[], startStationId: string, endStationId: string): string[] => {
         const graph = new Graph();
@@ -202,9 +215,16 @@ const MrtTapOut = () => {
                     if (beepCard.balance >= minimumFare.price) {
                         // Sufficient balance, proceed with tap-in
                         if (beepCard.isActive) {
-                            // Construct tap-in transaction object
-                            const beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters); //replace 10 with minimumFare per 500m approximately then if not exact value, return approximate
+                            let beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters);
+                            if (transactionResponse && transactionResponse.currStation === stationName?.replace(/[\s-]+/g, ' '))
+                                beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, 0);
+                            else
+                                beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters);
 
+                            // Construct tap-in transaction object
+                            //replace 10 with minimumFare per 500m approximately then if not exact value, return approximate
+                            // Set the submission status to true when starting the submission process
+                            setIsSubmitting(true);
                             const tapOutTransaction: TapOutTransactionModel = {
                                 UUIC: beepCard.UUIC,
                                 tapIn: false,
@@ -225,8 +245,10 @@ const MrtTapOut = () => {
                             // Update beep card details and tap-in details
                             setTapOutDetails(tapOutDetailsResponse);
 
+                            setBeepCard(await StationApi.getBeepCard(beepCardNumber));
+
                             // Show success message
-                            toast.success('Tap-out successful! Thank you for using MRT-3', {
+                            toast.success('Tap-out successful! Thank you for using MRT-3.', {
                                 position: 'top-right',
                                 autoClose: 2000,
                                 hideProgressBar: false,
@@ -282,22 +304,31 @@ const MrtTapOut = () => {
                 pauseOnHover: true,
                 draggable: true,
             });
+        } finally {
+            // Set the submission status back to false after the submission process completes
+            setIsSubmitting(false);
         }
     };
 
-    const calculateFare = (pathDistance: number, minimumFare: FareModel | undefined) => {
+    const calculateFare = (pathDistanceInKM: number, minimumFare: FareModel | undefined) => {
         const baseFare = minimumFare?.price;
-        const additionalMeters = pathDistance - 500; // Exclude the first 500 meters
-        const farePer500Meters = minimumFare?.price; // Adjust this value as needed
+        const additionalKilometers = (pathDistanceInKM - 1000) / 1000; // Convert meters to kilometers and exclude the first kilometer
+        const farePerKilometer = minimumFare?.price; // Assuming you have a price per kilometer defined in your FareModel
 
-        // Calculate the additional fare for every 500 meters beyond the first 500 meters
-        const additionalFare = Math.ceil(additionalMeters / 500) * farePer500Meters!;
+        // Calculate the additional fare for every kilometer beyond the first kilometer
+        const additionalFare = additionalKilometers * farePerKilometer!;
 
         // Total fare is the base fare plus additional fare
         const totalFare = baseFare! + additionalFare;
 
-        return totalFare;
+        return Math.ceil(totalFare);
     };
+
+    function toTitleCase(str: string) {
+        return str.replace(/\b\w/g, function (char: string) {
+            return char.toUpperCase();
+        });
+    }
 
     useEffect(() => {
         setPathPolylines([])
@@ -310,8 +341,7 @@ const MrtTapOut = () => {
                     setBeepCard(cardDetails);
 
                     const prevStationId = stations.find(station => station.stationName === transactionResponse?.currStation)?._id;
-                    const currStationId = stations.find(station => station.stationName.replace(/[\s-]+/g, '_').toLocaleLowerCase() === stationName)?._id;
-
+                    const currStationId = stations.find(station => station.stationName.replace(/[\s-]+/g, '_').toLocaleLowerCase() === stationName)!._id;
                     if (prevStationId && currStationId) {
                         const shortestPath = findShortestPath(stations, prevStationId, currStationId);
                         const pathDistance = shortestPath.reduce((acc, stationId, index) => {
@@ -326,6 +356,7 @@ const MrtTapOut = () => {
                             }
                             return acc;
                         }, 0);
+                        setPathDistance(pathDistance)
                         setFarePerMeters(calculateFare(pathDistance, minimumFare))
 
                         const pathPolylines = shortestPath.map((stationId, index) => {
@@ -351,8 +382,37 @@ const MrtTapOut = () => {
                         });
                         const pathPolylinesFiltered = pathPolylines.filter((element) => element !== null) as ReactElement[];
                         setPathPolylines(pathPolylinesFiltered);
+
+                        // Replace marker for the previous station with new custom marker
+                        const prevStationName = transactionResponse?.currStation;
+
+                        const prevStation = stations.find(station => station.stationName === prevStationName);
+                        if (prevStation) {
+                            const updatedMapMarkers = mapMarkers.map((marker) => {
+                                if (marker.key === prevStation._id) {
+                                    return (
+                                        <Marker
+                                            key={prevStation._id}
+                                            position={[prevStation.coords[0], prevStation.coords[1]]}
+                                            icon={newCustomIcon} // Replace the icon with the new custom icon
+                                            eventHandlers={{
+                                                mouseover: (event) => event.target.openPopup(),
+                                                mouseout: (event) => event.target.closePopup()
+                                            }}
+                                        >
+                                            <Popup className={`text-center rounded-lg shadow-lg`}>
+                                                <h3 className="font-bold">{toTitleCase(prevStation.stationName)}</h3>
+                                                PREVIOUS STATION
+                                            </Popup>
+                                        </Marker>
+                                    );
+                                }
+                                return marker;
+                            });
+                            setMapMarkers(updatedMapMarkers);
+                        }
                     } else {
-                        toast.warn('Path not found, please contact admin.', {
+                        toast.warn('No previous station found. Beep card already tapped out.', {
                             position: 'top-right',
                             autoClose: 2000,
                             hideProgressBar: false,
@@ -363,6 +423,8 @@ const MrtTapOut = () => {
                         return
                     }
 
+                } else {
+                    setBeepCard(null)
                 }
             } catch (error) {
                 console.log(error)
@@ -445,17 +507,18 @@ const MrtTapOut = () => {
                                         <p className="text-xl lg:text-2xl text-white mb-1">Initial Balance: {tapOutDetails.initialBalance}</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Previous Station: {tapOutDetails.prevStation}</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Current Station: {stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase())}</p>
+                                        <p className="text-xl lg:text-2xl text-white mb-1">Distance: {(pathDistance / 1000).toFixed(2)}km</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Date of Tap-in: {formatDate(tapOutDetails.updatedAt)}</p>
                                         <p className="text-xl lg:text-2xl text-white mb-1">Fare: {farePerMeters}</p>
-                                        <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapOutDetails.currBalance}</p>
+                                        <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapOutDetails.initialBalance ? (tapOutDetails.initialBalance - farePerMeters) : 'N/A'}</p>
                                     </div>
                                 )}
                                 <Button
                                     className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
-                                    disabled={!beepCard?.UUIC} // Disable the button if beepCard is null
-                                    onClick={handleTapOut} // Call handleTapIn when the button is clicked
+                                    disabled={!beepCard?.UUIC || isSubmitting} // Disable tap-out if beepCard UUIC is invalid or submitting
+                                    onClick={handleTapOut} // Call handleTapOut when the button is clicked
                                 >
-                                    TAP-OUT
+                                    {isSubmitting ? 'TAPPING OUT...' : 'TAP-OUT'}
                                 </Button>
                             </div>
                         </TabPanel>
@@ -471,7 +534,7 @@ const MrtTapOut = () => {
                         </TabPanel>
 
                         <TabPanel>
-                            {beepCard && (
+                            {beepCard ? (
                                 <>
                                     <h2 className="text-3xl lg:text-4xl font-semibold mb-2 lg:mb-10 text-white flex items-center lg:gap-2 justify-center" style={{ marginTop: '15px' }}>
                                         Beep Card Info
@@ -489,6 +552,12 @@ const MrtTapOut = () => {
                                     <p className="text-2xl lg:text-3xl text-white mb-1">Last Updated:</p>
                                     <p className="text-xl lg:text-2xl text-white mb-3">{formatDate(beepCard.updatedAt)}</p>
                                     {/* Add more details as needed */}
+                                </>
+                            ) : (
+                                <>
+                                    <h2 className="text-3xl lg:text-4xl font-semibold mb-2 lg:mb-10 text-white flex items-center lg:gap-2 justify-center" style={{ marginTop: '15px' }}>
+                                        No Beep Card Entered
+                                    </h2>
                                 </>
                             )}
                         </TabPanel>

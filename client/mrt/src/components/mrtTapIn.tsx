@@ -61,31 +61,6 @@ const MrtTapIn = () => {
         document.title = 'MRT ONLINE TAP-IN'; // Set the title dynamically
     }, []);
 
-    const findShortestPath = (stations: StationsModel[], startStationId: string, endStationId: string): string[] => {
-        const graph = new Graph();
-
-        // Add stations and their connections to the graph
-        stations.forEach(station => {
-            graph.setNode(station._id);
-            station.connectedTo.forEach(connectedStationId => {
-                graph.setEdge(station._id, connectedStationId);
-            });
-        });
-
-        // Find the shortest path using Dijkstra's algorithm
-        const shortestPath = alg.dijkstra(graph, startStationId);
-
-        // Get the shortest path as an array of station IDs
-        const path: string[] = [];
-        let currentStationId = endStationId;
-        while (currentStationId !== startStationId) {
-            path.push(currentStationId);
-            currentStationId = shortestPath[currentStationId].predecessor;
-        }
-        path.push(startStationId); // Add the start station ID
-        path.reverse(); // Reverse the array to get the correct order from start to end
-        return path;
-    };
 
     useEffect(() => {
         const loadStationsAndMarkers = async () => {
@@ -97,7 +72,7 @@ const MrtTapIn = () => {
                 setStations(stations)
                 setFares(fares)
 
-                const isStationNameValid = stations.some(station => station.stationName.replace(/[\s-]+/g, '_').toLocaleLowerCase() === stationName);
+                const isStationNameValid = stations.some(station => station.stationName.replace(/[\s-]+/g, '_') === stationName);
 
                 if (!isStationNameValid) {
                     // Redirect to PageNotFound if the stationName is not valid
@@ -119,12 +94,12 @@ const MrtTapIn = () => {
                         >
                             {isCurrentStation ? (
                                 <Popup className={`text-center ${isCurrentStation ? 'rounded-lg shadow-lg' : ''}`}>
-                                    <h3 className="font-bold">{station.stationName}</h3>
-                                    YOU ARE CURRENTLY HERE ^^
+                                    <h3 className="font-bold">{toTitleCase(station.stationName)}</h3>
+                                    YOU ARE CURRENTLY HERE
                                 </Popup>
                             ) : (
                                 <Popup className={`text-center ${isCurrentStation ? 'rounded-lg shadow-lg' : ''}`}>
-                                    <h3 className="font-bold">{station.stationName}</h3>
+                                    <h3 className="font-bold">{toTitleCase(station.stationName)}</h3>
                                     <br />
                                 </Popup>
                             )}
@@ -185,8 +160,13 @@ const MrtTapIn = () => {
     }, []);
 
     const handleBeepCardNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = event.target.value.startsWith('637805') ? event.target.value : '637805';
+        // Limit input to numbers only
+        const newValue = event.target.value.replace(/\D/g, '').startsWith('637805') ? event.target.value : '637805';
         setBeepCardNumber(newValue);
+        // Limit input to maximum of 15 characters
+        const maxLength = 15;
+        const truncatedValue = newValue.slice(0, maxLength);
+        setBeepCardNumber(truncatedValue);
 
         // Reset tap-in details when changing the beep card number
         setTapInDetails(null);
@@ -206,7 +186,7 @@ const MrtTapIn = () => {
                                 UUIC: beepCard.UUIC,
                                 tapIn: true,
                                 initialBalance: beepCard.balance,
-                                currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
+                                currStation: stationName?.replace(/[\s_]+/g, ' ').toLocaleLowerCase(),
                                 prevStation: "",
                                 fare: minimumFare.price,
                                 currBalance: beepCardResponse.balance, // Update current balance after tap-in
@@ -223,7 +203,7 @@ const MrtTapIn = () => {
                             setTapInDetails(tapInDetailsResponse);
 
                             // Show success message
-                            toast.success('Tap-in successful!', {
+                            toast.success('Tap-in successful. Enjoy your trip!', {
                                 position: 'top-right',
                                 autoClose: 2000,
                                 hideProgressBar: false,
@@ -299,6 +279,12 @@ const MrtTapIn = () => {
             setBeepCard(null);
         }
     }, [beepCardNumber]);
+
+    function toTitleCase(str: string) {
+        return str.replace(/\b\w/g, function (char: string) {
+            return char.toUpperCase();
+        });
+    }
 
     return (
         <>
@@ -393,7 +379,7 @@ const MrtTapIn = () => {
                         </TabPanel>
 
                         <TabPanel>
-                            {beepCard && (
+                            {beepCard ? (
                                 <>
                                     <h2 className="text-3xl lg:text-4xl font-semibold mb-2 lg:mb-10 text-white flex items-center lg:gap-2 justify-center" style={{ marginTop: '15px' }}>
                                         Beep Card Info
@@ -411,6 +397,12 @@ const MrtTapIn = () => {
                                     <p className="text-2xl lg:text-3xl text-white mb-1">Last Updated:</p>
                                     <p className="text-xl lg:text-2xl text-white mb-3">{formatDate(beepCard.updatedAt)}</p>
                                     {/* Add more details as needed */}
+                                </>
+                            ) : (
+                                <>
+                                    <h2 className="text-3xl lg:text-4xl font-semibold mb-2 lg:mb-10 text-white flex items-center lg:gap-2 justify-center" style={{ marginTop: '15px' }}>
+                                        No Beep Card Entered
+                                    </h2>
                                 </>
                             )}
                         </TabPanel>

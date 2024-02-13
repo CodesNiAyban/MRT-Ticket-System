@@ -5,6 +5,7 @@ import { Button, Col, Row } from "react-bootstrap";
 import { BiEdit, BiPlus } from "react-icons/bi";
 import { TbCurrencyPeso } from "react-icons/tb";
 import styles from "././beepCardPageLoggedInView.module.css";
+import { FaPlus } from "react-icons/fa";
 
 interface ButtonsProps {
   editMode: boolean;
@@ -31,7 +32,7 @@ const Buttons: React.FC<ButtonsProps> = ({
           className={`me-1 ${styles.blockStart} ${styles.customButton} ${styles.flexCenter} button1`}
           onClick={() => setShowAddBeepCardDialog(true)}
         >
-          <BiPlus />
+          <FaPlus />
         </Button>
 
         <Button

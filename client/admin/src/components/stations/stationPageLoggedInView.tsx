@@ -2,7 +2,7 @@ import * as L from 'leaflet';
 import { ReactElement, useEffect, useRef, useState } from 'react';
 import { Button, Col, Container, Form, Modal, Pagination, Row, Spinner, Table } from 'react-bootstrap';
 import { BiEdit } from "react-icons/bi";
-import { FaMap, FaPencilAlt, FaTable, FaTrash } from 'react-icons/fa';
+import { FaMap, FaPencilAlt, FaPlus, FaTable, FaTrash } from 'react-icons/fa';
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -38,6 +38,7 @@ const StationPageLoggedInView = () => {
 	const [clickedCoords, setClickedCoords] = useState<[number, number] | null>(null);
 	const [polylines, setPolylines] = useState<ReactElement[]>([]);
 	const [newStation, setNewStation] = useState<StationsModel | null>(null);
+	const [isAddingStation, setIsAddingStation] = useState(false);
 	const mapContainerRef = useRef<HTMLDivElement>(null);
 
 	const [perPage, setPerPage] = useState(5);
@@ -100,6 +101,7 @@ const StationPageLoggedInView = () => {
 
 		const stations = await StationApi.fetchStations();
 		setStations(stations);
+
 		let distance: number | undefined;
 		let stationConnectedName;
 
@@ -124,6 +126,16 @@ const StationPageLoggedInView = () => {
 			// Update the station's coordinates
 			station.coords = [lat, lng];
 			// Update the station in the state
+			// If dragging would exceed the limit, show a warning toast
+			toast.info(toTitleCase(station.stationName) + " is moved. Edit to save current coordinate.", {
+				position: "top-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				progress: undefined,
+			});
 			setStations(prevStations => {
 				const updatedStations = prevStations.map(s => {
 					if (s._id === station._id) {
@@ -135,7 +147,7 @@ const StationPageLoggedInView = () => {
 			});
 		} else {
 			// If dragging would exceed the limit, show a warning toast
-			toast.warn(station.stationName + " is " + Math.round(distance!) + "m to " + stationConnectedName + ", must be less than 500m from connected stations.", {
+			toast.warn(toTitleCase(station.stationName) + " is " + Math.round(distance!) + "m to " + stationConnectedName + ", must be less than 500m from connected stations.", {
 				position: "top-right",
 				autoClose: 3000,
 				hideProgressBar: false,
@@ -210,6 +222,8 @@ const StationPageLoggedInView = () => {
 				setStations(stations);
 				setFilteredStations(stations);
 
+				setMapMarkers([]);
+
 				const markers = stations.map((station) => (
 					<Marker key={station._id} position={[station.coords[0], station.coords[1]]} icon={customIcon} eventHandlers={{
 						mouseover: (event) => event.target.openPopup(),
@@ -221,14 +235,14 @@ const StationPageLoggedInView = () => {
 						<Popup eventHandlers={{
 							mouseout: (event) => event.target.closePopup(),
 						}} className="text-center">
-							<h3 className="font-bold">{station.stationName}</h3>
+							<h3 className="font-bold">{toTitleCase(station.stationName)}</h3>
 							Latitude: {station.coords[1]}<br />
 							Longitude: {station.coords[0]}<br />
 							Connected To: {station.connectedTo.map((connectedStationId, index) => {
 								const connectedStation = stations.find(s => s._id === connectedStationId);
 								return (
 									<span key={index}>
-										{connectedStation ? connectedStation.stationName : 'Unknown Station'}
+										{connectedStation ? toTitleCase(connectedStation.stationName) : 'Unknown Station'}
 										{index < station.connectedTo.length - 1 && ', '}
 									</span>
 								);
@@ -313,6 +327,10 @@ const StationPageLoggedInView = () => {
 		setIsModalClosed(true);
 	};
 
+	const toggleAddStationMode = () => {
+		setIsAddingStation(prevState => !prevState); // Toggle the state
+	};
+
 	const deleteStation = async (station: StationsModel) => {
 		try {
 			await StationApi.deleteStation(station._id);
@@ -320,7 +338,7 @@ const StationPageLoggedInView = () => {
 			setShowConfirmation(false);
 			refresh();
 			await new Promise<void>((resolve: () => void) => {
-				toast.warn(`Station ${station.stationName} Deleted.`, {
+				toast.warn(`Station ${toTitleCase(station.stationName)} Deleted.`, {
 					position: "top-right",
 					autoClose: 1500,
 					hideProgressBar: false,
@@ -374,6 +392,12 @@ const StationPageLoggedInView = () => {
 		setFilteredStations(filtered);
 	};
 
+	function toTitleCase(str: string) {
+		return str.replace(/\b\w/g, function (char: string) {
+			return char.toUpperCase();
+		});
+	}
+
 	const handleConfirmation = (action: () => void, target: StationsModel) => {
 		setShowConfirmation(true);
 		setConfirmationAction(() => action);
@@ -387,8 +411,10 @@ const StationPageLoggedInView = () => {
 	};
 
 	const handleMapClick = (latlng: { lat: number; lng: number }) => {
-		setClickedCoords([latlng.lat, latlng.lng]);
-		setSelectedMarker(null); // Reset selectedMarker when map is clicked
+		if (isAddingStation) {
+			setClickedCoords([latlng.lat, latlng.lng]);
+			setSelectedMarker(null); // Reset selectedMarker when map is clicked
+		}
 	};
 
 	const handleNewMarkerClick = () => {
@@ -411,15 +437,30 @@ const StationPageLoggedInView = () => {
 			<ToastContainer limit={3} />
 			<Container>
 				{showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
-				{isMapView &&
-					<Button
-						variant="primary"
-						onClick={toggleView}
-						className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"} button2`}
-						style={{ zIndex: 999, position: "absolute" }}
-					>
-						{isMapView ? <FaTable /> : <FaMap />}
-					</Button>
+				{isMapView && !showStationsLoadingError &&
+					<>
+						<Button
+							variant="primary"
+							onClick={toggleView}
+							className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"} button2`}
+							style={{ zIndex: 999, position: "absolute" }}
+						>
+							{isMapView ? <FaTable /> : <FaMap />}
+						</Button>
+						<Button
+							variant="primary"
+							onClick={toggleAddStationMode}
+							className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isAddingStation ? "btn-primary" : "btn-secondary"} button2`}
+							style={{ zIndex: 999, position: "absolute", marginLeft: 99 }} // Adjust position as needed
+						>
+							{isAddingStation ? <FaPlus className="me-1" /> : (
+								<>
+									<FaPlus className="me-1 text-muted" />
+								</>
+							)}
+						</Button>
+
+					</>
 				}
 				{isMapView ? (
 					<div ref={mapContainerRef} id="map" className="map">
@@ -502,7 +543,7 @@ const StationPageLoggedInView = () => {
 												<tbody>
 													{paginatedStations.map((station) => (
 														<tr key={station._id}>
-															<td>{station.stationName}</td>
+															<td>{toTitleCase(station.stationName)}</td>
 															<td>{station.coords[1]}</td>
 															<td>{station.coords[0]}</td>
 															<td>
@@ -513,7 +554,7 @@ const StationPageLoggedInView = () => {
 																	return (
 																		<span key={index}>
 																			{connectedStation
-																				? connectedStation.stationName
+																				? toTitleCase(connectedStation.stationName)
 																				: 'Unknown Station'}
 																			{index < station.connectedTo.length - 1 && ', '}
 																		</span>
