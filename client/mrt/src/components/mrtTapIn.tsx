@@ -187,7 +187,7 @@ const MrtTapIn = () => {
                                 tapIn: true,
                                 initialBalance: beepCard.balance,
                                 currStation: stationName?.replace(/[\s_]+/g, ' ').toLocaleLowerCase(),
-                                prevStation: "",
+                                prevStation: "N/A",
                                 fare: minimumFare.price,
                                 currBalance: beepCardResponse.balance, // Update current balance after tap-in
                                 createdAt: new Date().toISOString(), // Set current timestamp as creation time

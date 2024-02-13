@@ -159,7 +159,7 @@ const MrtTapOut = () => {
             } catch (error) {
                 console.error(error);
                 setShowStationsLoadingError(true);
-            }  finally {
+            } finally {
                 setResetBeepCard(false)
             }
         }
@@ -175,8 +175,8 @@ const MrtTapOut = () => {
         const truncatedValue = newValue.slice(0, maxLength);
         console.log(truncatedValue)
         console.log(truncatedValue.length === 14)
-        if(truncatedValue.length === 14)setResetBeepCard(true)
         setBeepCardNumber(truncatedValue);
+        // if (truncatedValue.length <= 14) setResetBeepCard(true)
 
         // Reset tap-in details when changing the beep card number
         setTapOutDetails(null);
@@ -215,16 +215,14 @@ const MrtTapOut = () => {
                     if (beepCard.balance >= minimumFare.price) {
                         // Sufficient balance, proceed with tap-in
                         if (beepCard.isActive) {
-                            let beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters);
-                            if (transactionResponse && transactionResponse.currStation === stationName?.replace(/[\s-]+/g, ' '))
-                                beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, 0);
-                            else
-                                beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters);
-
-                            // Construct tap-in transaction object
-                            //replace 10 with minimumFare per 500m approximately then if not exact value, return approximate
-                            // Set the submission status to true when starting the submission process
+                            let beepCardResponse;
                             setIsSubmitting(true);
+                            if (transactionResponse && transactionResponse.currStation === stationName?.replace(/[\s-]+/g, ' ')) {
+                                beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, 0);
+                            } else {
+                                beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters);
+                            }
+
                             const tapOutTransaction: TapOutTransactionModel = {
                                 UUIC: beepCard.UUIC,
                                 tapIn: false,
@@ -240,12 +238,13 @@ const MrtTapOut = () => {
                             // Send tap-in transaction to API
                             const tapOutDetailsResponse = await StationApi.createTapOutTransaction(tapOutTransaction);
 
-                            setBeepCard(beepCardResponse);
+                            // setBeepCard(beepCardResponse);
+
+                            setBeepCard(await StationApi.getBeepCard(beepCardNumber));
 
                             // Update beep card details and tap-in details
                             setTapOutDetails(tapOutDetailsResponse);
 
-                            setBeepCard(await StationApi.getBeepCard(beepCardNumber));
 
                             // Show success message
                             toast.success('Tap-out successful! Thank you for using MRT-3.', {
@@ -387,7 +386,7 @@ const MrtTapOut = () => {
                         const prevStationName = transactionResponse?.currStation;
 
                         const prevStation = stations.find(station => station.stationName === prevStationName);
-                        if (prevStation) {
+                        if (prevStation && cardDetails.isActive) {
                             const updatedMapMarkers = mapMarkers.map((marker) => {
                                 if (marker.key === prevStation._id) {
                                     return (
@@ -410,9 +409,11 @@ const MrtTapOut = () => {
                                 return marker;
                             });
                             setMapMarkers(updatedMapMarkers);
+                        } else {
+                            setResetBeepCard(true)
                         }
                     } else {
-                        toast.warn('No previous station found. Beep card already tapped out.', {
+                        toast.warn('There was a detected problem on your beep card, please go to the nearest teller.', {
                             position: 'top-right',
                             autoClose: 2000,
                             hideProgressBar: false,
@@ -424,6 +425,34 @@ const MrtTapOut = () => {
                     }
 
                 } else {
+                    const markers = stations.map((station) => {
+                        const isCurrentStation = station.stationName.replace(/[\s-]+/g, '_').toLocaleLowerCase() === stationName;
+                        return (
+                            <Marker
+                                key={station._id}
+                                position={[station.coords[0], station.coords[1]]}
+                                icon={isCurrentStation ? newCustomIcon : customIcon} // Use newCustomIcon for the current station
+                                eventHandlers={{
+                                    mouseover: (event) => event.target.openPopup(),
+                                    mouseout: (event) => event.target.closePopup()
+                                }}
+                            >
+                                {isCurrentStation ? (
+                                    <Popup className={`text-center ${isCurrentStation ? 'rounded-lg shadow-lg' : ''}`}>
+                                        <h3 className="font-bold">{toTitleCase(station.stationName)}</h3>
+                                        YOU ARE CURRENTLY HERE
+                                    </Popup>
+                                ) : (
+                                    <Popup className={`text-center ${isCurrentStation ? 'rounded-lg shadow-lg' : ''}`}>
+                                        <h3 className="font-bold">{toTitleCase(station.stationName)}</h3>
+                                        <br />
+                                    </Popup>
+                                )}
+                            </Marker>
+                        );
+                    });
+
+                    setMapMarkers(markers);
                     setBeepCard(null)
                 }
             } catch (error) {
@@ -527,7 +556,7 @@ const MrtTapOut = () => {
                             {fares.map((fare) => (
                                 <div key={fare._id} className="mb-3">
                                     <h2 className="text-2xl lg:text-3xl text-white mb-1">{fare.fareType}</h2>
-                                    <p className="text-xl lg:text-2xl text-white mb-5">${fare.price}</p>
+                                    <p className="text-xl lg:text-2xl text-white mb-5">{fare.price}</p>
                                     {/* Add more details as needed */}
                                 </div>
                             ))}
