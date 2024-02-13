@@ -265,11 +265,11 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 	return (
 		<>
 			<ToastContainer limit={3} style={{ zIndex: 9999 }} />
-			<Modal show={show} onHide={onHide} size="lg">
-				<Modal.Header closeButton>
-					<Modal.Title>Connect Stations</Modal.Title>
+			<Modal show={show} className={`${styles.modalContent} beep-card-modal`} centered onHide={onHide} size="lg">
+				<Modal.Header closeButton className={styles.modalHeader}>
+					<Modal.Title className={`${styles.modalTitle} modal-title`}>Connect Stations</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>
+				<Modal.Body className={`${styles.modalBody} modal-body`} style={{ zIndex: "999" }}>
 					<div id="map" className={`${styles.mapContainer} border rounded`} style={{ width: '100%', height: '400px' }}>
 						<MapContainer center={stationToEdit ? [stationToEdit.coords[0], stationToEdit.coords[1]] : (newStation ? [newStation.coords[0], newStation.coords[1]] : [14.550561416466541, 121.02785649562283])} zoom={12} zoomControl={false} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
 							<TileLayer
@@ -321,7 +321,7 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 						</div>
 					</div>
 				</Modal.Body>
-				<Modal.Footer>
+				<Modal.Footer className={`${styles.modalFooter} modal-footer`}>
 					<Button variant="primary" onClick={onHide}// disabled={selectedStations.length === 0}
 					>
 						Confirm

@@ -24,6 +24,7 @@ export const createTapInTransaction: RequestHandler<unknown, unknown, TapInTrans
 	const initialBalance = req.body.initialBalance;
 	const prevStation = req.body.prevStation;
 	const currStation = req.body.currStation;
+	const distance = req.body.distance;
 	const fare = req.body.fare;
 	const currBalance = req.body.currBalance;
 
@@ -38,6 +39,7 @@ export const createTapInTransaction: RequestHandler<unknown, unknown, TapInTrans
 			initialBalance: initialBalance,
 			prevStation: prevStation,
 			currStation: currStation,
+			distance: distance,
 			fare: fare,
 			currBalance: currBalance
 		});
@@ -54,6 +56,7 @@ export const createTapOutTransaction: RequestHandler<unknown, unknown, TapOutTra
 	const initialBalance = req.body.initialBalance;
 	const prevStation = req.body.prevStation;
 	const currStation = req.body.currStation;
+	const distance = req.body.distance;
 	const fare = req.body.fare;
 	const currBalance = req.body.currBalance;
 
@@ -69,6 +72,7 @@ export const createTapOutTransaction: RequestHandler<unknown, unknown, TapOutTra
 			initialBalance: initialBalance,
 			prevStation: prevStation,
 			currStation: currStation,
+			distance: distance,
 			fare: fare,
 			currBalance: currBalance
 		});

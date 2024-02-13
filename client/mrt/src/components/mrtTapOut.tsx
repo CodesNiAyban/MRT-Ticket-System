@@ -168,7 +168,7 @@ const MrtTapOut = () => {
 
     const handleBeepCardNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         // Limit input to numbers only
-        const newValue = event.target.value.replace(/\D/g, '').startsWith('637805') ? event.target.value : '637805';
+        const newValue = event.target.value.replace(/\D/g, '').startsWith('637805') ? event.target.value.replace(/\D/g, '') : '637805';
         setBeepCardNumber(newValue);
         // Limit input to maximum of 15 characters
         const maxLength = 15;
@@ -229,7 +229,8 @@ const MrtTapOut = () => {
                                 initialBalance: beepCard.balance,
                                 prevStation: transactionResponse?.currStation,
                                 currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
-                                fare: farePerMeters, //Change to per km fare 
+                                fare: farePerMeters, //Change to per km fare 4
+                                distance: parseFloat((pathDistance / 1000).toFixed(2)),
                                 currBalance: beepCardResponse?.balance,
                                 createdAt: new Date().toISOString(),
                                 updatedAt: new Date().toISOString(),
@@ -573,7 +574,7 @@ const MrtTapOut = () => {
                                     <p className="text-xl lg:text-2xl text-white mb-5">{beepCard.UUIC}</p>
 
                                     <p className="text-2xl lg:text-3xl text-white mb-1">Current Balance:</p>
-                                    <p className="text-xl lg:text-2xl text-white mb-5">${beepCard.balance}</p>
+                                    <p className="text-xl lg:text-2xl text-white mb-5">{beepCard.balance}</p>
 
                                     <p className="text-2xl lg:text-3xl text-white mb-1">Date Created:</p>
                                     <p className="text-xl lg:text-2xl text-white mb-3">{formatDate(beepCard.createdAt)}</p>

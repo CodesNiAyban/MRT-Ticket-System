@@ -30,7 +30,6 @@ const BeepCardPageLoggedInView = () => {
     message: "",
     card: null,
   });
-
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
   const [editMode, setEditMode] = useState(false);
@@ -287,7 +286,7 @@ const BeepCardPageLoggedInView = () => {
         className={`${styles.modalContent} beep-card-modal`} // Add beep-card-modal class
         centered
       >
-        <Modal.Header closeButton className={`${styles.modalHeader} modal-header`}>
+        <Modal.Header className={`${styles.confirmationModalHeader} modal-title`} closeButton>
           <Modal.Title className={`${styles.modalTitle} modal-title`}>
             Delete Confirmation
           </Modal.Title>
@@ -310,7 +309,7 @@ const BeepCardPageLoggedInView = () => {
           </Card>
 
           <p className={styles.confirmationMessage}>
-            Are you sure you want to delete this Beep Card?
+            Are you sure you want to delete Beep Card <strong>{confirmationModal?.card?.UUIC || "N/A"}</strong>?
           </p>
         </Modal.Body>
 

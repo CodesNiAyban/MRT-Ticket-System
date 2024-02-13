@@ -135,8 +135,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
           });
           return;
         }
-
-        input.balance = await getDefaultLoadPrice();
+          input.balance = await getDefaultLoadPrice();
       } else {
         if (!/^637805\d{9}$/.test(input.UUIC)) {
           toast.error("Invalid Beep Card ID format. Must start with '637805' and have 15 digits.", {
@@ -156,9 +155,9 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       if (
         isNaN(balanceValue) ||
         balanceValue < defaultLoadPrice ||
-        balanceValue > 5000
+        balanceValue > 999999
       ) {
-        toast.error(`Invalid balance. It should be between ${defaultLoadPrice} and 5000.`, {
+        toast.error(`Invalid balance. It should be between ${defaultLoadPrice} and 999999.`, {
           position: "top-center",
           autoClose: 5000,
           hideProgressBar: false,

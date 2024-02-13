@@ -85,7 +85,8 @@ body {
 }
 
 .smaller-search-input {
-  width: 120px; /* Adjust the width as needed */
+  width: 120px;
+  /* Adjust the width as needed */
 }
 
 .blockCenter {
@@ -207,6 +208,15 @@ body {
   border-top: none;
 }
 
+.alert {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 300px;
+}
+
 .confirmationModal {
   background-color: #ffffff;
   border-radius: 10px;
@@ -232,7 +242,8 @@ body {
 .pagination-buttons {
   display: flex;
   justify-content: center;
-  margin-top: 20px; /* Adjust the top margin as needed */
+  margin-top: 20px;
+  /* Adjust the top margin as needed */
 }
 
 .pagination-buttons button {
@@ -269,6 +280,6 @@ body {
 
 .confirmationMessage {
   font-size: 18px;
-  margin-top: 20px;
-  text-align: center; /* Center the text */
+  text-align: center;
+  /* Center the text */
 }

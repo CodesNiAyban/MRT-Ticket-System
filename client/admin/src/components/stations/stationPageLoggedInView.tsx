@@ -635,7 +635,6 @@ const StationPageLoggedInView = () => {
 				)}
 				{showAddStationDialog && (
 					<AddEditStationDialog
-
 						stations={stations}
 						stationToEdit={selectedMarker || undefined}
 						coordinates={clickedCoords}
@@ -701,12 +700,25 @@ const StationPageLoggedInView = () => {
 					/>
 				)}
 
-				<Modal show={showConfirmation} onHide={closeConfirmation}>
-					<Modal.Header closeButton>
-						<Modal.Title>Confirmation</Modal.Title>
+				<Modal show={showConfirmation} onHide={closeConfirmation} className={`${styles.modalContent} beep-card-modal`} centered>
+					<Modal.Header closeButton className={`${styles.confirmationModalHeader} modal-title`}>
+						<Modal.Title className={`${styles.modalTitle} modal-title`}>Confirmation</Modal.Title>
 					</Modal.Header>
-					<Modal.Body>Are you sure you want to delete this station?</Modal.Body>
-					<Modal.Footer>
+					<Modal.Body>
+						<p className={styles.confirmationMessage}>
+							Are you sure you want to delete this Station?
+						</p>
+						{confirmationTarget && (
+							<div>
+								Station Name: <h5>{toTitleCase(confirmationTarget.stationName)}</h5>
+								Connected To: <h5>{confirmationTarget.connectedTo.map(connectedId => {
+									const connectedStation = stations.find(station => station._id === connectedId);
+									return connectedStation ? toTitleCase(connectedStation.stationName) : 'Unknown Station';
+								}).join(', ')}</h5>
+							</div>
+						)}
+					</Modal.Body>
+					<Modal.Footer className={`${styles.modalFooter} modal-footer`}>
 						<Button variant="secondary" onClick={closeConfirmation}>
 							No
 						</Button>

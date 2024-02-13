@@ -161,7 +161,7 @@ const MrtTapIn = () => {
 
     const handleBeepCardNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         // Limit input to numbers only
-        const newValue = event.target.value.replace(/\D/g, '').startsWith('637805') ? event.target.value : '637805';
+        const newValue = event.target.value.replace(/\D/g, '').startsWith('637805') ? event.target.value.replace(/\D/g, '') : '637805';
         setBeepCardNumber(newValue);
         // Limit input to maximum of 15 characters
         const maxLength = 15;
@@ -189,6 +189,7 @@ const MrtTapIn = () => {
                                 currStation: stationName?.replace(/[\s_]+/g, ' ').toLocaleLowerCase(),
                                 prevStation: "N/A",
                                 fare: minimumFare.price,
+                                distance: 0,
                                 currBalance: beepCardResponse.balance, // Update current balance after tap-in
                                 createdAt: new Date().toISOString(), // Set current timestamp as creation time
                                 updatedAt: new Date().toISOString(), // Set current timestamp as update time
@@ -372,7 +373,7 @@ const MrtTapIn = () => {
                             {fares.map((fare) => (
                                 <div key={fare._id} className="mb-3">
                                     <h2 className="text-2xl lg:text-3xl text-white mb-1">{fare.fareType}</h2>
-                                    <p className="text-xl lg:text-2xl text-white mb-5">${fare.price}</p>
+                                    <p className="text-xl lg:text-2xl text-white mb-5">{fare.price}</p>
                                     {/* Add more details as needed */}
                                 </div>
                             ))}
@@ -389,7 +390,7 @@ const MrtTapIn = () => {
                                     <p className="text-xl lg:text-2xl text-white mb-5">{beepCard.UUIC}</p>
 
                                     <p className="text-2xl lg:text-3xl text-white mb-1">Current Balance:</p>
-                                    <p className="text-xl lg:text-2xl text-white mb-5">${beepCard.balance}</p>
+                                    <p className="text-xl lg:text-2xl text-white mb-5">{beepCard.balance}</p>
 
                                     <p className="text-2xl lg:text-3xl text-white mb-1">Date Created:</p>
                                     <p className="text-xl lg:text-2xl text-white mb-3">{formatDate(beepCard.createdAt)}</p>

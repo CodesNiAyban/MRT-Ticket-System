@@ -4,6 +4,7 @@ export interface CreateTapOutTransactionBody {
 	initialBalance?: number,
 	prevStation?: string,
 	currStation?: string,
+	distance?: number,
 	fare?: number,
 	currBalance?: number,
 }

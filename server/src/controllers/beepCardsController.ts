@@ -44,12 +44,10 @@ export const getBeepCardByUUIC: RequestHandler = async (req, res, next) => {
 export const createBeepCard: RequestHandler<unknown, unknown, beepCardinterface.CreateBeepCardsBody, unknown> = async (req, res, next) => {
 	const UUIC = req.body.UUIC;
 	const balance = req.body.balance;
-	const isActive = req.body.isActive;
 
 	try {
 		if (!UUIC) { throw createHttpError(400, "beepCards must have a UUIC"); }
 		if (!balance) { throw createHttpError(400, "beepCards must have a balance"); }
-		if (isActive === undefined) { throw createHttpError(400, "beepCards must have a isActive"); }
 
 		const newBeepCards = await beepCardsModel.create({
 			UUIC: UUIC,

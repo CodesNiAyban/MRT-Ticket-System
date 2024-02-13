@@ -6,6 +6,7 @@ const transactionSchema = new Schema({
 	initialBalance: {type: String, required: true},
 	prevStation: {type: String},
 	currStation: {type: String},
+	distance: {type: Number},
 	fare: {type: Number, required: true},
 	currBalance:{type: Number, required: true},
 },{timestamps: true, versionKey: false});

@@ -226,12 +226,12 @@ const AddEditStationDialog = ({
 	};
 
 	return (
-		<Modal show onHide={onDismiss} style={{}}>
-			<Modal.Header closeButton>
-				<Modal.Title>{stationToEdit ? 'Edit Station' : 'Add Station'}</Modal.Title>
+		<Modal show onHide={onDismiss}  className={`${styles.modalContent} beep-card-modal`} centered>
+			<Modal.Header closeButton className={styles.modalHeader}>
+				<Modal.Title className={`${styles.modalTitle} modal-title`}>{stationToEdit ? 'Edit Station' : 'Add Station'}</Modal.Title>
 			</Modal.Header>
 
-			<Modal.Body style={{ zIndex: "999" }}>
+			<Modal.Body className={`${styles.modalBody} modal-body`} style={{ zIndex: "999" }}>
 				<Form id="addEditStationForm" onSubmit={handleSubmit(onSubmit)}>
 					<TextInputField
 						name="stationName"
@@ -318,7 +318,7 @@ const AddEditStationDialog = ({
 					</Form.Group>
 				</Form>
 			</Modal.Body>
-			<Modal.Footer>
+			<Modal.Footer className={`${styles.modalFooter} modal-footer`}>
 				<Button type="submit" form="addEditStationForm" disabled={isSubmitting}>
 					Save
 				</Button>
