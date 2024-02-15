@@ -20,7 +20,7 @@ const NavBar: React.FC<NavBarProps> = ({
         <Navbar
             bg="dark"
             variant="dark"
-            expand="md"
+            expand="xl"
             sticky="top"
             id="main-navbar"
             className="bg-gray-100"
@@ -36,7 +36,7 @@ const NavBar: React.FC<NavBarProps> = ({
 
                 <Navbar.Toggle aria-controls="main-navbar" />
                 <Navbar.Collapse id="main-navbar">
-                    <Nav className="container-fluid" variant="tabs" style={{ marginLeft: 'auto' }}>
+                    <Nav className="container-fluid" variant="tabs" style={{ marginLeft: 'auto', justifyContent: 'end' }}>
                         {loggedInAdmin ? (
                             <NavBarLoggedInView
                                 user={loggedInAdmin}

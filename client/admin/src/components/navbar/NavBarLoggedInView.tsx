@@ -1,8 +1,8 @@
-import { Button, Modal, Navbar, Nav } from "react-bootstrap";
+import { Button, Modal, Navbar, Nav, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Admin } from "../../model/adminModel";
 import * as AdminApi from "../../network/adminAPI";
 import { useState } from "react";
-import styles from "./NavBar.module.css"
+import styles from "./NavBar.module.css";
 import { Link } from "react-router-dom";
 
 interface NavBarLoggedInViewProps {
@@ -15,6 +15,7 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
     onLogoutSuccessful,
 }) => {
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [maintenanceMode, setMaintenanceMode] = useState(false);
 
     async function logout() {
         try {
@@ -30,34 +31,81 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
         setShowConfirmationModal(false);
     };
 
+    const handleMaintenanceSwitch = () => {
+        setMaintenanceMode(!maintenanceMode);
+        // Handle maintenance mode activation/deactivation logic here
+    };
+
     return (
         <>
-            <Nav.Item>
-                <Nav.Link as={Link} to="/beepcards">
-                <h5>Beep Cards</h5>
-                </Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-                <Nav.Link as={Link} to="/stations">
-                <h5>Stations</h5>
-                </Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-                <Nav.Link as={Link} to="/fare">
-                    <h5>Fare</h5>
-                </Nav.Link>
-            </Nav.Item>
-
-            <Nav.Item className="ms-auto d-lg-flex align-items-center me-4 center-content">
-                <Navbar.Text className="me-lg-2"><h5>Signed in as: <u>{user.username}</u></h5></Navbar.Text>
-                <Button
-                    className="ms-lg-2 btn-logout"
-                    onClick={() => setShowConfirmationModal(true)}
-                    style={{display: "inline-block"}}
-                >
-                    <h6 style={{position: "static", textAlign: 'center', display: "inline-block" }}>Logout</h6>
-                </Button>
-            </Nav.Item>
+            <Navbar.Collapse id="responsive-navbar-nav">
+                <Nav className="me-auto">
+                    <Nav.Item>
+                        <OverlayTrigger
+                            placement="bottom"
+                            overlay={<Tooltip id="tooltip-cards">Cards</Tooltip>}
+                        >
+                            <Nav.Link as={Link} to="/beepcards">
+                                <h5 className="nav-link-text">Cards</h5>
+                            </Nav.Link>
+                        </OverlayTrigger>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <OverlayTrigger
+                            placement="bottom"
+                            overlay={<Tooltip id="tooltip-stations">Stations</Tooltip>}
+                        >
+                            <Nav.Link as={Link} to="/stations">
+                                <h5 className="nav-link-text">Stations</h5>
+                            </Nav.Link>
+                        </OverlayTrigger>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <OverlayTrigger
+                            placement="bottom"
+                            overlay={<Tooltip id="tooltip-fare">Fare</Tooltip>}
+                        >
+                            <Nav.Link as={Link} to="/fare">
+                                <h5 className="nav-link-text">Fare</h5>
+                            </Nav.Link>
+                        </OverlayTrigger>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <OverlayTrigger
+                            placement="bottom"
+                            overlay={<Tooltip id="tooltip-transactions">Transactions</Tooltip>}
+                        >
+                            <Nav.Link as={Link} to="/fare">
+                                <h5 className="nav-link-text">Transactions</h5>
+                            </Nav.Link>
+                        </OverlayTrigger>
+                    </Nav.Item>
+                </Nav>
+                <Nav>
+                    <Navbar.Text>
+                        <OverlayTrigger
+                            placement="bottom"
+                            overlay={<Tooltip id="tooltip-maintenance">Maintenance</Tooltip>}
+                        >
+                            <Form.Check
+                                type="switch"
+                                id="maintenance-switch"
+                                checked={maintenanceMode}
+                                onChange={handleMaintenanceSwitch}
+                            />
+                        </OverlayTrigger>
+                    </Navbar.Text>
+                    <Navbar.Text>
+                        <h6 className="nav-link-text">Signed in as: <u>{user.username}</u></h6>
+                    </Navbar.Text>
+                    <Button
+                        className="mb-1 ms-lg-2 btn-logout"
+                        onClick={() => setShowConfirmationModal(true)}
+                    >
+                        <h6 style={{ position: "static", textAlign: 'center', display: "inline-block" }}>Logout</h6>
+                    </Button>
+                </Nav>
+            </Navbar.Collapse>
 
             {/* Confirmation Modal */}
             <Modal

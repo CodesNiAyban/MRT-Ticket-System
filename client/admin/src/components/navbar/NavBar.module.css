@@ -378,3 +378,9 @@ body {
   text-align: center;
   /* Center the text */
 }
+
+@media (max-width: 768px) {
+  .nav-link-text {
+    font-size: 12px; /* Adjust the font size as needed */
+  }
+}
