@@ -66,7 +66,7 @@ const BeepCardPageLoggedInView = () => {
                 (existingBeepCard) => existingBeepCard._id !== beepCard._id
               )
             );
-            showCustomToast("danger", `Beep Card ${beepCard.UUIC} deleted.`);
+            showCustomToast("success", `Beep Card ${beepCard.UUIC} deleted.`);
           } catch (error) {
             console.error(error);
             showCustomToast("danger", "Error deleting Beep Card. Please try again.");

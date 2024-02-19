@@ -212,6 +212,13 @@ const StationPageLoggedInView = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [clickedCoords]);
 
+	// Update map center when there are no stations available
+	useEffect(() => {
+		if (stations.length === 0) {
+			setMapCenter([14.550561416466541, 121.02785649562283]); // Set default center
+		}
+	}, [stations]);
+
 	useEffect(() => {
 		const loadStationsAndMarkers = async () => {
 			try {
@@ -272,8 +279,21 @@ const StationPageLoggedInView = () => {
 
 				// Calculate average coordinates for the center of the map
 				const totalCoords = stations.reduce((acc, station) => {
-					return [acc[0] + station.coords[0], acc[1] + station.coords[1]];
+					// Ensure that station coordinates are valid numbers
+					if (!isNaN(station.coords[0]) && !isNaN(station.coords[1])) {
+						return [acc[0] + station.coords[0], acc[1] + station.coords[1]];
+					} else {
+						return acc;
+					}
 				}, [0, 0]);
+
+				// Calculate the average coordinates only if there are valid coordinates
+				if (totalCoords[0] !== 0 && totalCoords[1] !== 0 && stations.length > 0) {
+					setMapCenter([totalCoords[0] / stations.length, totalCoords[1] / stations.length]);
+				} else {
+					// Fallback to a default center if no valid coordinates are found
+					setMapCenter([14.550561416466541, 121.02785649562283]);
+				}
 
 				setMapCenter([totalCoords[0] / stations.length, totalCoords[1] / stations.length]);
 

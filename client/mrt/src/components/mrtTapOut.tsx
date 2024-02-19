@@ -217,45 +217,57 @@ const MrtTapOut = () => {
                         if (beepCard.isActive) {
                             let beepCardResponse;
                             setIsSubmitting(true);
-                            if (transactionResponse && transactionResponse.currStation === stationName?.replace(/[\s-]+/g, ' ')) {
-                                beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, 0);
+                            const calculatedFare = calculateFare(pathDistance, minimumFare);
+                            if (beepCard.balance >= calculatedFare) { // Check if the balance is sufficient for the fare
+                                if (transactionResponse && transactionResponse.currStation === stationName?.replace(/[\s-]+/g, ' ')) {
+                                    beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, 0);
+                                } else {
+                                    beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters);
+                                }
+                                const tapOutTransaction: TapOutTransactionModel = {
+                                    UUIC: beepCard.UUIC,
+                                    tapIn: false,
+                                    initialBalance: beepCard.balance,
+                                    prevStation: transactionResponse?.currStation,
+                                    currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
+                                    fare: farePerMeters, //Change to per km fare 4
+                                    distance: parseFloat((pathDistance / 1000).toFixed(2)),
+                                    currBalance: beepCardResponse?.balance,
+                                    createdAt: new Date().toISOString(),
+                                    updatedAt: new Date().toISOString(),
+                                };
+
+                                // Send tap-in transaction to API
+                                const tapOutDetailsResponse = await StationApi.createTapOutTransaction(tapOutTransaction);
+
+                                // setBeepCard(beepCardResponse);
+
+                                setBeepCard(await StationApi.getBeepCard(beepCardNumber));
+
+                                // Update beep card details and tap-in details
+                                setTapOutDetails(tapOutDetailsResponse);
+
+
+                                // Show success message
+                                toast.success('Tap-out successful! Thank you for using MRT-3.', {
+                                    position: 'top-right',
+                                    autoClose: 2000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                });
                             } else {
-                                beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters);
+                                // Insufficient balance
+                                toast.error('You only have '+ beepCard.balance +', your fare is ' + calculatedFare + '. Please top up your beep card to the nearest teller.', {
+                                    position: 'top-right',
+                                    autoClose: 2000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                });
                             }
-
-                            const tapOutTransaction: TapOutTransactionModel = {
-                                UUIC: beepCard.UUIC,
-                                tapIn: false,
-                                initialBalance: beepCard.balance,
-                                prevStation: transactionResponse?.currStation,
-                                currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
-                                fare: farePerMeters, //Change to per km fare 4
-                                distance: parseFloat((pathDistance / 1000).toFixed(2)),
-                                currBalance: beepCardResponse?.balance,
-                                createdAt: new Date().toISOString(),
-                                updatedAt: new Date().toISOString(),
-                            };
-
-                            // Send tap-in transaction to API
-                            const tapOutDetailsResponse = await StationApi.createTapOutTransaction(tapOutTransaction);
-
-                            // setBeepCard(beepCardResponse);
-
-                            setBeepCard(await StationApi.getBeepCard(beepCardNumber));
-
-                            // Update beep card details and tap-in details
-                            setTapOutDetails(tapOutDetailsResponse);
-
-
-                            // Show success message
-                            toast.success('Tap-out successful! Thank you for using MRT-3.', {
-                                position: 'top-right',
-                                autoClose: 2000,
-                                hideProgressBar: false,
-                                closeOnClick: true,
-                                pauseOnHover: true,
-                                draggable: true,
-                            });
                         } else {
                             // Beep card is already tapped in
                             toast.warn('Beep Card Already Tapped Out.', {
