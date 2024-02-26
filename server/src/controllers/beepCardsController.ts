@@ -51,6 +51,7 @@ export const createBeepCard: RequestHandler<unknown, unknown, beepCardinterface.
 
 		const newBeepCards = await beepCardsModel.create({
 			UUIC: UUIC,
+			userID: "",
 			balance: balance,
 			isActive: false
 		});
@@ -63,6 +64,7 @@ export const createBeepCard: RequestHandler<unknown, unknown, beepCardinterface.
 
 export const updateBeepCard: RequestHandler<beepCardinterface.UpdateBeepCardsParams, unknown, beepCardinterface.UpdateBeepCardsBody, unknown> = async (req, res, next) => {
 	const beepCardId = req.params.beepCardId;
+	const userId = req.body.userID;
 	const newUUIC = req.body.UUIC;
 	const newBalance = req.body.balance;
 	const isActive = req.body.isActive; // Added isActive property
@@ -78,6 +80,7 @@ export const updateBeepCard: RequestHandler<beepCardinterface.UpdateBeepCardsPar
 		if (!beepCards) throw createHttpError(404, "Beep card not found.");
 
 		beepCards.UUIC = newUUIC;
+		beepCards.userID = userId;
 		beepCards.balance = newBalance;
 		beepCards.isActive = isActive; // Set isActive property
 

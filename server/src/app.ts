@@ -13,12 +13,13 @@ import fareRoute from "./routes/fareRoutes";
 import stationRoute from "./routes/stationsRoute";
 import mrtRoute from "./routes/mrtRoute";
 import beepCardManagerRoute from "./routes/beepCardManagerRoute";
+import maintenanceRoute from "./routes/maintenanceRoute";
 import env from "./utils/validateENV";
 import MongoStore from "connect-mongo";
-import authenticateToken from "./middleware/authMiddleware";
+import authenticateToken from "./middleware/authMiddleware"; 
 
 // Set isProduction to true when deploying to Render.com
-// const isProduction = false;
+const isProduction = false;
 
 // Initializing the express app
 const app = express();
@@ -27,14 +28,14 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(morgan("dev"));
 
+// Set the origin based on deployment
 const corsOptions = {
-	origin: "*", // Allow requests from any origin
+	origin: isProduction ? env.API_CONNECTION_STRING : ["http://localhost:3000", "http://localhost:3001"],
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	optionsSuccessStatus: 204,
 	allowedHeaders: "Content-Type, Authorization",
 };
-
 
 app.use(cors(corsOptions));
 // Using the dependencies
@@ -59,6 +60,7 @@ app.use("/api/fare", authenticateToken, fareRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/mrt", mrtRoute);
 app.use("/api/beepCardManager", beepCardManagerRoute);
+app.use("/api/maintenance", maintenanceRoute);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {

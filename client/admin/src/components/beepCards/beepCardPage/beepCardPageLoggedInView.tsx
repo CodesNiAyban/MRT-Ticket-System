@@ -101,6 +101,7 @@ const BeepCardPageLoggedInView = () => {
   const filteredBeepCards = beepCards.filter(
     (beepCard) =>
       beepCard.UUIC.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+      beepCard.userID?.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
       beepCard.balance!.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
       formatDate(beepCard.createdAt).toLowerCase().includes(searchQuery.toLowerCase()) ||
       formatDate(beepCard.updatedAt).toLowerCase().includes(searchQuery.toLowerCase()) ||

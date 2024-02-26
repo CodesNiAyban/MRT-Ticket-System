@@ -35,16 +35,17 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     formState: { errors, isSubmitting, isDirty }, // Use dirty flag to check if the form has changes
     setValue,
     getValues,
-    reset,
   } = useForm<BeepCardInput>({
     defaultValues: {
       UUIC: beepCardToEdit?.UUIC || generateDefaultNumber(),
+      userID: beepCardToEdit?.userID || '', // Set default value for userID
       balance: editMode ? beepCardToEdit?.balance : 0,
       isActive: editMode ? beepCardToEdit?.isActive : false,
     },
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isActive, setisActive] = useState<boolean>(false);
 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -64,10 +65,12 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       setValue("UUIC", beepCardToEdit?.UUIC || generateDefaultNumber());
       if (beepCardToEdit?.balance !== undefined) {
         if (editMode) {
+          setValue("userID", beepCardToEdit.userID);
           setValue("balance", beepCardToEdit.balance);
           setisActive(beepCardToEdit?.isActive || false);
         } else {
           const defaultBalance = await getDefaultLoadPrice();
+          setValue("userID", beepCardToEdit.userID);
           setValue("balance", defaultBalance);
           setValue("isActive", false);
         }

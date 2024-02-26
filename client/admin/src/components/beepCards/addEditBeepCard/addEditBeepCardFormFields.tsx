@@ -82,6 +82,16 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
                 disabled={isSubmitting}
               />
 
+              <TextInputField
+                name="userID"
+                label="User ID"
+                type="text"
+                placeholder="User ID"
+                register={register}
+                registerOptions={{ required: "Required " }}
+                errors={errors.userID}
+                disabled={isSubmitting}
+              />
 
               <Form.Group controlId="formIsActive">
                 <Form.Check
