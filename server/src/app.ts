@@ -20,7 +20,7 @@ import authenticateToken from "./middleware/authMiddleware";
 import maintenanceAdmin from "./middleware/maintenanceAdmin";
 
 // Set isProduction to true when deploying to Render.com
-const isProduction = false;
+const isProduction = true;
 
 // Initializing the express app
 const app = express();
