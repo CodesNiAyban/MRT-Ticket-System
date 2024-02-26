@@ -13,7 +13,7 @@ export const getMaintenance: RequestHandler = async (req, res, next) => {
 };
 
 
-export const updateMaintenance: RequestHandler<maintenanceInterface.UpdateMaintenanceParams, unknown, maintenanceInterface.UpdateMaintenanceBody, unknown> = async (req, res, next) => {
+export const updateMaintenance: RequestHandler<unknown, unknown, maintenanceInterface.UpdateMaintenanceBody, unknown> = async (req, res, next) => {
 	const newMaintenance = req.body.maintenance;
 
 	try {

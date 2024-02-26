@@ -1,7 +1,8 @@
 import { Button, Modal, Navbar, Nav, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Admin } from "../../model/adminModel";
 import * as AdminApi from "../../network/adminAPI";
-import { useState } from "react";
+import * as MaintenanceApi from "../../network/maintenanceAPI"
+import { useEffect, useState } from "react";
 import styles from "./NavBar.module.css";
 import { Link } from "react-router-dom";
 
@@ -17,6 +18,20 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
 
+    useEffect(() => {
+        async function fetchMaintenanceMode() {
+            try {
+                const maintenance = await MaintenanceApi.fetchMaintenance();
+                setMaintenanceMode(maintenance[0].maintenance);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        fetchMaintenanceMode();
+    }, []); // Run once when component mounts
+
+
     async function logout() {
         try {
             await AdminApi.logout();
@@ -31,9 +46,16 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
         setShowConfirmationModal(false);
     };
 
-    const handleMaintenanceSwitch = () => {
+    const handleMaintenanceSwitch = async () => {
         setMaintenanceMode(!maintenanceMode);
-        // Handle maintenance mode activation/deactivation logic here
+        try {
+            // Update maintenance mode status when the switch is toggled
+            await MaintenanceApi.updateMaintenance({
+                maintenance: !maintenanceMode,
+            });
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (

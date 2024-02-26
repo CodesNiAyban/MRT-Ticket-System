@@ -17,6 +17,7 @@ import maintenanceRoute from "./routes/maintenanceRoute";
 import env from "./utils/validateENV";
 import MongoStore from "connect-mongo";
 import authenticateToken from "./middleware/authMiddleware"; 
+import maintenanceAdmin from "./middleware/maintenanceAdmin";
 
 // Set isProduction to true when deploying to Render.com
 const isProduction = false;
@@ -54,13 +55,13 @@ app.use(session({
 }));
 
 // Declaring station API URL
-app.use("/api/stations", authenticateToken, stationRoute);
+app.use("/api/stations", maintenanceAdmin, authenticateToken, stationRoute);
 app.use("/api/beepCards", authenticateToken, beepCardRoute);
-app.use("/api/fare", authenticateToken, fareRoute);
+app.use("/api/fare", maintenanceAdmin, authenticateToken, fareRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/mrt", mrtRoute);
 app.use("/api/beepCardManager", beepCardManagerRoute);
-app.use("/api/maintenance", maintenanceRoute);
+app.use("/api/maintenance", authenticateToken, maintenanceRoute);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
