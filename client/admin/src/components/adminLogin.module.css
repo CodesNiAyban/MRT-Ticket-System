@@ -1,0 +1,255 @@
+/* Colors */
+:root {
+  --black: #000000;
+  --dark-gray: rgba(var(--black), 0.8);
+  --gray: rgba(var(--black), 0.6);
+  --light-gray: rgba(var(--black), 0.4);
+  --lighter-gray: rgba(var(--black), 0.2);
+  --white: #ffffff;
+  --accent: #4285f4;
+}
+
+/* Font Family and Weights */
+:root {
+  --body-font: "Roboto";
+  --regular: 400;
+  --semibold: 500;
+  --bold: 700;
+}
+
+/* Update your existing styles with the new color and font variables */
+.App {
+  background-color: var(--white);
+}
+
+.Auth-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.Auth-form {
+  box-shadow: rgba(0, 0, 0, 0.16) 1px 1px 10px;
+  padding-top: 30px;
+  padding-bottom: 20px;
+  border-radius: 8px;
+  background-color: var(--white);
+  font-family: var(--body-font), sans-serif;
+  color: var(--gray);
+}
+
+.Auth-form-content {
+  padding-left: 12%;
+  padding-right: 12%;
+}
+
+.Auth-form-title {
+  text-align: center;
+  margin-bottom: 1em;
+  font-size: 24px;
+  color: var(--accent);
+  font-weight: var(--bold);
+}
+
+label {
+  font-size: 12px;
+  font-weight: var(--semibold);
+  color: var(--gray);
+}
+
+.form-group {
+  margin: 0 0 10px;
+
+  input {
+    outline: none;
+    display: block;
+    background: rgba(var(--black), 0.1);
+    width: 100%;
+    border: 0;
+    border-radius: 4px;
+    box-sizing: border-box;
+    padding: 12px 20px;
+    color: var(--gray);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: var(--semibold);
+    line-height: inherit;
+    transition: 0.3s ease;
+
+    &:focus {
+      color: var(--dark-gray);
+    }
+  }
+
+  #username,
+  #password {
+    font-family: var(--body-font);
+    color: var(--dark-gray);
+  }
+
+  button[type="submit"] {
+    background-color: var(--accent);
+    color: var(--white);
+    font-family: var(--body-font);
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+  button {
+    outline: none;
+    background: var(--accent);
+    width: 100%;
+    border: 0;
+    border-radius: 4px;
+    padding: 12px 20px;
+    color: var(--white);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: var(--semibold);
+    line-height: inherit;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .form-remember {
+    font-size: 12px;
+    font-weight: var(--regular);
+    letter-spacing: 0;
+    text-transform: none;
+
+    input[type="checkbox"] {
+      display: inline-block;
+      width: auto;
+      margin: 0 10px 0 0;
+    }
+  }
+
+  .form-recovery {
+    color: var(--accent);
+    font-size: 12px;
+    text-decoration: none;
+  }
+}
+
+hr {
+  border-top: 1px solid var(--ddd);
+  margin-bottom: 15px;
+}
+
+.form-panel {
+  padding: 60px calc(5% + 60px) 60px 60px;
+  box-sizing: border-box;
+}
+
+.form-panel.one:before {
+  content: "";
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.3s ease;
+}
+
+.form-panel.one.hidden:before {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+.form-panel.two {
+  z-index: 5;
+  position: absolute;
+  top: 0;
+  left: 95%;
+  background: #4285f4;
+  width: 100%;
+  min-height: 100%;
+  padding: 60px calc(10% + 60px) 60px 60px;
+  transition: 0.3s ease;
+  cursor: pointer;
+}
+
+.form-panel.two:before,
+.form-panel.two:after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 60px;
+  left: 1.5%;
+  background: rgba(255, 255, 255, 0.2);
+  height: 30px;
+  width: 2px;
+  transition: 0.3s ease;
+}
+
+.form-panel.two:after {
+  left: 3%;
+}
+
+.form-panel.two:hover {
+  left: 93%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.form-panel.two:hover:before,
+.form-panel.two:hover:after {
+  opacity: 0;
+}
+
+.form-panel.two.active {
+  left: 10%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  cursor: default;
+}
+
+.form-panel.two.active:before,
+.form-panel.two.active:after {
+  opacity: 0;
+}
+
+.form-header {
+  margin: 0 0 40px;
+}
+
+.form-header h1 {
+  padding: 4px 0;
+  color: #4285f4;
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.two .form-header h1 {
+  position: relative;
+  z-index: 40;
+  color: #ffffff;
+}
+
+.pen-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 600px;
+  margin: 20px auto 100px;
+}
+
+.pen-footer a {
+  color: #ffffff;
+  font-size: 12px;
+  text-decoration: none;
+  text-shadow: 1px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.pen-footer a .material-icons {
+  width: 12px;
+  margin: 0 5px;
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+.cp-fab {
+  background: #ffffff !important;
+  color: #4285f4 !important;
+}
+
