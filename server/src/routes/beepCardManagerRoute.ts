@@ -3,10 +3,10 @@ import * as BeepCardsManagerController from "../controllers/beepCardManagerContr
 
 const router = express.Router();
 
-router.get("/", BeepCardsManagerController.getBeepCards);
+router.get("/:userID", BeepCardsManagerController.getBeepCards);
 
-router.put("/:beepCardId", BeepCardsManagerController.updateBeepCardUserID);
+router.put("/:beepCardUUID", BeepCardsManagerController.updateBeepCardUserID); 
 
-router.delete("/:beepCardId", BeepCardsManagerController.deleteBeepCardUserID);
+router.delete("/:beepCardUUID", BeepCardsManagerController.deleteBeepCardUserID); 
 
 export default router;
