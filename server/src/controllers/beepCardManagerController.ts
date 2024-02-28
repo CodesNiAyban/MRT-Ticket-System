@@ -13,7 +13,7 @@ export const getBeepCards: RequestHandler<beepCardManagerInterface.GetBeepCardsP
 		}
 
 		// Find beep cards with matching userID
-		const beepCards = await beepCardsModel.find({ "UUIC": userId }).exec();
+		const beepCards = await beepCardsModel.find({ userID : userId }).exec();
 
 		res.status(200).json(beepCards);
 	} catch (error) {
