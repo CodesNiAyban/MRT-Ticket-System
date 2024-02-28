@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import * as beepCardManagerInterface from "../interfaces/beepCardManagerInterface";
 import beepCardsModel from "../models/beepCardModel";
+import TapTransactionModel from "../models/tapTransactionsModel";
 
 export const getBeepCards: RequestHandler<beepCardManagerInterface.GetBeepCardsParams, unknown, unknown, unknown> = async (req, res, next) => {
 	const userId = req.params.userID; // Extract userID from route parameters
@@ -13,7 +14,7 @@ export const getBeepCards: RequestHandler<beepCardManagerInterface.GetBeepCardsP
 		}
 
 		// Find beep cards with matching userID
-		const beepCards = await beepCardsModel.find({ userID : userId }).exec();
+		const beepCards = await beepCardsModel.find({ userID: userId }).exec();
 
 		res.status(200).json(beepCards);
 	} catch (error) {
@@ -44,7 +45,7 @@ export const updateBeepCardUserID: RequestHandler<beepCardManagerInterface.Updat
 
 export const deleteBeepCardUserID: RequestHandler<beepCardManagerInterface.UpdateBeepCardsParams, unknown, beepCardManagerInterface.UpdateBeepCardsBody, unknown> = async (req, res, next) => {
 	const beepCardUUID = req.params.UUIC;
-	const userID  = req.body.userID;
+	const userID = req.body.userID;
 
 	try {
 		// Find the beep card by UUIC
@@ -70,3 +71,34 @@ export const deleteBeepCardUserID: RequestHandler<beepCardManagerInterface.Updat
 		next(error);
 	}
 };
+
+export const getTapOutTransactionsByUserID: RequestHandler = async (req, res, next) => {
+	const userID = req.params.userID;
+
+	try {
+		// Find beep cards of the user
+		const userBeepCards = await beepCardsModel.find({ userID }).exec();
+
+		if (!userBeepCards || userBeepCards.length === 0) {
+			return res.status(404).json({ message: "User's beep cards not found" });
+		}
+
+		// Extract UUIDs of user's beep cards
+		const userBeepCardUUIDs = userBeepCards.map(beepCard => beepCard.UUIC);
+
+		// Find all tap-out transactions for the user's beep cards
+		const tapOutTransactions = await TapTransactionModel.find({ UUIC: { $in: userBeepCardUUIDs }, tapIn: false })
+			.sort({ createdAt: -1 }) // Sort in descending order based on createdAt
+			.exec();
+
+		if (!tapOutTransactions || tapOutTransactions.length === 0) {
+			return res.status(404).json({ message: "Tap out transactions not found" });
+		}
+
+		res.status(200).json(tapOutTransactions);
+	} catch (error) {
+		next(error);
+	}
+};
+
+
