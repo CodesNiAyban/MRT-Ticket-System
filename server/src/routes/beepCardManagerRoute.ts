@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.get("/:userID", BeepCardsManagerController.getBeepCards);
 
-router.put("/:beepCardUUID", BeepCardsManagerController.updateBeepCardUserID); 
+router.put("/link/:UUIC", BeepCardsManagerController.updateBeepCardUserID); 
 
-router.delete("/:beepCardUUID", BeepCardsManagerController.deleteBeepCardUserID); 
+router.put("/unlink/:UUIC", BeepCardsManagerController.deleteBeepCardUserID); 
 
 export default router;

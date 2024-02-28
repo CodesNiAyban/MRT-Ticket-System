@@ -13,7 +13,7 @@ export const getBeepCards: RequestHandler<beepCardManagerInterface.GetBeepCardsP
 		}
 
 		// Find beep cards with matching userID
-		const beepCards = await beepCardsModel.find({ userID: userId }).exec();
+		const beepCards = await beepCardsModel.find({ "UUIC": userId }).exec();
 
 		res.status(200).json(beepCards);
 	} catch (error) {
@@ -21,47 +21,48 @@ export const getBeepCards: RequestHandler<beepCardManagerInterface.GetBeepCardsP
 	}
 };
 
-
 export const updateBeepCardUserID: RequestHandler<beepCardManagerInterface.UpdateBeepCardsParams, unknown, beepCardManagerInterface.UpdateBeepCardsBody, unknown> = async (req, res, next) => {
-	const beepCardUUID = req.params.UUIC; // Change variable name
-	const userId = req.body.userID; // Only update userID
+	const beepCardUUID = req.params.UUIC;
+	const userId = req.body.userID;
 
 	try {
-		// Find beep card by UUID
-		const beepCard = await beepCardsModel.findOne({ beepCardUUID }).exec();
+		const updatedBeepCard = await beepCardsModel.findOneAndUpdate(
+			{ UUIC: beepCardUUID }, // Filter criteria
+			{ userID: userId }, // Updated fields
+			{ new: true } // Return the updated document
+		).exec();
 
-		if (!beepCard) throw createHttpError(404, "Beep card not found.");
-
-		// Check if the userID from the database is empty
-		if (!beepCard.userID) {
-			// If userID is empty, replace it with the new userID
-			beepCard.userID = userId;
-			const updatedBeepCard = await beepCard.save();
-			res.status(200).json(updatedBeepCard);
-		} else if (beepCard.userID === userId) {
-			// If userID already exists for the current beep card
-			res.status(400).json({ message: "Beep card is already taken." });
-		} else {
-			// If userID is different from the one in the database
-			res.status(400).json({ message: "Beep card is already assigned to another user." });
+		if (!updatedBeepCard) {
+			throw createHttpError(404, "Beep card not found.");
 		}
+
+		res.status(200).json(updatedBeepCard);
 	} catch (error) {
 		next(error);
 	}
 };
 
-
 export const deleteBeepCardUserID: RequestHandler<beepCardManagerInterface.UpdateBeepCardsParams, unknown, beepCardManagerInterface.UpdateBeepCardsBody, unknown> = async (req, res, next) => {
-	const beepCardUUID = req.params.UUIC; // Change variable name
+	const beepCardUUID = req.params.UUIC;
+	const userID  = req.body.userID;
 
 	try {
-		const beepCard = await beepCardsModel.findOne({ beepCardUUID }).exec();
+		// Find the beep card by UUIC
+		const beepCard = await beepCardsModel.findOne({ UUIC: beepCardUUID }).exec();
 
-		if (!beepCard) throw createHttpError(404, "Beep card not found.");
+		if (!beepCard) {
+			throw createHttpError(404, "Beep card not found.");
+		}
 
-		// Unset the userID field
+		// Check if the provided userID matches the current userID
+		if (beepCard.userID !== userID) {
+			throw createHttpError(404, "User ID does not match.");
+		}
+
+		// Update the userID field to an empty string
 		beepCard.userID = "";
 
+		// Save the updated beep card
 		const updatedBeepCard = await beepCard.save();
 
 		res.status(200).json(updatedBeepCard);
