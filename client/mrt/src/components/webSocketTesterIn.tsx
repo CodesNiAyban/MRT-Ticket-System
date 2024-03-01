@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Button, Container, Form } from 'react-bootstrap';
 import io from 'socket.io-client';
+import QRCode from 'react-qr-code'; // Import QRCode component
+import uuid from 'react-native-uuid';
 
 const WebSocketTester = () => {
   const [receivedMessage, setReceivedMessage] = useState<string | null>(null);
   const [socket, setSocket] = useState<any>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [room, setRoom] = useState('');
+  const [room, setRoom] = useState<any>(uuid.v4()); // Generate initial room value using UUID
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -17,12 +18,16 @@ const WebSocketTester = () => {
     // Listen for messages from the server
     newSocket.on('message', (msg: string) => {
       setReceivedMessage(msg);
+      leaveRoom();
+      setRoom(uuid.v4())
+      joinRoom()
     });
 
     // Set connection status
     newSocket.on('connect', () => {
       setIsConnected(true);
     });
+
     newSocket.on('disconnect', () => {
       setIsConnected(false);
     });
@@ -55,34 +60,46 @@ const WebSocketTester = () => {
   };
 
   return (
-    <Container>
-      <h1>WebSocket Tester</h1>
-      <Form.Group>
-        <Form.Label>Room:</Form.Label>
-        <Form.Control type="text" value={room} onChange={(e) => setRoom(e.target.value)} />
-      </Form.Group>
-      <Form.Group>
-        <Form.Label>Message:</Form.Label>
-        <Form.Control type="text" value={message} onChange={(e) => setMessage(e.target.value)} />
-      </Form.Group>
-      <Button onClick={joinRoom} disabled={!isConnected || !room}>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">WebSocket Tester</h1>
+      <div className="mb-4">
+        <label className="block mb-1">Room:</label>
+        <input
+          type="text"
+          value={room}
+          onChange={(e) => setRoom(e.target.value)}
+          className="w-full border border-gray-300 rounded-md p-2"
+        />
+        {/* Generate QR code for the room value */}
+        <QRCode value={room} />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-1">Message:</label>
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="w-full border border-gray-300 rounded-md p-2"
+        />
+      </div>
+      <button onClick={joinRoom} disabled={!isConnected || !room} className="btn">
         Join Room
-      </Button>
-      <Button onClick={leaveRoom} disabled={!isConnected || !room}>
+      </button>
+      <button onClick={leaveRoom} disabled={!isConnected || !room} className="btn">
         Leave Room
-      </Button>
-      <Button onClick={sendMessage} disabled={!isConnected || !room || !message}>
+      </button>
+      <button onClick={sendMessage} disabled={!isConnected || !room || !message} className="btn">
         Send Message to Room
-      </Button>
-      <div>
+      </button>
+      <div className="mt-4">
         {isConnected ? (
-          <p>Connected to WebSocket server</p>
+          <p className="text-green-600">Connected to WebSocket server</p>
         ) : (
-          <p>Not connected to WebSocket server</p>
+          <p className="text-red-600">Not connected to WebSocket server</p>
         )}
         {receivedMessage && <p>Received message: {receivedMessage}</p>}
       </div>
-    </Container>
+    </div>
   );
 };
 
