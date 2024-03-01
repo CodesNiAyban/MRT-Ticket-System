@@ -1,9 +1,10 @@
+// app.ts
 import bodyParser from "body-parser";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";
-import express, { type NextFunction, type Request, type Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import session from "express-session";
 import { isHttpError } from "http-errors";
 import morgan from "morgan";
@@ -16,11 +17,13 @@ import beepCardManagerRoute from "./routes/beepCardManagerRoute";
 import maintenanceRoute from "./routes/maintenanceRoute";
 import env from "./utils/validateENV";
 import MongoStore from "connect-mongo";
-import authenticateToken from "./middleware/authMiddleware"; 
+import authenticateToken from "./middleware/authMiddleware";
 import maintenanceAdmin from "./middleware/maintenanceAdmin";
+import http from "http"; // Import http module
+import { Server as SocketIOServer } from "socket.io";
 
 // Set isProduction to true when deploying to Render.com
-const isProduction = true;
+const isProduction = false;
 
 // Initializing the express app
 const app = express();
@@ -61,7 +64,7 @@ app.use("/api/fare", maintenanceAdmin, authenticateToken, fareRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/mrt", mrtRoute);
 app.use("/api/beepCardManager", beepCardManagerRoute);
-app.use("/api/maintenance", authenticateToken, maintenanceRoute);
+app.use("/api/maintenance", maintenanceRoute);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
@@ -87,4 +90,42 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
 	}
 });
 
-export default app;
+// Create HTTP server
+const server = http.createServer(app);
+
+// Pass server instance to socket.io
+const io = new SocketIOServer(server, {
+	cors: {
+		origin: isProduction ? env.API_CONNECTION_STRING : ["http://localhost:3000", "http://localhost:3001"],
+		methods: ["GET", "POST"],
+		credentials: true
+	}
+});
+
+// WebSocket logic
+io.on("connection", (socket) => {
+	console.log("A user connected");
+
+	// Join a room
+	socket.on("joinRoom", (room) => {
+		socket.join(room);
+		console.log(`User joined room: ${room}`);
+	});
+
+	// Leave a room
+	socket.on("leaveRoom", (room) => {
+		socket.leave(room);
+		console.log(`User left room: ${room}`);
+	});
+
+	// Send message to a specific room
+	socket.on("messageToRoom", ({ room, message }) => {
+		io.to(room).emit("message", message);
+	});
+
+	socket.on("disconnect", () => {
+		console.log("A user disconnected");
+	});
+});
+
+export default server;

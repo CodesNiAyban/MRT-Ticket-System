@@ -4,13 +4,30 @@ import { Fare } from "../model/fareModel";
 import { TapInTransaction } from '../model/tapInTransactionModel'
 // import { logout } from "./adminAPI"; // Make sure to import your logout function
 import { fetchData } from "./fetcher";
+import { Maintenance } from "../model/maintenanceModel";
 
 const MRT_API = process.env.REACT_APP_API_URL;
+
+export async function fetchMaintenance(): Promise<Maintenance[]> {
+    const response = await fetchData(`${MRT_API}/api/maintenance`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+        },
+    });
+
+    return response.json();
+}
 
 export async function fetchStations(): Promise<Stations[]> {
     const response = await fetchData(`${MRT_API}/api/mrt`, {
         method: "GET",
     });
+
+    if (response.status === 503) {
+        alert("Service temporarily unavailable due to maintenance. Please try again later.");
+        return [];
+    }
 
     return response.json();
 }
@@ -19,6 +36,11 @@ export async function fetchFares(): Promise<Fare[]> {
     const response = await fetchData(`${MRT_API}/api/mrt/fares/getAllFares`, {
         method: "GET",
     });
+
+    if (response.status === 503) {
+        alert("Service temporarily unavailable due to maintenance. Please try again later.");
+        return [];
+    }
 
     return response.json();
 }
@@ -34,6 +56,11 @@ export async function getBeepCard(beepCardUUIC: string): Promise<BeepCard | null
             return null;
         }
 
+        if (response.status === 503) {
+            alert("Service temporarily unavailable due to maintenance. Please try again later.");
+            return null;
+        }
+
         return await response.json();
     } catch (error) {
         // Handle other errors if needed
@@ -42,8 +69,8 @@ export async function getBeepCard(beepCardUUIC: string): Promise<BeepCard | null
     }
 }
 
-export async function tapInBeepCard(beepCardUUIC: string): Promise<BeepCard> {
-    const response = await fetchData(`${MRT_API}/api/mrt/beepCard/tapIn/${beepCardUUIC}`, {
+export async function tapInBeepCard(beepCardUUIC: string): Promise<BeepCard | null> {
+    return fetchData(`${MRT_API}/api/mrt/beepCard/tapIn/${beepCardUUIC}`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -51,9 +78,24 @@ export async function tapInBeepCard(beepCardUUIC: string): Promise<BeepCard> {
         },
         credentials: 'include',
         body: JSON.stringify({ beepCardUUIC }), // Pass an object here
-    });
+    })
+        .then(response => {
+            // Alert the status code
+            alert(response.status);
 
-    return await response.json();
+            if (response.status === 503) {
+                alert("Service temporarily unavailable due to maintenance. Please try again later.");
+                return null; // Return null when service is unavailable
+            }
+
+            return response.json();
+        })
+        .catch(error => {
+            alert(error);
+            console.error("Error tapping in beep card:", error);
+            // Handle the error gracefully and return null or an empty beep card
+            return null;
+        });
 }
 
 export async function tapOutBeepCard(beepCardUUIC: string, amountToDeduct: number): Promise<BeepCard> {
@@ -79,6 +121,11 @@ export async function createTapInTransaction(transaction: TapInTransaction): Pro
             },
             body: JSON.stringify(transaction),
         });
+
+    if (response.status === 503) {
+        alert("Service temporarily unavailable due to maintenance. Please try again later.");
+    }
+
     return await response.json();
 }
 
@@ -91,6 +138,11 @@ export async function createTapOutTransaction(transaction: TapInTransaction): Pr
             },
             body: JSON.stringify(transaction),
         });
+
+    if (response.status === 503) {
+        alert("Service temporarily unavailable due to maintenance. Please try again later.");
+    }
+
     return await response.json();
 }
 
@@ -103,6 +155,10 @@ export async function getTapInTransactionByUUIC(transaction: string): Promise<Ta
         if (response.status === 404) {
             // Beep card not found, return null
             return null;
+        }
+
+        if (response.status === 503) {
+            alert("Service temporarily unavailable due to maintenance. Please try again later.");
         }
 
         return await response.json();

@@ -1,10 +1,9 @@
-import { Button, Modal, Navbar, Nav, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { Admin } from "../../model/adminModel";
-import * as AdminApi from "../../network/adminAPI";
-import * as MaintenanceApi from "../../network/maintenanceAPI"
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { Button, Form, Modal, Nav, Navbar, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { Admin } from '../../model/adminModel';
+import * as MaintenanceApi from "../../network/maintenanceAPI";
 import styles from "./NavBar.module.css";
-import { Link } from "react-router-dom";
 
 interface NavBarLoggedInViewProps {
     user: Admin;
@@ -18,6 +17,8 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
 
+    const navigate = useNavigate();
+    
     useEffect(() => {
         async function fetchMaintenanceMode() {
             try {
@@ -29,17 +30,11 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
         }
 
         fetchMaintenanceMode();
-    }, []); // Run once when component mounts
+    }, [maintenanceMode]);
 
-
-    async function logout() {
-        try {
-            await AdminApi.logout();
-            onLogoutSuccessful();
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    const navigateToCardsPage = () => {
+        navigate("/beepcards");
+    };
 
     const handleLogoutConfirmation = () => {
         logout();
@@ -47,12 +42,25 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
     };
 
     const handleMaintenanceSwitch = async () => {
-        setMaintenanceMode(!maintenanceMode);
         try {
             // Update maintenance mode status when the switch is toggled
-            await MaintenanceApi.updateMaintenance({
+            const maintenance = await MaintenanceApi.updateMaintenance({
                 maintenance: !maintenanceMode,
             });
+            setMaintenanceMode(maintenance.maintenance);
+            if (!!!maintenance.maintenance) {
+                navigateToCardsPage(); // Navigate to Cards page when activating maintenance
+            }
+        } catch (error) {
+            setMaintenanceMode(!maintenanceMode);
+            alert(error)
+            console.error(error);
+        }
+    };
+
+    const logout = async () => {
+        try {
+            // Logout logic here
         } catch (error) {
             console.error(error);
         }
@@ -77,8 +85,8 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
                             placement="bottom"
                             overlay={<Tooltip id="tooltip-stations">Stations</Tooltip>}
                         >
-                            <Nav.Link as={Link} to="/stations">
-                                <h5 className="nav-link-text">Stations</h5>
+                            <Nav.Link as={Link} to="/stations" disabled={!maintenanceMode}>
+                                <h5 className={`nav-link-text ${maintenanceMode ? 'disabled' : ''}`}>Stations</h5>
                             </Nav.Link>
                         </OverlayTrigger>
                     </Nav.Item>
@@ -87,8 +95,8 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
                             placement="bottom"
                             overlay={<Tooltip id="tooltip-fare">Fare</Tooltip>}
                         >
-                            <Nav.Link as={Link} to="/fare">
-                                <h5 className="nav-link-text">Fare</h5>
+                            <Nav.Link as={Link} to="/fare" disabled={!maintenanceMode}>
+                                <h5 className={`nav-link-text ${maintenanceMode ? 'disabled' : ''}`}>Fare</h5>
                             </Nav.Link>
                         </OverlayTrigger>
                     </Nav.Item>
@@ -97,17 +105,17 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
                             placement="bottom"
                             overlay={<Tooltip id="tooltip-transactions">Transactions</Tooltip>}
                         >
-                            <Nav.Link as={Link} to="/fare">
+                            <Nav.Link as={Link} to="/websocket">
                                 <h5 className="nav-link-text">Transactions</h5>
                             </Nav.Link>
                         </OverlayTrigger>
                     </Nav.Item>
                 </Nav>
-                <Nav>
+                 <Nav>
                     <Navbar.Text>
                         <OverlayTrigger
                             placement="bottom"
-                            overlay={<Tooltip id="tooltip-maintenance">Maintenance</Tooltip>}
+                            overlay={<Tooltip id="tooltip-maintenance">{maintenanceMode ? 'Disable for Deployment of MRT Online Tap' : 'Enable for Station and Fare Control'}</Tooltip>}
                         >
                             <Form.Check
                                 type="switch"

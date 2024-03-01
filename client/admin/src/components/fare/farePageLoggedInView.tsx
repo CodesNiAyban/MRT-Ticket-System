@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Button,
   Col,
+  Container,
   Row,
   Spinner,
-  Container,
-  Form,
-  Toast,
+  Toast
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { Fare as FaresModel } from "../../model/fareModel";
 import * as FareApi from "../../network/fareAPI";
+import * as MaintenanceApi from "../../network/maintenanceAPI";
 import styles from "./fare.module.css";
 import Fare from "./fareComponent";
 import UpdateFareDialog from "./updateFareDialog";
+
 
 const FarePageLoggedInView = () => {
   const [fares, setFares] = useState<FaresModel[]>([]);
@@ -29,6 +30,8 @@ const FarePageLoggedInView = () => {
   const [editFormData, setEditFormData] = useState<FaresModel | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     async function loadFares() {
       try {
@@ -42,6 +45,21 @@ const FarePageLoggedInView = () => {
       }
     }
     loadFares();
+  }, []);
+
+  useEffect(() => {
+    async function fetchMaintenanceMode() {
+      try {
+        const maintenance = await MaintenanceApi.fetchMaintenance();
+        if (maintenance) {
+          // navigate("/beepcards");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchMaintenanceMode();
   }, []);
 
   const showToastMessage = (variant: "success" | "danger", message: string) => {
@@ -73,7 +91,7 @@ const FarePageLoggedInView = () => {
       setFareToEdit(null);
       setUpdateText("");
       setShowEditForm(false);
-      showToastMessage("success",  `${updatedFare.fareType.charAt(0).toUpperCase() + updatedFare.fareType.slice(1)} updated successfully.`);
+      showToastMessage("success", `${updatedFare.fareType.charAt(0).toUpperCase() + updatedFare.fareType.slice(1)} updated successfully.`);
     } catch (error) {
       console.error(error);
       showToastMessage("danger", "Error updating fare. Please try again.");

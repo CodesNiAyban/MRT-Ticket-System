@@ -11,6 +11,8 @@ import * as StationApi from '../../network/stationsAPI';
 import AddEditStationDialog from './addEditStationDialog';
 import styles from './station.module.css';
 import MapEventHandler from './stationsCoordinates';
+import * as MaintenanceApi from "../../network/maintenanceAPI";
+import { useNavigate } from 'react-router-dom';
 
 const StationPageLoggedInView = () => {
 	const [isMapView, setIsMapView] = useState(true); // true for map, false for table
@@ -59,6 +61,8 @@ const StationPageLoggedInView = () => {
 	const handlePageChange = (newPage: number) => {
 		setCurrentPage(newPage);
 	};
+
+	const navigate = useNavigate();
 
 	const newCustomIcon = L.icon({
 		iconUrl: '/newMarker.png',
@@ -162,6 +166,21 @@ const StationPageLoggedInView = () => {
 	};
 
 	useEffect(() => {
+		async function fetchMaintenanceMode() {
+			try {
+				const maintenance = await MaintenanceApi.fetchMaintenance();
+				if (maintenance) {
+					// navigate("/beepcards");
+				}
+			} catch (error) {
+				console.error(error);
+			}
+		}
+
+		fetchMaintenanceMode();
+	}, []);
+
+	useEffect(() => {
 		if (clickedCoords) {
 			const newMarker = (
 				<Marker
@@ -249,7 +268,7 @@ const StationPageLoggedInView = () => {
 								const connectedStation = stations.find(s => s._id === connectedStationId);
 								return (
 									<span key={index}>
-										{connectedStation ? toTitleCase(connectedStation.stationName) : 'Unknown Station'}
+										{connectedStation ? toTitleCase(connectedStation.stationName) : ''}
 										{index < station.connectedTo.length - 1 && ', '}
 									</span>
 								);
@@ -366,7 +385,11 @@ const StationPageLoggedInView = () => {
 					pauseOnHover: true,
 					draggable: true,
 					progress: undefined,
-					onClose: resolve,
+					onClose: () => {
+						// Reset current page to 1 after deletion
+						handlePageChange(1);
+						resolve();
+					},
 				});
 			});
 
@@ -575,7 +598,7 @@ const StationPageLoggedInView = () => {
 																		<span key={index}>
 																			{connectedStation
 																				? toTitleCase(connectedStation.stationName)
-																				: 'Unknown Station'}
+																				: ''}
 																			{index < station.connectedTo.length - 1 && ', '}
 																		</span>
 																	);
@@ -604,7 +627,7 @@ const StationPageLoggedInView = () => {
 												</tbody>
 											</Table>
 
-											{!stationsLoading && filteredStations.length > perPage && (
+											{!stationsLoading && filteredStations.length > perPage && filteredStations.length > 0 && (
 												<Row className="justify-content-end">
 													<Col xs={12} className="text-end">
 														<div style={{
@@ -733,7 +756,7 @@ const StationPageLoggedInView = () => {
 								Station Name: <h5>{toTitleCase(confirmationTarget.stationName)}</h5>
 								Connected To: <h5>{confirmationTarget.connectedTo.map(connectedId => {
 									const connectedStation = stations.find(station => station._id === connectedId);
-									return connectedStation ? toTitleCase(connectedStation.stationName) : 'Unknown Station';
+									return connectedStation ? toTitleCase(connectedStation.stationName) : '';
 								}).join(', ')}</h5>
 							</div>
 						)}

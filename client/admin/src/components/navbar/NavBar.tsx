@@ -1,9 +1,8 @@
-import { Container, Nav, Navbar, Button, Modal } from "react-bootstrap";
+import { Container, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { Admin } from "../../model/adminModel";
 import NavBarLoggedInView from "./NavBarLoggedInView";
 import NavBarLoggedOutView from "./NavBarLoggedOutView";
-import styles from "./NavBar.module.css"; // Add this line if you have styles
 
 interface NavBarProps {
     loggedInAdmin: Admin | null;

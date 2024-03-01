@@ -88,7 +88,6 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
                 type="text"
                 placeholder="User ID"
                 register={register}
-                registerOptions={{ required: "Required " }}
                 errors={errors.userID}
                 disabled={isSubmitting}
               />

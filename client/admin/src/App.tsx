@@ -11,6 +11,7 @@ import FarePage from "./pages/farePage";
 import LoginPage from "./pages/loginPage";
 import PageNotFound from "./pages/pageNotFound";
 import StationsPage from "./pages/stationsPage";
+import WebSocketPage from "./pages/websocket";
 import styles from "./styles/app.module.css";
 
 function App() {
@@ -76,6 +77,10 @@ function App() {
           <Route
             path="/fare"
             element={<FarePage loggedInAdmin={loggedInAdmin} />}
+          />
+          <Route
+            path="/websocket"
+            element={<WebSocketPage loggedInAdmin={loggedInAdmin} />}
           />
         </Route>
 

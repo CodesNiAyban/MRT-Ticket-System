@@ -74,7 +74,6 @@ export const deleteBeepCardUserID: RequestHandler<beepCardManagerInterface.Updat
 
 export const getTapOutTransactionsByUserID: RequestHandler = async (req, res, next) => {
 	const userID = req.params.userID;
-
 	try {
 		// Find beep cards of the user
 		const userBeepCards = await beepCardsModel.find({ userID }).exec();

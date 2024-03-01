@@ -14,7 +14,7 @@ import {
 } from "./addEditBeepCardConstants";
 import BeepCardFormFields from "./addEditBeepCardFormFields";
 import ConfirmationModal from "./addEditCardConfirmModal";
-
+import QRCode from "react-qr-code";
 
 interface AddEditBeepCardDialogProps {
   beepCardToEdit?: BeepCard;
@@ -138,7 +138,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
           });
           return;
         }
-          input.balance = await getDefaultLoadPrice();
+        input.balance = await getDefaultLoadPrice();
       } else {
         if (!/^637805\d{9}$/.test(input.UUIC)) {
           toast.error("Invalid Beep Card ID format. Must start with '637805' and have 15 digits.", {
@@ -265,7 +265,11 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
             </Form>
           )}
         </Modal.Body>
-
+        {beepCardToEdit &&
+          <div className="text-center mt-3" style={{ marginTop: '30', padding: '50', paddingBottom: '10'}}>
+            <QRCode value={beepCardToEdit?.UUIC.toString()} size={150} />
+          </div>
+        }
         <Modal.Footer className={`${styles.modalFooter} modal-footer`}>
           {beepCardToEdit ? (
             editMode ? (

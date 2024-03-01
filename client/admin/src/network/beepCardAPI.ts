@@ -5,7 +5,7 @@ import { fetchData } from "./fetcher";
 const MRT_API = process.env.REACT_APP_API_URL;
 
 export async function fetchBeepCard(): Promise<BeepCard[]> {
-    const response = await fetchData(`${MRT_API}/api/beepCardManager`, {
+    const response = await fetchData(`${MRT_API}/api/beepCards`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
