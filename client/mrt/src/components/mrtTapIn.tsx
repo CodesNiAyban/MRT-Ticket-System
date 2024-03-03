@@ -17,6 +17,9 @@ import { TapInTransaction as TapInTransactionModel } from "../model/tapInTransac
 import * as StationApi from '../network/mrtAPI';
 import { formatDate } from "../utils/formatDate";
 import MaintenancePage from '../pages/maintenancePage';
+import io from 'socket.io-client';
+import QRCode from 'react-qr-code'; // Import QRCode component
+import uuid from 'react-native-uuid';
 
 const MrtTapIn = () => {
     const [mapCenter, setMapCenter] = useState<[number, number]>([14.550561416466541, 121.02785649562283]);
@@ -33,6 +36,14 @@ const MrtTapIn = () => {
     const [beepCardNumberCheck, setBeepCardNumberCheck] = useState(false);
     const [isMaintenance, setIsMaintenance] = useState(false);
     const [beepCard, setBeepCard] = useState<BeepCardsModel | null>(null);
+
+    const [receivedMessage, setReceivedMessage] = useState<string | null>(null);
+    const [socket, setSocket] = useState<any>(null);
+    const [isConnected, setIsConnected] = useState(false);
+    const [room, setRoom] = useState<any>(uuid.v4()); // Generate initial room value using UUID
+    const [message, setMessage] = useState('');
+    const [isRoomJoined, setIsRoomJoined] = useState(false);
+    const [roomJoiner, setRoomJoiner] = useState(false); // State to track whether room is joined
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
     const { stationName } = useParams();
@@ -61,6 +72,83 @@ const MrtTapIn = () => {
     useEffect(() => {
         document.title = 'MRT ONLINE TAP-IN'; // Set the title dynamically
     }, []);
+
+    useEffect(() => {
+        const initializeSocket = async () => {
+            try {
+                console.log(room)
+                // Connect to the WebSocket server
+                const newSocket = io('http://192.168.64.240:5000'); // Replace with your WebSocket server URL
+                setSocket(newSocket);
+
+                // Listen for messages from the server
+                newSocket.on('message', (msg: string) => {
+                    setReceivedMessage(msg);
+                });
+
+                // Set connection status
+                newSocket.on('connect', () => {
+                    setRoomJoiner(true)
+                    setIsConnected(true);
+                });
+
+                newSocket.on('disconnect', () => {
+                    setIsConnected(false);
+                    setIsRoomJoined(false); // Reset room joined status on disconnect
+                });
+
+            } catch (error) {
+                console.error('Error connecting to WebSocket:', error);
+            }
+        };
+
+        initializeSocket();
+
+        return () => {
+            // Cleanup function
+            if (socket) {
+                socket.disconnect(); // Disconnect WebSocket connection when component unmounts
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (roomJoiner) {
+            console.log("natawag")
+            joinRoom(socket);
+        }
+        setRoomJoiner(false)
+    }, [roomJoiner]);
+
+    useEffect(() => {
+        if (receivedMessage) {
+            setBeepCardNumber(receivedMessage)
+            handleTapIn()
+        }
+    }, [receivedMessage]);
+
+    const sendMessage = () => {
+        // Send a message to the server
+        if (socket && room && message) {
+            socket.emit('messageToRoom', { room, message });
+        }
+    };
+
+    const joinRoom = async (newSocket: any) => { // Accept newSocket as a parameter
+        if (newSocket && room) { // Use newSocket instead of socket
+            newSocket.emit('joinRoom', room); // Use newSocket instead of socket
+            setIsRoomJoined(true);
+            console.log("Nakajoin")
+        }
+    };
+
+    const leaveRoom = () => {
+        // Leave a room
+        if (socket && room) {
+            socket.emit('leaveRoom', room);
+            setIsRoomJoined(false); // Reset room joined status when leaving room
+        }
+    };
 
     useEffect(() => {
         const checkMaintenance = async () => {
@@ -275,6 +363,8 @@ const MrtTapIn = () => {
                 pauseOnHover: true,
                 draggable: true,
             });
+        } finally {
+            setReceivedMessage('')
         }
     };
 
@@ -289,7 +379,7 @@ const MrtTapIn = () => {
             }
         };
 
-        if (beepCardNumber !== '637805') {
+        if (beepCardNumber !== '637805' || beepCardNumber.length > 13) {
             loadBeepCardDetails();
         } else {
             setBeepCard(null);
@@ -378,6 +468,12 @@ const MrtTapIn = () => {
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapInDetails.currBalance}</p>
                                             </div>
                                         )}
+                                        {room && socket && isRoomJoined && (
+                                            <div className="flex justify-center items-center mt-2">
+                                                <QRCode value={room} fgColor="#4A90E2" />
+                                            </div>
+                                        )}
+                                        {receivedMessage && <p>Received message: {receivedMessage}</p>}
                                         <Button
                                             className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
                                             disabled={!beepCard?.UUIC} // Disable the button if beepCard is null

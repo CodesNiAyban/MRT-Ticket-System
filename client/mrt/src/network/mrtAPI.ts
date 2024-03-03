@@ -80,8 +80,6 @@ export async function tapInBeepCard(beepCardUUIC: string): Promise<BeepCard | nu
         body: JSON.stringify({ beepCardUUIC }), // Pass an object here
     })
         .then(response => {
-            // Alert the status code
-            alert(response.status);
 
             if (response.status === 503) {
                 alert("Service temporarily unavailable due to maintenance. Please try again later.");
