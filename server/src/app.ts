@@ -23,7 +23,7 @@ import http from "http"; // Import http module
 import { Server as SocketIOServer } from "socket.io";
 
 // Set isProduction to true when deploying to Render.com
-const isProduction = false;
+const isProduction = true;
 
 // Initializing the express app
 const app = express();
@@ -74,7 +74,7 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
 	if (isHttpError(error)) {
 		statusCode = error.status;
 		errorMessage = error.message;
-	}
+	}	
 	res.status(statusCode).json({ error: errorMessage });
 });
 
