@@ -111,7 +111,7 @@ export async function tapOutBeepCard(beepCardUUIC: string, amountToDeduct: numbe
 }
 
 export async function createTapInTransaction(transaction: TapInTransaction): Promise<TapInTransaction> {
-    const response = await fetchData(`${MRT_API}/api/mrt/transactions/create`,
+    const response = await fetchData(`${MRT_API}/api/mrt/transactions/create/in`,
         {
             method: "POST",
             headers: {
@@ -128,7 +128,7 @@ export async function createTapInTransaction(transaction: TapInTransaction): Pro
 }
 
 export async function createTapOutTransaction(transaction: TapInTransaction): Promise<TapInTransaction> {
-    const response = await fetchData(`${MRT_API}/api/mrt/transactions/create`,
+    const response = await fetchData(`${MRT_API}/api/mrt/transactions/create/out`,
         {
             method: "POST",
             headers: {

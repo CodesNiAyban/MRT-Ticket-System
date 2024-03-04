@@ -2,7 +2,7 @@ import express from "express";
 import { tapIn, tapOut, getBeepCardByUUIC } from "../controllers/beepCardsController";
 import { getFares } from "../controllers/fareController";
 import { getStation, getStations } from "../controllers/stationsController";
-import { createTapInTransaction, getTapInTransactionByUUIC } from "../controllers/transactionController";
+import { createTapInTransaction, getTapInTransactionByUUIC, createTapOutTransaction } from "../controllers/transactionController";
 import maintenanceMrt from "../middleware/maintenanceMrt";
 
 const router = express.Router();
@@ -21,6 +21,8 @@ router.patch("/beepCard/tapIn/:UUIC", maintenanceMrt, tapIn);
 
 router.patch("/beepCard/tapOut/:UUIC", tapOut);
 
-router.post("/transactions/create", createTapInTransaction);
+router.post("/transactions/create/in", createTapInTransaction);
+
+router.post("/transactions/create/out", createTapOutTransaction);
 
 export default router;

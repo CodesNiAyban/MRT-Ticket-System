@@ -695,7 +695,7 @@ const MrtTapOut = () => {
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Current Station: {stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase())}</p>
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Distance: {(pathDistance / 1000).toFixed(2)}km</p>
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Date of Tap-in: {formatDate(tapOutDetails.updatedAt)}</p>
-                                                <p className="text-xl lg:text-2xl text-white mb-1">Fare: {calculateFare(pathDistance, minimumFare) + minimumFare?.price!}</p>
+                                                <p className="text-xl lg:text-2xl text-white mb-1">Fare: {farePerKm + minimumFare?.price!}</p>
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapOutDetails.initialBalance ? (tapOutDetails.initialBalance - (farePerKm + minimumFare?.price!)) : 'N/A'}</p>
                                             </div>
                                         )}
