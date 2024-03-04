@@ -34,12 +34,19 @@ app.use(morgan("dev"));
 
 // Set the origin based on deployment
 const corsOptions = {
-	origin: isProduction ? env.API_CONNECTION_STRING : ["http://localhost:3000", "http://localhost:3001"],
+	origin: function (origin: string | undefined, callback: (error: Error | null, allow: boolean) => void) {
+		if (!origin || env.API_CONNECTION_STRING.includes(origin)) {
+			callback(null, true);
+		} else {
+			callback(new Error("Not allowed by CORS"), false);
+		}
+	},
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	optionsSuccessStatus: 204,
 	allowedHeaders: "Content-Type, Authorization",
 };
+
 
 app.use(cors(corsOptions));
 // Using the dependencies
@@ -74,7 +81,7 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
 	if (isHttpError(error)) {
 		statusCode = error.status;
 		errorMessage = error.message;
-	}	
+	}
 	res.status(statusCode).json({ error: errorMessage });
 });
 
