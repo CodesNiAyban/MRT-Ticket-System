@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { faBalanceScale, faCreditCard, faHandPointer, faTrain } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from 'flowbite-react';
@@ -88,7 +90,7 @@ const MrtTapOut = () => {
             try {
                 console.log(room)
                 // Connect to the WebSocket server
-                const newSocket = io('http://10.200.54.109:5000'); // Replace with your WebSocket server URL
+                const newSocket = io('https://mrtonlineapi.onrender.com'); // Replace with your WebSocket server URL
                 setSocket(newSocket);
 
                 // Listen for messages from the server
