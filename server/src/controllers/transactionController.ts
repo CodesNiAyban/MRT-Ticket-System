@@ -1,8 +1,8 @@
 import { RequestHandler } from "express";
+import createHttpError from "http-errors";
 import * as TapInTransactionInterface from "../interfaces/tapInTransactionsInterface";
 import * as TapOutTransactionInterface from "../interfaces/tapOutTransactionsModel";
 import TapTransactionModel from "../models/tapTransactionsModel";
-import createHttpError from "http-errors";
 
 export const getTapInTransactionByUUIC: RequestHandler = async (req, res, next) => {
 	const UUIC = req.params.UUIC;
@@ -25,7 +25,6 @@ export const createTapInTransaction: RequestHandler<unknown, unknown, TapInTrans
 	const prevStation = req.body.prevStation;
 	const currStation = req.body.currStation;
 	const distance = req.body.distance;
-	const fare = req.body.fare;
 	const currBalance = req.body.currBalance;
 
 	try {
@@ -40,7 +39,7 @@ export const createTapInTransaction: RequestHandler<unknown, unknown, TapInTrans
 			prevStation: prevStation,
 			currStation: currStation,
 			distance: distance,
-			fare: fare,
+			fare: 0,
 			currBalance: currBalance
 		});
 

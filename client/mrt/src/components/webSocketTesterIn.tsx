@@ -17,7 +17,7 @@ const WebSocketTester = () => {
             try {
                 console.log(room)
                 // Connect to the WebSocket server
-                const newSocket = io('http://192.168.64.240:5000'); // Replace with your WebSocket server URL
+                const newSocket = io('http://10.200.54.109:5000'); // Replace with your WebSocket server URL
                 setSocket(newSocket);
 
                 // Listen for messages from the server

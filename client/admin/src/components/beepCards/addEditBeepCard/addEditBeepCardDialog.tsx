@@ -266,7 +266,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
           )}
         </Modal.Body>
         {beepCardToEdit &&
-          <div className="text-center mt-3" style={{ marginTop: '30', padding: '50', paddingBottom: '10'}}>
+          <div className="text-center mt-3" style={{ marginTop: '30', padding: '50', paddingBottom: '10' }}>
             <QRCode value={beepCardToEdit?.UUIC.toString()} size={150} />
           </div>
         }

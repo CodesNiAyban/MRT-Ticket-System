@@ -4,21 +4,24 @@ import { Button } from 'flowbite-react';
 import { Graph, alg } from 'graphlib';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useRef, useState } from 'react';
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
+import uuid from 'react-native-uuid';
+import QRCode from 'react-qr-code'; // Import QRCode component
 import { useNavigate, useParams } from 'react-router-dom';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import io from 'socket.io-client';
 import { BeepCard as BeepCardsModel } from "../model/beepCardModel";
 import { Fare as FareModel } from "../model/fareModel";
 import { Stations as StationsModel } from "../model/stationsModel";
 import { TapInTransaction as TapInTransactionModel } from "../model/tapInTransactionModel";
 import { TapOutTransaction as TapOutTransactionModel } from "../model/tapOutTransactionModel";
 import * as StationApi from '../network/mrtAPI';
-import { formatDate } from "../utils/formatDate";
 import MaintenancePage from '../pages/maintenancePage';
+import { formatDate } from "../utils/formatDate";
 
 const MrtTapOut = () => {
     const [mapCenter, setMapCenter] = useState<[number, number]>([14.550561416466541, 121.02785649562283]);
@@ -37,10 +40,20 @@ const MrtTapOut = () => {
     const [beepCardNumber, setBeepCardNumber] = useState('637805');
     const [beepCard, setBeepCard] = useState<BeepCardsModel | null>(null);
     const [transactionResponse, setTransactionResponse] = useState<TapInTransactionModel | null>(null);
-    const [farePerMeters, setFarePerMeters] = useState(Number)
-    const [pathDistance, setPathDistance] = useState(Number)
+    const [farePerKm, setFarePerMeters] = useState<number>(Number)
+    const [pathDistance, setPathDistance] = useState<number>(Number)
     const [resetBeepCard, setResetBeepCard] = useState(false)
     const [isMaintenance, setIsMaintenance] = useState(false);
+
+    const [receivedMessage, setReceivedMessage] = useState<string | null>(null);
+    const [socket, setSocket] = useState<any>(null);
+    const [isConnected, setIsConnected] = useState(false);
+    const [isScanned, setIsScanned] = useState(false);
+    const [room, setRoom] = useState<any>(uuid.v4()); // Generate initial room value using UUID
+    const [message, setMessage] = useState('');
+    const [isRoomJoined, setIsRoomJoined] = useState(false);
+    const [roomJoiner, setRoomJoiner] = useState(false); // State to track whether room is joined
+    const tapOutButtonRef = useRef<HTMLButtonElement>(null);
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
     const { stationName } = useParams();
@@ -69,6 +82,100 @@ const MrtTapOut = () => {
     useEffect(() => {
         document.title = 'MRT ONLINE TAP-OUT'; // Set the title dynamically
     }, []);
+
+    useEffect(() => {
+        const initializeSocket = async () => {
+            try {
+                console.log(room)
+                // Connect to the WebSocket server
+                const newSocket = io('http://10.200.54.109:5000'); // Replace with your WebSocket server URL
+                setSocket(newSocket);
+
+                // Listen for messages from the server
+                newSocket.on('message', (msg: string) => {
+                    setReceivedMessage(msg);
+                });
+
+                // Set connection status
+                newSocket.on('connect', () => {
+                    setRoomJoiner(true)
+                    setIsConnected(true);
+                });
+
+                newSocket.on('disconnect', () => {
+                    setIsConnected(false);
+                    setIsRoomJoined(false); // Reset room joined status on disconnect
+                });
+
+            } catch (error) {
+                console.error('Error connecting to WebSocket:', error);
+            }
+        };
+
+        initializeSocket();
+
+        return () => {
+            // Cleanup function
+            if (socket) {
+                socket.disconnect(); // Disconnect WebSocket connection when component unmounts
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (roomJoiner) {
+            console.log("natawag")
+            joinRoom(socket);
+        }
+        setRoomJoiner(false)
+    }, [roomJoiner]);
+
+    const isValidBeepCard = (value: string) => {
+        const regex = /^637805\d{9}$/;
+        return regex.test(value);
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (isValidBeepCard(receivedMessage!)) {
+                try {
+                    // Fetch the beep card details based on the received UUIC message
+                    const cardDetails = await StationApi.getBeepCard(receivedMessage!);
+                    setBeepCardNumber("")
+                    setBeepCardNumber(cardDetails?.UUIC!)
+                    setIsScanned(true)
+                } catch (error) {
+                    setIsScanned(false)
+                }
+            }
+        };
+
+        fetchData();
+    }, [receivedMessage]);
+
+    const sendMessage = () => {
+        // Send a message to the server
+        if (socket && room && message) {
+            socket.emit('messageToRoom', { room, message });
+        }
+    };
+
+    const joinRoom = async (newSocket: any) => { // Accept newSocket as a parameter
+        if (newSocket && room) { // Use newSocket instead of socket
+            newSocket.emit('joinRoom', room); // Use newSocket instead of socket
+            setIsRoomJoined(true);
+            console.log("Nakajoin")
+        }
+    };
+
+    const leaveRoom = () => {
+        // Leave a room
+        if (socket && room) {
+            socket.emit('leaveRoom', room);
+            setIsRoomJoined(false); // Reset room joined status when leaving room
+        }
+    };
+
 
     useEffect(() => {
         const checkMaintenance = async () => {
@@ -226,43 +333,35 @@ const MrtTapOut = () => {
 
     const handleTapOut = async () => {
         try {
-            if (beepCard?.UUIC) {
-                if (beepCard?.balance !== undefined && minimumFare?.price !== undefined) {
-                    if (beepCard.balance >= minimumFare.price) {
-                        // Sufficient balance, proceed with tap-in
-                        if (beepCard.isActive) {
-                            let beepCardResponse;
+            const cardDetails = await StationApi.getBeepCard(beepCardNumber);
+            if (cardDetails?.UUIC) {
+                if (cardDetails?.balance !== undefined && minimumFare?.price !== undefined) {
+                    if (cardDetails.balance >= (minimumFare.price + farePerKm)) {
+                        // Sufficient balance, proceed with tap-out
+                        if (cardDetails.isActive) {
                             setIsSubmitting(true);
-                            const calculatedFare = calculateFare(pathDistance, minimumFare);
-                            if (beepCard.balance >= calculatedFare) { // Check if the balance is sufficient for the fare
-                                if (transactionResponse && transactionResponse.currStation === stationName?.replace(/[\s-]+/g, ' ')) {
-                                    beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, 0);
-                                } else {
-                                    beepCardResponse = await StationApi.tapOutBeepCard(beepCard.UUIC, farePerMeters);
-                                }
+                            if (cardDetails.balance >= farePerKm) { // Check if the balance is sufficient for the fare
+                                const beepCardResponse = await StationApi.tapOutBeepCard(cardDetails.UUIC, farePerKm + minimumFare.price!);
+                                const transactionResponse = await StationApi.getTapInTransactionByUUIC(cardDetails.UUIC);
                                 const tapOutTransaction: TapOutTransactionModel = {
-                                    UUIC: beepCard.UUIC,
+                                    UUIC: cardDetails.UUIC,
                                     tapIn: false,
-                                    initialBalance: beepCard.balance,
-                                    prevStation: transactionResponse!.currStation!.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
+                                    initialBalance: cardDetails.balance,
+                                    prevStation: toTitleCase(transactionResponse?.currStation),
                                     currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
-                                    fare: farePerMeters,
-                                    distance: parseFloat((pathDistance / 1000).toFixed(2)),
-                                    currBalance: beepCardResponse?.balance,
+                                    fare: farePerKm + minimumFare.price, // Adding farePerMeters
+                                    distance: Number((pathDistance / 1000).toFixed(2)), // Using kilometers for distance
+                                    currBalance: beepCardResponse.balance! - (farePerKm + minimumFare.price!), // Updating currBalance with updated balance
                                     createdAt: new Date().toISOString(),
                                     updatedAt: new Date().toISOString(),
                                 };
 
-                                // Send tap-in transaction to API
+                                // Send tap-out transaction to API
                                 const tapOutDetailsResponse = await StationApi.createTapOutTransaction(tapOutTransaction);
 
-                                // setBeepCard(beepCardResponse);
-
-                                setBeepCard(await StationApi.getBeepCard(beepCardNumber));
-
                                 // Update beep card details and tap-in details
+                                setBeepCard(await StationApi.getBeepCard(beepCardNumber));
                                 setTapOutDetails(tapOutDetailsResponse);
-
 
                                 // Show success message
                                 toast.success('Tap-out successful! Thank you for using MRT-3.', {
@@ -275,7 +374,7 @@ const MrtTapOut = () => {
                                 });
                             } else {
                                 // Insufficient balance
-                                toast.error('You only have ' + beepCard.balance + ', your fare is ' + calculatedFare + '. Please top up your beep card to the nearest teller.', {
+                                toast.error(`You only have ${cardDetails.balance}, your fare is ${farePerKm}. Please top up your beep card to the nearest teller.`, {
                                     position: 'top-right',
                                     autoClose: 2000,
                                     hideProgressBar: false,
@@ -285,7 +384,7 @@ const MrtTapOut = () => {
                                 });
                             }
                         } else {
-                            // Beep card is already tapped in
+                            // Beep card is already tapped out
                             toast.warn('Beep Card Already Tapped Out.', {
                                 position: 'top-right',
                                 autoClose: 2000,
@@ -297,7 +396,7 @@ const MrtTapOut = () => {
                         }
                     } else {
                         // Insufficient balance
-                        toast.error('Insufficient balance. Please top up your beep card.', {
+                        toast.error(`You only have ${cardDetails.balance}, your fare is ${farePerKm}. Please top up your beep card to the nearest teller.`, {
                             position: 'top-right',
                             autoClose: 2000,
                             hideProgressBar: false,
@@ -324,7 +423,7 @@ const MrtTapOut = () => {
         } catch (error) {
             console.error(error);
             // Show error message
-            toast.error('Tap-in failed. Please try again.', {
+            toast.error('Tap-out failed. Please try again.', {
                 position: 'top-right',
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -334,9 +433,18 @@ const MrtTapOut = () => {
             });
         } finally {
             // Set the submission status back to false after the submission process completes
+            setReceivedMessage('')
             setIsSubmitting(false);
+            setIsScanned(false);
+            setMessage('');
+            setTimeout(() => {
+                setTapOutDetails(null);
+                setBeepCardNumber('637805')
+            }, 5000); // 5000 milliseconds = 5 seconds
         }
     };
+
+
 
     const calculateFare = (pathDistanceInKM: number, minimumFare: FareModel | undefined) => {
         const baseFare = minimumFare?.price;
@@ -352,7 +460,8 @@ const MrtTapOut = () => {
         return Math.ceil(totalFare);
     };
 
-    function toTitleCase(str: string) {
+    function toTitleCase(str: string | undefined) {
+        if (!str) return ''; // Return an empty string if str is undefined or falsy
         return str.replace(/\b\w/g, function (char: string) {
             return char.toUpperCase();
         });
@@ -360,12 +469,13 @@ const MrtTapOut = () => {
 
     useEffect(() => {
         setPathPolylines([])
+        let intervalId: string | number | NodeJS.Timeout | undefined;
         const loadBeepCardDetails = async () => {
             try {
                 const cardDetails = await StationApi.getBeepCard(beepCardNumber);
                 if (cardDetails) {
-                    const transactionResponse = await StationApi.getTapInTransactionByUUIC(beepCardNumber);
-                    setTransactionResponse(transactionResponse)
+                    const transactionResponse = await StationApi.getTapInTransactionByUUIC(cardDetails.UUIC);
+                    setTransactionResponse(transactionResponse);
                     setBeepCard(cardDetails);
 
                     const prevStationId = stations.find(station => station.stationName === transactionResponse?.currStation)?._id;
@@ -385,7 +495,7 @@ const MrtTapOut = () => {
                             return acc;
                         }, 0);
                         setPathDistance(pathDistance)
-                        setFarePerMeters(calculateFare(pathDistance, minimumFare))
+                        setFarePerMeters(calculateFare(pathDistance, minimumFare!))
 
                         const pathPolylines = shortestPath.map((stationId, index) => {
                             if (index > 0) {
@@ -486,6 +596,16 @@ const MrtTapOut = () => {
                 }
             } catch (error) {
                 console.log(error)
+            } finally {
+                intervalId = setInterval(() => {
+                    if (pathDistance && farePerKm) { // Check if both pathDistance and farePerKm have values
+                        if (isScanned) {
+                            setIsScanned(false);
+                            tapOutButtonRef.current!.click();
+                            clearInterval(intervalId); // Stop the interval
+                        }
+                    }
+                }, 1000); // Check every second
             }
         };
 
@@ -494,10 +614,13 @@ const MrtTapOut = () => {
         } else {
             setBeepCard(null);
         }
-    }, [beepCardNumber]);
+
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [beepCardNumber, farePerKm, pathDistance]);
 
     return (
-
         <>
             {isMaintenance ? (
                 <MaintenancePage />
@@ -568,14 +691,27 @@ const MrtTapOut = () => {
                                         {tapOutDetails && (
                                             <div className="mb-5">
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Initial Balance: {tapOutDetails.initialBalance}</p>
-                                                <p className="text-xl lg:text-2xl text-white mb-1">Previous Station: {tapOutDetails.prevStation}</p>
+                                                <p className="text-xl lg:text-2xl text-white mb-1">Previous Station: {toTitleCase(tapOutDetails.prevStation!)}</p>
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Current Station: {stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase())}</p>
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Distance: {(pathDistance / 1000).toFixed(2)}km</p>
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Date of Tap-in: {formatDate(tapOutDetails.updatedAt)}</p>
-                                                <p className="text-xl lg:text-2xl text-white mb-1">Fare: {farePerMeters}</p>
-                                                <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapOutDetails.initialBalance ? (tapOutDetails.initialBalance - farePerMeters) : 'N/A'}</p>
+                                                <p className="text-xl lg:text-2xl text-white mb-1">Fare: {calculateFare(pathDistance, minimumFare) + minimumFare?.price!}</p>
+                                                <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapOutDetails.initialBalance ? (tapOutDetails.initialBalance - (farePerKm + minimumFare?.price!)) : 'N/A'}</p>
                                             </div>
                                         )}
+                                        {!!!tapOutDetails && room && socket && isRoomJoined && (
+                                            <div className="flex justify-center items-center mt-2 pb-4"> {/* Added pb-4 for bottom padding */}
+                                                <QRCode value={room} fgColor="#333" size={150} style={{ outline: '10px solid white' }} /> {/* Reduced size of QR code */}
+                                            </div>
+                                        )}
+                                        {receivedMessage && <p>Received message: {receivedMessage}</p>}
+
+                                        <button
+                                            ref={tapOutButtonRef}
+                                            onClick={handleTapOut} // Call handleTapOut when the button is clicked
+                                        >
+                                        </button>
+
                                         <Button
                                             className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
                                             disabled={!beepCard?.UUIC || isSubmitting} // Disable tap-out if beepCard UUIC is invalid or submitting

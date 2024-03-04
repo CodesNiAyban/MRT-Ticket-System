@@ -163,6 +163,7 @@ export async function getTapInTransactionByUUIC(transaction: string): Promise<Ta
     } catch (error) {
         // Handle other errors if needed
         console.error("Error fetching transaction:", error);
+        alert("No transaction found please go to the nearest teller.")
         throw error; // You can choose to throw or handle the error based on your requirements
     }
 }

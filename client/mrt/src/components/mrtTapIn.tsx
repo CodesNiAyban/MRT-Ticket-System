@@ -5,21 +5,21 @@ import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ReactElement, useEffect, useState } from 'react';
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
+import uuid from 'react-native-uuid';
+import QRCode from 'react-qr-code'; // Import QRCode component
 import { useNavigate, useParams } from 'react-router-dom';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import io from 'socket.io-client';
 import { BeepCard as BeepCardsModel } from "../model/beepCardModel";
 import { Fare as FareModel } from "../model/fareModel";
 import { Stations as StationsModel } from "../model/stationsModel";
 import { TapInTransaction as TapInTransactionModel } from "../model/tapInTransactionModel";
 import * as StationApi from '../network/mrtAPI';
-import { formatDate } from "../utils/formatDate";
 import MaintenancePage from '../pages/maintenancePage';
-import io from 'socket.io-client';
-import QRCode from 'react-qr-code'; // Import QRCode component
-import uuid from 'react-native-uuid';
+import { formatDate } from "../utils/formatDate";
 
 const MrtTapIn = () => {
     const [mapCenter, setMapCenter] = useState<[number, number]>([14.550561416466541, 121.02785649562283]);
@@ -29,6 +29,7 @@ const MrtTapIn = () => {
     const [fares, setFares] = useState<FareModel[]>([]);
     const [tapInDetails, setTapInDetails] = useState<TapInTransactionModel | null>(null);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [showStationsLoadingError, setShowStationsLoadingError] = useState(false);
     const [mapMarkers, setMapMarkers] = useState<ReactElement[]>([]);
     const [polylines, setPolylines] = useState<ReactElement[]>([]);
@@ -40,6 +41,7 @@ const MrtTapIn = () => {
     const [receivedMessage, setReceivedMessage] = useState<string | null>(null);
     const [socket, setSocket] = useState<any>(null);
     const [isConnected, setIsConnected] = useState(false);
+    const [isScanned, setIsScanned] = useState(false);
     const [room, setRoom] = useState<any>(uuid.v4()); // Generate initial room value using UUID
     const [message, setMessage] = useState('');
     const [isRoomJoined, setIsRoomJoined] = useState(false);
@@ -78,7 +80,7 @@ const MrtTapIn = () => {
             try {
                 console.log(room)
                 // Connect to the WebSocket server
-                const newSocket = io('http://192.168.64.240:5000'); // Replace with your WebSocket server URL
+                const newSocket = io('http://10.200.54.109:5000'); // Replace with your WebSocket server URL
                 setSocket(newSocket);
 
                 // Listen for messages from the server
@@ -120,11 +122,28 @@ const MrtTapIn = () => {
         setRoomJoiner(false)
     }, [roomJoiner]);
 
+    const isValidBeepCard = (value: string) => {
+        const regex = /^637805\d{9}$/;
+        return regex.test(value);
+    };
+
     useEffect(() => {
-        if (receivedMessage) {
-            setBeepCardNumber(receivedMessage)
-            handleTapIn()
-        }
+        const fetchData = async () => {
+            if (isValidBeepCard(receivedMessage!)) {
+                try {
+                    // Fetch the beep card details based on the received UUIC message
+                    const cardDetails = await StationApi.getBeepCard(receivedMessage!);
+                    setBeepCardNumber(cardDetails?.UUIC!)
+                    console.log("test" + beepCard?.UUIC!)
+                    setBeepCardNumberCheck(true);
+                    setIsScanned(true)
+                } catch (error) {
+                    setBeepCardNumberCheck(false);
+                }
+            }
+        };
+
+        fetchData();
     }, [receivedMessage]);
 
     const sendMessage = () => {
@@ -155,7 +174,6 @@ const MrtTapIn = () => {
             try {
                 const maintenanceStatus = await StationApi.fetchMaintenance();
                 setIsMaintenance(maintenanceStatus[0].maintenance);
-                console.log(isMaintenance)
             } catch (error) {
                 console.error('Error checking maintenance:', error);
             }
@@ -277,21 +295,24 @@ const MrtTapIn = () => {
 
     const handleTapIn = async () => {
         try {
-            if (beepCard?.UUIC) {
-                if (beepCard?.balance !== undefined && minimumFare?.price !== undefined) {
-                    if (beepCard.balance >= minimumFare.price) {
+            setIsScanned(false)
+            setIsSubmitting(true);
+            const cardDetails = await StationApi.getBeepCard(beepCardNumber);
+            if (cardDetails?.UUIC) {
+                if (cardDetails?.balance !== undefined && minimumFare?.price !== undefined) {
+                    if (cardDetails.balance >= minimumFare.price) {
                         // Sufficient balance, proceed with tap-in
-                        if (!beepCard.isActive) {
+                        if (!cardDetails.isActive) {
                             // Construct tap-in transaction object
-                            const beepCardResponse = await StationApi.tapInBeepCard(beepCard.UUIC);
+                            const beepCardResponse = await StationApi.tapInBeepCard(cardDetails.UUIC);
 
                             const tapInTransaction: TapInTransactionModel = {
-                                UUIC: beepCard.UUIC,
+                                UUIC: cardDetails.UUIC,
                                 tapIn: true,
-                                initialBalance: beepCard.balance,
-                                currStation: stationName?.replace(/[\s_]+/g, ' ').toLocaleLowerCase(),
+                                initialBalance: cardDetails.balance,
+                                currStation: stationName,
                                 prevStation: "N/A",
-                                fare: minimumFare.price,
+                                fare: 0,
                                 distance: 0,
                                 currBalance: beepCardResponse!.balance, // Update current balance after tap-in
                                 createdAt: new Date().toISOString(), // Set current timestamp as creation time
@@ -342,7 +363,7 @@ const MrtTapIn = () => {
                     console.error('Beep card balance or minimum fare price is undefined');
                 }
             } else {
-                // Beep card not found
+                setBeepCardNumberCheck(false)
                 toast.error('Beep card not found!', {
                     position: 'top-right',
                     autoClose: 2000,
@@ -365,26 +386,39 @@ const MrtTapIn = () => {
             });
         } finally {
             setReceivedMessage('')
+            setIsSubmitting(false);
+            setIsScanned(false);
+            setMessage('');
+            setTimeout(() => {
+                setTapInDetails(null);
+                setBeepCardNumber('637805')
+            }, 3000); // 5000 milliseconds = 5 seconds
         }
-    };
+    }; // Empty dependencies array
+
 
     useEffect(() => {
         const loadBeepCardDetails = async () => {
             try {
-                const cardDetails = await StationApi.getBeepCard(beepCardNumber);
+                let cardDetails = await StationApi.getBeepCard(beepCardNumber);
                 setBeepCard(cardDetails);
                 setBeepCardNumberCheck(true)
+                if (isScanned && cardDetails) {
+                    cardDetails = null
+                    setIsScanned(false)
+                    handleTapIn()
+                }
             } catch (error) {
                 setBeepCardNumberCheck(false)
             }
         };
 
-        if (beepCardNumber !== '637805' || beepCardNumber.length > 13) {
+        if (beepCardNumber !== '637805') {
             loadBeepCardDetails();
         } else {
             setBeepCard(null);
         }
-    }, [beepCardNumber]);
+    }, [beepCardNumber, isScanned]);
 
     function toTitleCase(str: string) {
         return str.replace(/\b\w/g, function (char: string) {
@@ -461,25 +495,23 @@ const MrtTapIn = () => {
                                         />
                                         {tapInDetails && (
                                             <div className="mb-5">
-                                                <p className="text-xl lg:text-2xl text-white mb-1">Initial Balance: {tapInDetails.initialBalance}</p>
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Current Station: {stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase())}</p>
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Date of Tap-in: {formatDate(tapInDetails.updatedAt)}</p>
-                                                <p className="text-xl lg:text-2xl text-white mb-1">Deducted Minimum Fare: {minimumFare?.price}</p>
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapInDetails.currBalance}</p>
                                             </div>
                                         )}
                                         {room && socket && isRoomJoined && (
-                                            <div className="flex justify-center items-center mt-2">
-                                                <QRCode value={room} fgColor="#4A90E2" />
+                                            <div className="flex justify-center items-center mt-2 pb-4"> {/* Added pb-4 for bottom padding */}
+                                                <QRCode value={room} fgColor="#333" size={150} style={{ outline: '10px solid white' }} /> {/* Reduced size of QR code */}
                                             </div>
                                         )}
                                         {receivedMessage && <p>Received message: {receivedMessage}</p>}
                                         <Button
                                             className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
-                                            disabled={!beepCard?.UUIC} // Disable the button if beepCard is null
-                                            onClick={handleTapIn} // Call handleTapIn when the button is clicked
+                                            disabled={!beepCard?.UUIC || isSubmitting} // Disable the button if beepCard is null
+                                            onClick={handleTapIn}
                                         >
-                                            TAP-IN
+                                            {isSubmitting ? 'TAPPING IN...' : 'TAP-IN'}
                                         </Button>
                                     </div>
                                 </TabPanel>

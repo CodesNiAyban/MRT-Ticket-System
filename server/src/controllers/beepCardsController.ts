@@ -3,7 +3,6 @@ import createHttpError from "http-errors";
 import mongoose from "mongoose";
 import * as beepCardinterface from "../interfaces/beepCardInterface";
 import beepCardsModel from "../models/beepCardModel";
-import faresModel from "../models/fareModel";
 
 export const getBeepCards: RequestHandler = async (req, res, next) => {
 	try {
@@ -122,21 +121,10 @@ export const tapIn: RequestHandler = async (req, res, next) => {
 			throw createHttpError(404, "Beep card not found.");
 		}
 
-		// Fetch the minimum fare
-		const minimumFare = await faresModel.findOne({ fareType: "MINIMUM FARE" }).exec();
-
-		if (!minimumFare) {
-			throw createHttpError(404, "Minimum fare not found.");
-		}
-
-		// Deduct the minimum fare from the BeepCard balance
-		let newBalance = beepCard.balance - minimumFare.price;
-		newBalance = Math.max(newBalance, 0); // Ensure the new balance is not negative
-
 		// Update the BeepCard with the new balance and set isActive to true
 		const updatedBeepCard = await beepCardsModel.findOneAndUpdate(
 			{ UUIC },
-			{ $set: { balance: newBalance, isActive: true } }, // Set isActive to true
+			{ $set: { isActive: true } }, // Set isActive to true
 			{ new: true }
 		).exec();
 
@@ -162,7 +150,6 @@ export const tapOut: RequestHandler = async (req, res, next) => {
 			throw createHttpError(404, "Beep card not found.");
 		}
 
-		// Deduct the specified amount from the BeepCard balance
 		let newBalance = beepCard.balance - amountToDeduct;
 		newBalance = Math.max(newBalance, 0); // Ensure the new balance is not negative
 
