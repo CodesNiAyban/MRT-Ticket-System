@@ -34,7 +34,7 @@ app.use(morgan("dev"));
 
 // Set the origin based on deployment
 const corsOptions = {
-	origin: isProduction ? env.API_CONNECTION_STRING : ["http://localhost:3000", "http://localhost:3001"],
+	origin: env.API_CONNECTION_STRING,
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	optionsSuccessStatus: 204,
