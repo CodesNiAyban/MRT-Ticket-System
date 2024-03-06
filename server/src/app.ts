@@ -23,7 +23,7 @@ import http from "http"; // Import http module
 import { Server as SocketIOServer } from "socket.io";
 
 // Set isProduction to true when deploying to Render.com
-const isProduction = true;
+const isProduction = false;
 
 // Initializing the express app
 const app = express();

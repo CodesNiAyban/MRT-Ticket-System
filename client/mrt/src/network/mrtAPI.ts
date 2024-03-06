@@ -5,6 +5,7 @@ import { TapInTransaction } from '../model/tapInTransactionModel'
 // import { logout } from "./adminAPI"; // Make sure to import your logout function
 import { fetchData } from "./fetcher";
 import { Maintenance } from "../model/maintenanceModel";
+import { Socket, io } from "socket.io-client";
 
 const MRT_API = process.env.REACT_APP_API_URL;
 
@@ -165,5 +166,16 @@ export async function getTapInTransactionByUUIC(transaction: string): Promise<Ta
         console.error("Error fetching transaction:", error);
         alert("No transaction found please go to the nearest teller.")
         throw error; // You can choose to throw or handle the error based on your requirements
+    }
+}
+
+export async function connectWebsocket(): Promise<Socket | null> {
+    try {
+        const newSocket = io(`${MRT_API}`); // Use the MRT_API variable
+
+        return newSocket;
+    } catch (error) {
+        console.error("Error connecting to WebSocket:", error);
+        return null; // Return null if there's an error
     }
 }

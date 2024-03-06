@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import QRCode from 'react-qr-code'; // Import QRCode component
 import uuid from 'react-native-uuid';
+import { connectWebsocket } from '../network/mrtAPI';
 
 const WebSocketTester = () => {
     const [receivedMessage, setReceivedMessage] = useState<string | null>(null);
@@ -15,23 +16,22 @@ const WebSocketTester = () => {
     useEffect(() => {
         const initializeSocket = async () => {
             try {
-                console.log(room)
                 // Connect to the WebSocket server
-                const newSocket = io('https://mrtonlineapi.onrender.com'); // Replace with your WebSocket server URL
+                const newSocket = await connectWebsocket();
                 setSocket(newSocket);
 
                 // Listen for messages from the server
-                newSocket.on('message', (msg: string) => {
+                newSocket!.on('message', (msg: string) => {
                     setReceivedMessage(msg);
                 });
 
                 // Set connection status
-                newSocket.on('connect', () => {
+                newSocket!.on('connect', () => {
                     setRoomJoiner(true)
                     setIsConnected(true);
                 });
 
-                newSocket.on('disconnect', () => {
+                newSocket!.on('disconnect', () => {
                     setIsConnected(false);
                     setIsRoomJoined(false); // Reset room joined status on disconnect
                 });
