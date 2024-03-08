@@ -7,7 +7,7 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import session from "express-session";
 import { isHttpError } from "http-errors";
-// import morgan from "morgan";
+import morgan from "morgan";
 import adminRoute from "./routes/adminRoute";
 import beepCardRoute from "./routes/beepCardsRoute";
 import fareRoute from "./routes/fareRoutes";
@@ -23,20 +23,28 @@ import http from "http"; // Import http module
 import { Server as SocketIOServer } from "socket.io";
 
 // Set isProduction to true when deploying to Render.com
-const isProduction = true;
+// const isProduction = false;
 
 // Initializing the express app
 const app = express();
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
-// app.use(morgan("dev"));
-
+app.use(morgan("dev"));
 // Set the origin based on deployment
+
+const allowedOrigins = ["https://mrtonlinetap.onrender.com", "https://mrtonline.onrender.com"];
+
 const corsOptions = {
-	origin: isProduction ? env.API_CONNECTION_STRING : ["http://localhost:3000", "http://localhost:3001"],
+	origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+		if (!origin || allowedOrigins.includes(origin)) {
+			callback(null, true);
+		} else {
+			callback(new Error("Not allowed by CORS"));
+		}
+	},
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-	credentials: true,
+	credentials: true, // Allow credentials
 	optionsSuccessStatus: 204,
 	allowedHeaders: "Content-Type, Authorization",
 };
@@ -50,12 +58,16 @@ app.use(session({
 	resave: false,
 	saveUninitialized: false,
 	store: MongoStore.create({
-		mongoUrl: env.MONGO_CONNECTION_STRING
+		mongoUrl: env.MONGO_CONNECTION_STRING,
 	}),
 	cookie: {
 		maxAge: 24 * 60 * 60 * 1000, // Set session duration to 24 hours in milliseconds
+		sameSite: "none", // Set the SameSite attribute to 'none' for cross-site cookies
+		secure: true, // Ensure cookies are only sent over HTTPS in production
+		httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
 	},
 }));
+
 
 // Declaring station API URL
 app.use("/api/stations", maintenanceAdmin, authenticateToken, stationRoute);
@@ -74,7 +86,7 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
 	if (isHttpError(error)) {
 		statusCode = error.status;
 		errorMessage = error.message;
-	}	
+	}
 	res.status(statusCode).json({ error: errorMessage });
 });
 
@@ -95,11 +107,7 @@ const server = http.createServer(app);
 
 // Pass server instance to socket.io
 const io = new SocketIOServer(server, {
-	cors: {
-		origin: isProduction ? env.API_CONNECTION_STRING : ["http://localhost:3000", "http://localhost:3001"],
-		methods: ["GET", "POST"],
-		credentials: true
-	}
+	cors: corsOptions
 });
 
 // WebSocket logic
