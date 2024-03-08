@@ -50,6 +50,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.set("trust proxy", 1);
 // Using the dependencies
 app.use(express.json());
 
