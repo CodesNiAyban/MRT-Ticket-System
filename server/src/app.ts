@@ -33,16 +33,14 @@ app.use(bodyParser.json());
 // app.use(morgan("dev"));
 
 // Set the origin based on deployment
-// Set the origin to allow access from all origins
 const corsOptions = {
-	origin: "*", // Allow access from all origins
+	origin: isProduction ? env.API_CONNECTION_STRING : ["http://localhost:3000", "http://localhost:3001"],
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	optionsSuccessStatus: 204,
 	allowedHeaders: "Content-Type, Authorization",
 };
 
-// Apply CORS middleware with the modified corsOptions
 app.use(cors(corsOptions));
 // Using the dependencies
 app.use(express.json());
@@ -66,7 +64,7 @@ app.use("/api/fare", maintenanceAdmin, authenticateToken, fareRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/mrt", mrtRoute);
 app.use("/api/beepCardManager", beepCardManagerRoute);
-app.use("/api/maintenance", authenticateToken, maintenanceRoute);
+app.use("/api/maintenance", maintenanceRoute);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
@@ -76,7 +74,7 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
 	if (isHttpError(error)) {
 		statusCode = error.status;
 		errorMessage = error.message;
-	}
+	}	
 	res.status(statusCode).json({ error: errorMessage });
 });
 
