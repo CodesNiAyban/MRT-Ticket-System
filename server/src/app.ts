@@ -34,7 +34,13 @@ app.use(bodyParser.json());
 
 // Set the origin based on deployment
 const corsOptions = {
-	origin: isProduction ? env.API_CONNECTION_STRING : ["http://localhost:3000", "http://localhost:3001"],
+	origin: function (origin: string | undefined, callback: (error: Error | null, allow: boolean) => void) {
+		if (!origin || env.API_CONNECTION_STRING.includes(origin)) {
+			callback(null, true);
+		} else {
+			callback(new Error("Not allowed by CORS"), false);
+		}
+	},
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	optionsSuccessStatus: 204,
@@ -64,7 +70,7 @@ app.use("/api/fare", maintenanceAdmin, authenticateToken, fareRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/mrt", mrtRoute);
 app.use("/api/beepCardManager", beepCardManagerRoute);
-app.use("/api/maintenance", maintenanceRoute);
+app.use("/api/maintenance", authenticateToken, maintenanceRoute);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
