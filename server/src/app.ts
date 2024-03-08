@@ -33,26 +33,16 @@ app.use(bodyParser.json());
 // app.use(morgan("dev"));
 
 // Set the origin based on deployment
+// Set the origin to allow access from all origins
 const corsOptions = {
-	origin: function (origin: string | undefined, callback: (error: Error | null, allow: boolean) => void) {
-		if (!origin || env.API_CONNECTION_STRING.includes(origin)) {
-			callback(null, true);
-		} else {
-			callback(new Error("Not allowed by CORS"), false);
-		}
-	},
+	origin: "*", // Allow access from all origins
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	optionsSuccessStatus: 204,
 	allowedHeaders: "Content-Type, Authorization",
 };
 
-app.all("*", function (req, res, next) {
-	res.header("Access-Control-Allow-Origin", corsOptions.origin.toString());
-	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	next();
-});
-
+// Apply CORS middleware with the modified corsOptions
 app.use(cors(corsOptions));
 // Using the dependencies
 app.use(express.json());
