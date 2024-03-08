@@ -47,6 +47,12 @@ const corsOptions = {
 	allowedHeaders: "Content-Type, Authorization",
 };
 
+app.all("*", function (req, res, next) {
+	res.header("Access-Control-Allow-Origin", corsOptions.origin.toString());
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+});
+
 app.use(cors(corsOptions));
 // Using the dependencies
 app.use(express.json());
@@ -80,7 +86,7 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
 	if (isHttpError(error)) {
 		statusCode = error.status;
 		errorMessage = error.message;
-	}	
+	}
 	res.status(statusCode).json({ error: errorMessage });
 });
 
