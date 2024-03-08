@@ -54,6 +54,8 @@ app.use(session({
 	}),
 	cookie: {
 		maxAge: 24 * 60 * 60 * 1000, // Set session duration to 24 hours in milliseconds
+		sameSite: "none", // Allow cookies to be sent in cross-origin requests
+		secure: true, // Ensure cookies are only sent over HTTPS
 	},
 }));
 

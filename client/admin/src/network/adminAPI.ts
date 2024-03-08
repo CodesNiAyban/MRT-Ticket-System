@@ -13,10 +13,10 @@ export async function getLoggedInAdmin(): Promise<Admin> {
 
     const response = await fetchData(`${MRT_API}/api/admin`, {
         method: "GET",
-        credentials: "include",
         headers: {
             Authorization: `Bearer ${authToken}`,
         },
+        credentials: "include",
     });
 
     if (!response.ok) {
