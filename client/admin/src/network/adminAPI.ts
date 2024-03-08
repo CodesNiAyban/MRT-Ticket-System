@@ -8,7 +8,7 @@ export async function getLoggedInAdmin(): Promise<Admin> {
     const authToken = localStorage.getItem('authToken');
 
     if (!authToken) {
-        throw new Error("Authorization token not found.");
+        throw new Error("Authorization token not found");
     }
 
     const response = await fetchData(`${MRT_API}/api/admin`, {
@@ -22,7 +22,7 @@ export async function getLoggedInAdmin(): Promise<Admin> {
     if (!response.ok) {
         // Check for authorization failure (e.g., status code 401 or 403)
         if (response.status === 401 || response.status === 403) {
-            console.error("Authorization failed. Logging out user.");
+            console.error("Authorization failed. Logging out user");
             await logout();
         }
 
@@ -51,7 +51,7 @@ export async function adminLogin(credentials: LoginCredentials): Promise<LoginRe
     if (!response.ok) {
         // Check for authorization failure (e.g., status code 401 or 403)
         if (response.status === 401 || response.status === 403) {
-            console.error("Authorization failed. Logging out user.");
+            console.error("Authorization failed. Logging out user");
             await logout();
         }
 

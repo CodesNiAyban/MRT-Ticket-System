@@ -19,10 +19,10 @@ export const getBeepCard: RequestHandler = async (req, res, next) => {
 		const beepCards = await beepCardsModel.findById(beepCardId).exec();
 
 		if (!mongoose.isValidObjectId(beepCardId))
-			throw createHttpError(400, "Invalid beep card id.");
+			throw createHttpError(400, "Invalid beep card id");
 
 		if (!beepCards)
-			throw createHttpError(404, "beepCards not found.");
+			throw createHttpError(404, "beepCards not found");
 		res.status(200).json(beepCards);
 	} catch (error) {
 		next(error);
@@ -69,14 +69,14 @@ export const updateBeepCard: RequestHandler<beepCardinterface.UpdateBeepCardsPar
 	const isActive = req.body.isActive; // Added isActive property
 
 	try {
-		if (!mongoose.isValidObjectId(beepCardId)) throw createHttpError(400, "Invalid beepCards id.");
+		if (!mongoose.isValidObjectId(beepCardId)) throw createHttpError(400, "Invalid beepCards id");
 		if (!newUUIC) { throw createHttpError(400, "Beep card must have a UUIC"); }
 		if (!newBalance) { throw createHttpError(400, "Beep card must have a balance"); }
 		if (isActive === undefined) { throw createHttpError(400, "Beep card must have an isActive"); }
 
 		const beepCards = await beepCardsModel.findById(beepCardId).exec();
 
-		if (!beepCards) throw createHttpError(404, "Beep card not found.");
+		if (!beepCards) throw createHttpError(404, "Beep card not found");
 
 		beepCards.UUIC = newUUIC;
 		beepCards.userID = userId;
@@ -96,11 +96,11 @@ export const deleteBeepCard: RequestHandler = async (req, res, next) => {
 	try {
 		const beepCardId = req.params.beepCardId;
 		// Error handling
-		if (!mongoose.isValidObjectId(beepCardId)) throw createHttpError(400, "Invalid beepCards id.");
+		if (!mongoose.isValidObjectId(beepCardId)) throw createHttpError(400, "Invalid beepCards id");
 
 		const beepCards = await beepCardsModel.findById(beepCardId).exec();
 
-		if (!beepCards) throw createHttpError(404, "Beep card not found.");
+		if (!beepCards) throw createHttpError(404, "Beep card not found");
 
 		await beepCards.deleteOne();
 
@@ -118,7 +118,7 @@ export const tapIn: RequestHandler = async (req, res, next) => {
 		const beepCard = await beepCardsModel.findOne({ UUIC }).exec();
 
 		if (!beepCard) {
-			throw createHttpError(404, "Beep card not found.");
+			throw createHttpError(404, "Beep card not found");
 		}
 
 		// Update the BeepCard with the new balance and set isActive to true
@@ -129,7 +129,7 @@ export const tapIn: RequestHandler = async (req, res, next) => {
 		).exec();
 
 		if (!updatedBeepCard) {
-			throw createHttpError(500, "Failed to update Beep card balance.");
+			throw createHttpError(500, "Failed to update Beep card balance");
 		}
 
 		res.status(200).json(updatedBeepCard);
@@ -147,7 +147,7 @@ export const tapOut: RequestHandler = async (req, res, next) => {
 		const beepCard = await beepCardsModel.findOne({ UUIC }).exec();
 
 		if (!beepCard) {
-			throw createHttpError(404, "Beep card not found.");
+			throw createHttpError(404, "Beep card not found");
 		}
 
 		let newBalance = beepCard.balance - amountToDeduct;
@@ -161,7 +161,7 @@ export const tapOut: RequestHandler = async (req, res, next) => {
 		).exec();
 
 		if (!updatedBeepCard) {
-			throw createHttpError(500, "Failed to update Beep card balance.");
+			throw createHttpError(500, "Failed to update Beep card balance");
 		}
 
 		res.status(200).json(updatedBeepCard);

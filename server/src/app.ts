@@ -7,7 +7,7 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import session from "express-session";
 import { isHttpError } from "http-errors";
-import morgan from "morgan";
+// import morgan from "morgan";
 import adminRoute from "./routes/adminRoute";
 import beepCardRoute from "./routes/beepCardsRoute";
 import fareRoute from "./routes/fareRoutes";
@@ -23,14 +23,14 @@ import http from "http"; // Import http module
 import { Server as SocketIOServer } from "socket.io";
 
 // Set isProduction to true when deploying to Render.com
-const isProduction = false;
+const isProduction = true;
 
 // Initializing the express app
 const app = express();
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(morgan("dev"));
+// app.use(morgan("dev"));
 
 // Set the origin based on deployment
 const corsOptions = {
@@ -121,6 +121,7 @@ io.on("connection", (socket) => {
 	// Send message to a specific room
 	socket.on("messageToRoom", ({ room, message }) => {
 		io.to(room).emit("message", message);
+		console.log(`Message: ${message}`);
 	});
 
 	socket.on("disconnect", () => {

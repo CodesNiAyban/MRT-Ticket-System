@@ -20,10 +20,10 @@ export const getFare: RequestHandler = async (req, res, next) => {
 		const fares = await faresModel.findById(fareId).exec();
 
 		if (!mongoose.isValidObjectId(fareId))
-			throw createHttpError(400, "Invalid beep card id.");
+			throw createHttpError(400, "Invalid beep card id");
 
 		if (!fares)
-			throw createHttpError(404, "fares not found.");
+			throw createHttpError(404, "fares not found");
 		res.status(200).json(fares);
 	} catch (error) {
 		next(error);
@@ -37,13 +37,13 @@ export const updateFare: RequestHandler<fareinterface.UpdateFareParams, unknown,
 
 	try {
 		// Error handling
-		if (!mongoose.isValidObjectId(fareId)) throw createHttpError(400, "Invalid fares id.");
-		if (!newfareType) { throw createHttpError(400, "FareType not found."); }
-		if (!newPrice) { throw createHttpError(400, "Price not found."); }
+		if (!mongoose.isValidObjectId(fareId)) throw createHttpError(400, "Invalid fares id");
+		if (!newfareType) { throw createHttpError(400, "FareType not found"); }
+		if (!newPrice) { throw createHttpError(400, "Price not found"); }
 
 		const fares = await faresModel.findById(fareId).exec();
 
-		if (!fares) throw createHttpError(404, "fare not found.");
+		if (!fares) throw createHttpError(404, "fare not found");
 
 		fares.fareType = newfareType;
 		fares.price = newPrice;

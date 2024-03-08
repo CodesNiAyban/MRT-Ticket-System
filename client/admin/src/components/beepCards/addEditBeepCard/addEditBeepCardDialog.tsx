@@ -109,8 +109,8 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
 
   const onSubmit = async (input: BeepCardInput) => {
     if (editMode && !isDirty) {
-      // showAlertMessage("danger", "No changes made. Please modify the beep card data.");
-      toast.error("No changes made.", {
+      // showAlertMessage("danger", "No changes made. Please modify the beep card data");
+      toast.error("No changes made", {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,
@@ -127,7 +127,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     try {
       if (!beepCardToEdit) {
         if (!input.UUIC || !/^\d{15}$/.test(input.UUIC)) {
-          toast.error("Invalid Beep Card ID format. Please enter 15 digits.", {
+          toast.error("Invalid Beep Card ID format. Please enter 15 digits", {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -141,7 +141,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
         input.balance = await getDefaultLoadPrice();
       } else {
         if (!/^637805\d{9}$/.test(input.UUIC)) {
-          toast.error("Invalid Beep Card ID format. Must start with '637805' and have 15 digits.", {
+          toast.error("Invalid Beep Card ID format. Must start with '637805' and have 15 digits", {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -196,7 +196,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       console.error(error);
 
       if (error.message === "Network Error") {
-        toast.error("No connection. Please check your internet connection.", {
+        toast.error("No connection. Please check your internet connection", {
           position: "top-center",
           autoClose: 5000,
           hideProgressBar: false,
@@ -206,7 +206,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
           progress: undefined,
         });
       } else if (error.response && error.response.status === 409) {
-        toast.error("Duplicate Beep Card ID. Please use a different Beep Card ID.", {
+        toast.error("Duplicate Beep Card ID. Please use a different Beep Card ID", {
           position: "top-center",
           autoClose: 5000,
           hideProgressBar: false,
@@ -216,7 +216,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
           progress: undefined,
         });
       } else {
-        toast.error("Error saving Beep Card. Please try again. Make sure that input ID's are unique.", {
+        toast.error("Error saving Beep Card. Please try again. Make sure that input ID's are unique", {
           position: "top-center",
           autoClose: 5000,
           hideProgressBar: false,

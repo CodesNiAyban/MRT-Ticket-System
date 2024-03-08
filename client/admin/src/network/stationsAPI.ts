@@ -15,7 +15,7 @@ export async function fetchStations(): Promise<Stations[]> {
     if (!response.ok) {
         // Check for authorization failure (e.g., status code 401 or 403)
         if (response.status === 401 || response.status === 403) {
-            console.error("Authorization failed. Logging out user.");
+            console.error("Authorization failed. Logging out user");
             await logout();
         } else {
             // Handle other errors if needed
@@ -46,7 +46,7 @@ export async function createStation(station: StationInput): Promise<Stations> {
     if (!response.ok) {
         // Check for authorization failure (e.g., status code 401 or 403)
         if (response.status === 401 || response.status === 403) {
-            console.error("Authorization failed. Logging out user.");
+            console.error("Authorization failed. Logging out user");
             await logout();
         } else {
             // Handle other errors if needed
@@ -70,7 +70,7 @@ export async function updateStation(stationId: string, station: Partial<StationI
     if (!response.ok) {
         // Check for authorization failure (e.g., status code 401 or 403)
         if (response.status === 401 || response.status === 403) {
-            console.error("Authorization failed. Logging out user.");
+            console.error("Authorization failed. Logging out user");
             await logout();
         } else {
             // Handle other errors if needed
@@ -95,7 +95,7 @@ export async function updateStations(stations: Stations[]): Promise<Stations[]> 
         if (!response.ok) {
             // Check for authorization failure (e.g., status code 401 or 403)
             if (response.status === 401 || response.status === 403) {
-                console.error("Authorization failed. Logging out user.");
+                console.error("Authorization failed. Logging out user");
                 await logout();
             } else {
                 // Handle other errors if needed
@@ -123,7 +123,7 @@ export async function deleteStation(stationId: string) {
         if (!response.ok) {
             // Check for authorization failure (e.g., status code 401 or 403)
             if (response.status === 401 || response.status === 403) {
-                console.error("Authorization failed. Logging out user.");
+                console.error("Authorization failed. Logging out user");
                 await logout();
             } else {
                 // Handle other errors if needed

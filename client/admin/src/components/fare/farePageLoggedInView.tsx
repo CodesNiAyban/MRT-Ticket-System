@@ -94,7 +94,7 @@ const FarePageLoggedInView = () => {
       showToastMessage("success", `${updatedFare.fareType.charAt(0).toUpperCase() + updatedFare.fareType.slice(1)} updated successfully.`);
     } catch (error) {
       console.error(error);
-      showToastMessage("danger", "Error updating fare. Please try again.");
+      showToastMessage("danger", "Error updating fare. Please try again");
     }
   };
 

@@ -10,7 +10,7 @@ export const getBeepCards: RequestHandler<beepCardManagerInterface.GetBeepCardsP
 	try {
 		// Check if userID is provided
 		if (!userId) {
-			throw createHttpError(400, "UserID parameter is required.");
+			throw createHttpError(400, "UserID parameter is required");
 		}
 
 		// Find beep cards with matching userID
@@ -27,6 +27,12 @@ export const updateBeepCardUserID: RequestHandler<beepCardManagerInterface.Updat
 	const userId = req.body.userID;
 
 	try {
+		const existingBeepCard = await beepCardsModel.findOne({ userID: { $ne: "" }, UUIC: beepCardUUID }).exec();
+
+		if (existingBeepCard) {
+			throw createHttpError(400, "Beep Card is already taken");
+		}
+
 		const updatedBeepCard = await beepCardsModel.findOneAndUpdate(
 			{ UUIC: beepCardUUID }, // Filter criteria
 			{ userID: userId }, // Updated fields
@@ -34,7 +40,7 @@ export const updateBeepCardUserID: RequestHandler<beepCardManagerInterface.Updat
 		).exec();
 
 		if (!updatedBeepCard) {
-			throw createHttpError(404, "Beep card not found.");
+			throw createHttpError(404, "Beep card not found");
 		}
 
 		res.status(200).json(updatedBeepCard);
@@ -52,12 +58,12 @@ export const deleteBeepCardUserID: RequestHandler<beepCardManagerInterface.Updat
 		const beepCard = await beepCardsModel.findOne({ UUIC: beepCardUUID }).exec();
 
 		if (!beepCard) {
-			throw createHttpError(404, "Beep card not found.");
+			throw createHttpError(404, "Beep card not found");
 		}
 
 		// Check if the provided userID matches the current userID
 		if (beepCard.userID !== userID) {
-			throw createHttpError(404, "User ID does not match.");
+			throw createHttpError(404, "User ID does not match");
 		}
 
 		// Update the userID field to an empty string
@@ -72,7 +78,7 @@ export const deleteBeepCardUserID: RequestHandler<beepCardManagerInterface.Updat
 	}
 };
 
-export const getTapOutTransactionsByUserID: RequestHandler = async (req, res, next) => {
+export const getTapTransactionsByUserID: RequestHandler = async (req, res, next) => {
 	const userID = req.params.userID;
 	try {
 		// Find beep cards of the user
@@ -86,7 +92,7 @@ export const getTapOutTransactionsByUserID: RequestHandler = async (req, res, ne
 		const userBeepCardUUIDs = userBeepCards.map(beepCard => beepCard.UUIC);
 
 		// Find all tap-out transactions for the user's beep cards
-		const tapOutTransactions = await TapTransactionModel.find({ UUIC: { $in: userBeepCardUUIDs }, tapIn: false })
+		const tapOutTransactions = await TapTransactionModel.find({ UUIC: { $in: userBeepCardUUIDs } })
 			.sort({ createdAt: -1 }) // Sort in descending order based on createdAt
 			.exec();
 

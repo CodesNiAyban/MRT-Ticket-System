@@ -16,7 +16,7 @@ export async function fetchFare(): Promise<Fare[]> {
         if (!response.ok) {
             // Check for authorization failure (e.g., status code 401 or 403)
             if (response.status === 401 || response.status === 403) {
-                console.error("Authorization failed. Logging out user.");
+                console.error("Authorization failed. Logging out user");
                 await logout();
             }
 
@@ -50,7 +50,7 @@ export async function updateFare(FareId: string, Fare: FareInput): Promise<Fare>
         if (!response.ok) {
             // Check for authorization failure (e.g., status code 401 or 403)
             if (response.status === 401 || response.status === 403) {
-                console.error("Authorization failed. Logging out user.");
+                console.error("Authorization failed. Logging out user");
                 await logout();
             }
 

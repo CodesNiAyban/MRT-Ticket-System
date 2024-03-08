@@ -154,7 +154,7 @@ const MrtTapOut = () => {
         fetchData();
     }, [receivedMessage]);
 
-    const sendMessage = () => {
+    const sendMessage = (message: string) => {
         // Send a message to the server
         if (socket && room && message) {
             socket.emit('messageToRoom', { room, message });
@@ -190,7 +190,7 @@ const MrtTapOut = () => {
         };
 
         checkMaintenance();
-    }, [beepCard]);
+    }, [beepCard, isMaintenance]);
 
     useEffect(() => {
         const loadStationsAndMarkers = async () => {
@@ -365,73 +365,82 @@ const MrtTapOut = () => {
                                 setTapOutDetails(tapOutDetailsResponse);
 
                                 // Show success message
-                                toast.success('Tap-out successful! Thank you for using MRT-3.', {
+                                toast.success('Tap-out successful! Thank you for using MRT Online', {
                                     position: 'top-right',
-                                    autoClose: 2000,
+                                    autoClose: 5000,
                                     hideProgressBar: false,
                                     closeOnClick: true,
                                     pauseOnHover: true,
                                     draggable: true,
                                 });
+                                sendMessage("Tap-out successful! Thank you for using MRT Online")
                             } else {
                                 // Insufficient balance
                                 toast.error(`You only have ${cardDetails.balance}, your fare is ${farePerKm}. Please top up your beep card to the nearest teller.`, {
                                     position: 'top-right',
-                                    autoClose: 2000,
+                                    autoClose: 5000,
                                     hideProgressBar: false,
                                     closeOnClick: true,
                                     pauseOnHover: true,
                                     draggable: true,
                                 });
+                                sendMessage(`You only have ${cardDetails.balance}, your fare is ${farePerKm}. Please top up your beep card to the nearest teller.`)
                             }
                         } else {
                             // Beep card is already tapped out
                             toast.warn('Beep Card Already Tapped Out.', {
                                 position: 'top-right',
-                                autoClose: 2000,
+                                autoClose: 5000,
                                 hideProgressBar: false,
                                 closeOnClick: true,
                                 pauseOnHover: true,
                                 draggable: true,
                             });
+                            sendMessage('Beep Card Already Tapped Out.')
+
                         }
                     } else {
                         // Insufficient balance
                         toast.error(`You only have ${cardDetails.balance}, your fare is ${farePerKm}. Please top up your beep card to the nearest teller.`, {
                             position: 'top-right',
-                            autoClose: 2000,
+                            autoClose: 5000,
                             hideProgressBar: false,
                             closeOnClick: true,
                             pauseOnHover: true,
                             draggable: true,
                         });
+                        sendMessage(`You only have ${cardDetails.balance}, your fare is ${farePerKm}. Please top up your beep card to the nearest teller.`)
+
                     }
                 } else {
                     // Handle case where balance or price is undefined
                     console.error('Beep card balance or minimum fare price is undefined');
+                    sendMessage('Beep card balance or minimum fare price is undefined')
                 }
             } else {
                 // Beep card not found
                 toast.error('Beep card not found!', {
                     position: 'top-right',
-                    autoClose: 2000,
+                    autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
                 });
+                sendMessage('Beep card not found!')
             }
         } catch (error) {
             console.error(error);
             // Show error message
             toast.error('Tap-out failed. Please try again.', {
                 position: 'top-right',
-                autoClose: 2000,
+                autoClose: 5000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
             });
+            sendMessage('Tap-out failed. Please try again.')
         } finally {
             // Set the submission status back to false after the submission process completes
             setReceivedMessage('')
@@ -441,11 +450,10 @@ const MrtTapOut = () => {
             setTimeout(() => {
                 setTapOutDetails(null);
                 setBeepCardNumber('637805')
-            }, 5000); // 5000 milliseconds = 5 seconds
+                setReceivedMessage('')
+            }, 3000); // 5000 milliseconds = 5 seconds
         }
     };
-
-
 
     const calculateFare = (pathDistanceInKM: number, minimumFare: FareModel | undefined) => {
         const baseFare = minimumFare?.price;
@@ -555,7 +563,7 @@ const MrtTapOut = () => {
                     } else {
                         toast.warn('There was a detected problem on your beep card, please go to the nearest teller.', {
                             position: 'top-right',
-                            autoClose: 2000,
+                            autoClose: 5000,
                             hideProgressBar: false,
                             closeOnClick: true,
                             pauseOnHover: true,
@@ -599,12 +607,11 @@ const MrtTapOut = () => {
                 console.log(error)
             } finally {
                 intervalId = setInterval(() => {
-                    if (pathDistance && farePerKm) { // Check if both pathDistance and farePerKm have values
-                        if (isScanned) {
-                            setIsScanned(false);
-                            tapOutButtonRef.current!.click();
-                            clearInterval(intervalId); // Stop the interval
-                        }
+                    console.log("NATAWAG TO")
+                    if (isScanned) {
+                        setIsScanned(false);
+                        tapOutButtonRef.current!.click();
+                        clearInterval(intervalId); // Stop the interval
                     }
                 }, 1000); // Check every second
             }
@@ -700,12 +707,12 @@ const MrtTapOut = () => {
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapOutDetails.initialBalance ? (tapOutDetails.initialBalance - (farePerKm + minimumFare?.price!)) : 'N/A'}</p>
                                             </div>
                                         )}
-                                        {!!!tapOutDetails && room && socket && isRoomJoined && (
+                                        {!!!tapOutDetails && room && socket && isRoomJoined && !!!receivedMessage && (
                                             <div className="flex justify-center items-center mt-2 pb-4"> {/* Added pb-4 for bottom padding */}
                                                 <QRCode value={room} fgColor="#333" size={150} style={{ outline: '10px solid white' }} /> {/* Reduced size of QR code */}
                                             </div>
                                         )}
-                                        {receivedMessage && <p>Received message: {receivedMessage}</p>}
+                                        {/* {receivedMessage && <p>QR scan detected, trying to tap out...</p>} */}
 
                                         <button
                                             ref={tapOutButtonRef}

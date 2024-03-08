@@ -20,10 +20,10 @@ export const getStation: RequestHandler = async (req, res, next) => {
 		const station = await StationModel.findById(stationId).exec();
 
 		if (!mongoose.isValidObjectId(stationId))
-			throw createHttpError(400, "Invalid station id.");
+			throw createHttpError(400, "Invalid station id");
 
 		if (!station)
-			throw createHttpError(404, "Station not found.");
+			throw createHttpError(404, "Station not found");
 		res.status(200).json(station);
 	} catch (error) {
 		next(error);
@@ -67,14 +67,14 @@ export const updateStation: RequestHandler<stationsInterface.UpdateStationParams
 
 	try {
 		// Error handling
-		if (!mongoose.isValidObjectId(stationId)) throw createHttpError(400, "Invalid station id.");
+		if (!mongoose.isValidObjectId(stationId)) throw createHttpError(400, "Invalid station id");
 		if (!newStationName) { throw createHttpError(400, "Station must have a stationName"); }
 		if (!newCoords) { throw createHttpError(400, "Station must have coords"); }
 		if (!newConnectedTo) { throw createHttpError(400, "Station must have connectedTo"); }
 
 		const station = await StationModel.findById(stationId).exec();
 
-		if (!station) throw createHttpError(404, "Station not found.");
+		if (!station) throw createHttpError(404, "Station not found");
 
 		// Compare previous connectedTo array with newConnectedTo array
 		const prevConnectedTo = station.connectedTo;
@@ -115,11 +115,11 @@ export const deleteStation: RequestHandler = async (req, res, next) => {
 	try {
 		const stationId = req.params.stationId;
 		// Error handling
-		if (!mongoose.isValidObjectId(stationId)) throw createHttpError(400, "Invalid station id.");
+		if (!mongoose.isValidObjectId(stationId)) throw createHttpError(400, "Invalid station id");
 
 		const station = await StationModel.findById(stationId).exec();
 
-		if (!station) throw createHttpError(404, "Station not found.");
+		if (!station) throw createHttpError(404, "Station not found");
 
 		// Remove the station ID from the connectedTo arrays of other stations
 		const connectedStations = await StationModel.find({ connectedTo: stationId }).exec();

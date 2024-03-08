@@ -15,7 +15,7 @@ export async function fetchBeepCard(): Promise<BeepCard[]> {
     if (!response.ok) {
         // Check for authorization failure (e.g., status code 401 or 403)
         if (response.status === 401 || response.status === 403) {
-            console.error("Authorization failed. Logging out user.");
+            console.error("Authorization failed. Logging out user");
             await logout();
         }
 
@@ -46,7 +46,7 @@ export async function createBeepCard(beepCard: BeepCardInput): Promise<BeepCard>
     if (!response.ok) {
         // Check for authorization failure (e.g., status code 401 or 403)
         if (response.status === 401 || response.status === 403) {
-            console.error("Authorization failed. Logging out user.");
+            console.error("Authorization failed. Logging out user");
             await logout();
         }
 
@@ -71,7 +71,7 @@ export async function updateBeepCard(beepCardId: string, beepCard: BeepCardInput
     if (!response.ok) {
         // Check for authorization failure (e.g., status code 401 or 403)
         if (response.status === 401 || response.status === 403) {
-            console.error("Authorization failed. Logging out user.");
+            console.error("Authorization failed. Logging out user");
             await logout();
         }
 
@@ -94,7 +94,7 @@ export async function deleteBeepCard(beepCardsId: string) {
         if (!response.ok) {
             // Check for authorization failure (e.g., status code 401 or 403)
             if (response.status === 401 || response.status === 403) {
-                console.error("Authorization failed. Logging out user.");
+                console.error("Authorization failed. Logging out user");
                 await logout();
             } else {
                 // Handle other errors if needed

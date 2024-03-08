@@ -116,10 +116,10 @@ const MrtTapIn = () => {
 
     useEffect(() => {
         if (roomJoiner) {
+            setRoomJoiner(false)
             console.log("natawag")
-            joinRoom(socket);
+            joinRoom();
         }
-        setRoomJoiner(false)
     }, [roomJoiner]);
 
     const isValidBeepCard = (value: string) => {
@@ -134,7 +134,6 @@ const MrtTapIn = () => {
                     // Fetch the beep card details based on the received UUIC message
                     const cardDetails = await StationApi.getBeepCard(receivedMessage!);
                     setBeepCardNumber(cardDetails?.UUIC!)
-                    console.log("test" + beepCard?.UUIC!)
                     setBeepCardNumberCheck(true);
                     setIsScanned(true)
                 } catch (error) {
@@ -146,16 +145,15 @@ const MrtTapIn = () => {
         fetchData();
     }, [receivedMessage]);
 
-    const sendMessage = () => {
-        // Send a message to the server
+    const sendMessage = (message: string) => {
         if (socket && room && message) {
             socket.emit('messageToRoom', { room, message });
         }
     };
 
-    const joinRoom = async (newSocket: any) => { // Accept newSocket as a parameter
-        if (newSocket && room) { // Use newSocket instead of socket
-            newSocket.emit('joinRoom', room); // Use newSocket instead of socket
+    const joinRoom = async () => { // Accept newSocket as a parameter
+        if (socket && room) { // Use newSocket instead of socket
+            socket.emit('joinRoom', room); // Use newSocket instead of socket
             setIsRoomJoined(true);
             console.log("Nakajoin")
         }
@@ -174,8 +172,12 @@ const MrtTapIn = () => {
             try {
                 const maintenanceStatus = await StationApi.fetchMaintenance();
                 setIsMaintenance(maintenanceStatus[0].maintenance);
+                if (isMaintenance) {
+                    sendMessage("Page is on Maintenance");
+                }
             } catch (error) {
                 console.error('Error checking maintenance:', error);
+                sendMessage(error as string)
             }
         };
 
@@ -336,9 +338,10 @@ const MrtTapIn = () => {
                                 pauseOnHover: true,
                                 draggable: true,
                             });
+                            sendMessage("Tap-in successful. Enjoy your trip!")
                         } else {
                             // Beep card is already tapped in
-                            toast.warn('Beep Card Already Tapped In.', {
+                            toast.warn('Beep Card Already Tapped In', {
                                 position: 'top-right',
                                 autoClose: 2000,
                                 hideProgressBar: false,
@@ -346,10 +349,11 @@ const MrtTapIn = () => {
                                 pauseOnHover: true,
                                 draggable: true,
                             });
+                            sendMessage("Beep Card Already Tapped In")
                         }
                     } else {
                         // Insufficient balance
-                        toast.error('Insufficient balance. Please top up your beep card.', {
+                        toast.error('Insufficient balance. Please top up your beep card', {
                             position: 'top-right',
                             autoClose: 2000,
                             hideProgressBar: false,
@@ -357,10 +361,12 @@ const MrtTapIn = () => {
                             pauseOnHover: true,
                             draggable: true,
                         });
+                        sendMessage("Insufficient balance. Please top up your beep card")
                     }
                 } else {
                     // Handle case where balance or price is undefined
                     console.error('Beep card balance or minimum fare price is undefined');
+                    sendMessage("Beep card balance or minimum fare price is undefined")
                 }
             } else {
                 setBeepCardNumberCheck(false)
@@ -372,11 +378,12 @@ const MrtTapIn = () => {
                     pauseOnHover: true,
                     draggable: true,
                 });
+                sendMessage("Beep card not found!")
             }
         } catch (error) {
             console.error(error);
             // Show error message
-            toast.error('Tap-in failed. Please try again.', {
+            toast.error('Tap-in failed. Please try again', {
                 position: 'top-right',
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -384,13 +391,15 @@ const MrtTapIn = () => {
                 pauseOnHover: true,
                 draggable: true,
             });
+            sendMessage("Tap-in failed. Please try again")
         } finally {
             setReceivedMessage('')
             setIsSubmitting(false);
             setIsScanned(false);
-            setMessage('');
+            console.log("natawag" + message)
             setTimeout(() => {
                 setTapInDetails(null);
+                setReceivedMessage("")
                 setBeepCardNumber('637805')
             }, 3000); // 5000 milliseconds = 5 seconds
         }
@@ -500,12 +509,12 @@ const MrtTapIn = () => {
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapInDetails.currBalance}</p>
                                             </div>
                                         )}
-                                        {room && socket && isRoomJoined && (
+                                        {room && socket && isRoomJoined && !!!receivedMessage &&  (
                                             <div className="flex justify-center items-center mt-2 pb-4"> {/* Added pb-4 for bottom padding */}
                                                 <QRCode value={room} fgColor="#333" size={150} style={{ outline: '10px solid white' }} /> {/* Reduced size of QR code */}
                                             </div>
                                         )}
-                                        {receivedMessage && <p>Received message: {receivedMessage}</p>}
+                                        {/* {receivedMessage && <p>QR scan detected, trying to tap in...</p>} */}
                                         <Button
                                             className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
                                             disabled={!beepCard?.UUIC || isSubmitting} // Disable the button if beepCard is null

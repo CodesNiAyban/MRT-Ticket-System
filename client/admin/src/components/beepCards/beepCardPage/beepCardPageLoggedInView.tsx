@@ -69,7 +69,7 @@ const BeepCardPageLoggedInView = () => {
             showCustomToast("success", `Beep Card ${beepCard.UUIC} deleted.`);
           } catch (error) {
             console.error(error);
-            showCustomToast("danger", "Error deleting Beep Card. Please try again.");
+            showCustomToast("danger", "Error deleting Beep Card. Please try again");
           } finally {
             setBeepCardsLoading(false);
             setConfirmationModal({
@@ -84,7 +84,7 @@ const BeepCardPageLoggedInView = () => {
         card: beepCard,
       } as ConfirmationModalState));
     } else {
-      showCustomToast("danger", "Beep Card is currently active.");
+      showCustomToast("danger", "Beep Card is currently active");
     }
   };
 

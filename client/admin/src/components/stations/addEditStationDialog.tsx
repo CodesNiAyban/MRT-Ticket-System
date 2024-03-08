@@ -146,7 +146,7 @@ const AddEditStationDialog = ({
 						]);
 						setSelectedStations([...selectedStations, station]);
 					} else {
-						toast.error("Stations cannot be connected less than 500m.", {
+						toast.error("Stations cannot be connected less than 500m", {
 							position: "top-right",
 							autoClose: 1500,
 							hideProgressBar: false,
@@ -178,7 +178,7 @@ const AddEditStationDialog = ({
 						]);
 						setSelectedStations([...selectedStations, station]);
 					} else {
-						toast.error("Stations cannot be connected less than 500m.", {
+						toast.error("Stations cannot be connected less than 500m", {
 							position: "top-right",
 							autoClose: 1500,
 							hideProgressBar: false,

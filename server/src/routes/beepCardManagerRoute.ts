@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/:userID", BeepCardsManagerController.getBeepCards);
 
-router.get("/transactions/:userID", BeepCardsManagerController.getTapOutTransactionsByUserID); 
+router.get("/transactions/:userID", BeepCardsManagerController.getTapTransactionsByUserID); 
 
 router.put("/link/:UUIC", BeepCardsManagerController.updateBeepCardUserID); 
 
