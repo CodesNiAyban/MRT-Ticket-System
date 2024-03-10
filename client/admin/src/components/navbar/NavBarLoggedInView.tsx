@@ -100,16 +100,6 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
                             </Nav.Link>
                         </OverlayTrigger>
                     </Nav.Item>
-                    <Nav.Item>
-                        <OverlayTrigger
-                            placement="bottom"
-                            overlay={<Tooltip id="tooltip-transactions">Transactions</Tooltip>}
-                        >
-                            <Nav.Link as={Link} to="/websocket">
-                                <h5 className="nav-link-text">Transactions</h5>
-                            </Nav.Link>
-                        </OverlayTrigger>
-                    </Nav.Item>
                 </Nav>
                  <Nav>
                     <Navbar.Text>
