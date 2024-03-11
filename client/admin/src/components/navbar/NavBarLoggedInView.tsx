@@ -108,7 +108,7 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
                     <Navbar.Text>
                         <OverlayTrigger
                             placement="bottom"
-                            overlay={<Tooltip id="tooltip-maintenance">{maintenanceMode ? 'Disable Maintenance Mode: For Deploy MRT Online Tap' : 'Enable Maintenance Mode: Station and Fare Control'}</Tooltip>}
+                            overlay={<Tooltip id="tooltip-maintenance">{maintenanceMode ? 'Disable Maintenance Mode: Deploy MRT Online Tap' : 'Enable Maintenance Mode: Station and Fare Control'}</Tooltip>}
                         >
                             <Form.Check
                                 type="switch"

@@ -114,15 +114,21 @@ export const updateStation: RequestHandler<stationsInterface.UpdateStationParams
 export const deleteStation: RequestHandler = async (req, res, next) => {
 	try {
 		const stationId = req.params.stationId;
+
 		// Error handling
 		if (!mongoose.isValidObjectId(stationId)) throw createHttpError(400, "Invalid station id");
 
 		const station = await StationModel.findById(stationId).exec();
 
 		if (!station) throw createHttpError(404, "Station not found");
-		
+
 		// Remove the station being deleted from all other station's connectedTo arrays
-		await StationModel.updateMany({}, { $pull: { connectedTo: stationId } });
+		const stationsToUpdate = await StationModel.find({ connectedTo: stationId }).exec();
+
+		await Promise.all(stationsToUpdate.map(async (connectedStation) => {
+			connectedStation.connectedTo = connectedStation.connectedTo.filter(id => id.toString() !== stationId.toString());
+			await connectedStation.save();
+		}));
 
 		// Delete the station
 		await station.deleteOne();
@@ -132,4 +138,5 @@ export const deleteStation: RequestHandler = async (req, res, next) => {
 		next(error);
 	}
 };
+
 
