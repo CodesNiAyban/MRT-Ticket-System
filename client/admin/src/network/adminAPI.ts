@@ -65,9 +65,9 @@ export async function adminLogin(credentials: LoginCredentials): Promise<LoginRe
 }
 
 export async function logout() {
+    localStorage.removeItem('authToken');
     await fetch(`${MRT_API}/api/admin/logout`, {
         method: "POST",
         credentials: "include",
-    });
-    localStorage.removeItem('authToken'); // Remove token from local storage
+    }); // Remove token from local storage
 }

@@ -3,6 +3,7 @@ import { Button, Form, Modal, Nav, Navbar, OverlayTrigger, Tooltip } from 'react
 import { Link, useNavigate } from 'react-router-dom';
 import { Admin } from '../../model/adminModel';
 import * as MaintenanceApi from "../../network/maintenanceAPI";
+import * as AdminApi from "../../network/adminAPI";
 import styles from "./NavBar.module.css";
 
 interface NavBarLoggedInViewProps {
@@ -18,7 +19,7 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
     const [maintenanceMode, setMaintenanceMode] = useState(false);
 
     const navigate = useNavigate();
-    
+
     useEffect(() => {
         async function fetchMaintenanceMode() {
             try {
@@ -58,13 +59,15 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
         }
     };
 
-    const logout = async () => {
+    async function logout() {
         try {
-            // Logout logic here
+            await AdminApi.logout();
+            onLogoutSuccessful();
         } catch (error) {
             console.error(error);
+            alert(error);
         }
-    };
+    }
 
     return (
         <>
@@ -100,18 +103,8 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
                             </Nav.Link>
                         </OverlayTrigger>
                     </Nav.Item>
-                    <Nav.Item>
-                        <OverlayTrigger
-                            placement="bottom"
-                            overlay={<Tooltip id="tooltip-transactions">Transactions</Tooltip>}
-                        >
-                            <Nav.Link as={Link} to="/websocket">
-                                <h5 className="nav-link-text">Transactions</h5>
-                            </Nav.Link>
-                        </OverlayTrigger>
-                    </Nav.Item>
                 </Nav>
-                 <Nav>
+                <Nav>
                     <Navbar.Text>
                         <OverlayTrigger
                             placement="bottom"
