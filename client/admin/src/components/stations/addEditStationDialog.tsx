@@ -226,7 +226,7 @@ const AddEditStationDialog = ({
 	};
 
 	return (
-		<Modal show onHide={onDismiss}  className={`${styles.modalContent} beep-card-modal`} centered>
+		<Modal show onHide={onDismiss} className={`${styles.modalContent} beep-card-modal`} centered>
 			<Modal.Header closeButton className={styles.modalHeader}>
 				<Modal.Title className={`${styles.modalTitle} modal-title`}>{stationToEdit ? 'Edit Station' : 'Add Station'}</Modal.Title>
 			</Modal.Header>
@@ -251,7 +251,6 @@ const AddEditStationDialog = ({
 						transformInput={(value: string) => value.toLowerCase()} // Transform input to lowercase
 					/>
 
-					{/* Latitude form input */}
 					<Form.Group className="mb-3">
 						<Form.Label>Latitude</Form.Label>
 						<Form.Control
@@ -260,13 +259,13 @@ const AddEditStationDialog = ({
 							isInvalid={!!errors.coords}
 							defaultValue={(coordinates?.[0] || stationToEdit?.coords[0] || 0).toString()}
 							onChange={(e) => setValue('coords.0', parseFloat(e.target.value))}
+							required
 						/>
 						<Form.Control.Feedback type="invalid">
 							{errors.coords?.message}
 						</Form.Control.Feedback>
 					</Form.Group>
 
-					{/* Longitude form input */}
 					<Form.Group className="mb-3">
 						<Form.Label>Longitude</Form.Label>
 						<Form.Control
@@ -275,11 +274,13 @@ const AddEditStationDialog = ({
 							isInvalid={!!errors.coords}
 							defaultValue={(coordinates?.[1] || stationToEdit?.coords[1] || 0).toString()}
 							onChange={(e) => setValue('coords.1', parseFloat(e.target.value))}
+							required 
 						/>
 						<Form.Control.Feedback type="invalid">
 							{errors.coords?.message}
 						</Form.Control.Feedback>
 					</Form.Group>
+
 
 					<Form.Group className="mb-3">
 						<Form.Label>
