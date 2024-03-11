@@ -241,7 +241,7 @@ const AddEditStationDialog = ({
 						register={register}
 						registerOptions={{
 							required: 'Required',
-							maxLength: 50, // Limit to 10 characters
+							maxLength: 30, // Limit to 10 characters
 							pattern: {
 								value: /^[a-zA-Z0-9\s]*$/, // Allow only alphanumeric characters and spaces
 								message: 'Invalid input. Only alphanumeric characters and spaces are allowed.',

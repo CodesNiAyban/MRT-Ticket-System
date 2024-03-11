@@ -150,8 +150,12 @@ export const tapOut: RequestHandler = async (req, res, next) => {
 			throw createHttpError(404, "Beep card not found");
 		}
 
-		let newBalance = beepCard.balance - amountToDeduct;
-		newBalance = Math.max(newBalance, 0); // Ensure the new balance is not negative
+		let newBalance;
+		if (beepCard.balance >= amountToDeduct) {
+			newBalance = beepCard.balance - amountToDeduct;
+		} else {
+			throw createHttpError(404, "Not Enough Balance, please top up.");
+		}
 
 		// Update the BeepCard with the new balance and set isActive to true
 		const updatedBeepCard = await beepCardsModel.findOneAndUpdate(

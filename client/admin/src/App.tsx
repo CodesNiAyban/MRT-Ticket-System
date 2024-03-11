@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import LoginModal from "./components/adminLogin";
 import NavBar from "./components/navbar/NavBar";
@@ -12,7 +11,6 @@ import LoginPage from "./pages/loginPage";
 import PageNotFound from "./pages/pageNotFound";
 import StationsPage from "./pages/stationsPage";
 import WebSocketPage from "./pages/websocket";
-import styles from "./styles/app.module.css";
 
 function App() {
   const [loggedInAdmin, setLoggedInAdmin] = useState<Admin | null>(null);

@@ -33,7 +33,7 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
             type="text"
             placeholder="UUIC"
             register={register}
-            registerOptions={{ required: "Required " }}
+            registerOptions={{ required: "Required ", maxLength: 15 }}
             errors={errors.UUIC}
             disabled
           />
@@ -56,7 +56,7 @@ const BeepCardFormFields: React.FC<BeepCardFormFieldsProps> = ({
             type="text"
             placeholder="ID"
             register={register}
-            registerOptions={{ required: "Required " }}
+            registerOptions={{ required: "Required ", maxLength: 15 }}
             errors={errors.UUIC}
             disabled={isSubmitting}
           />

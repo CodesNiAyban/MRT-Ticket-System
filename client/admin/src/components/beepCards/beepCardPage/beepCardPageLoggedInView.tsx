@@ -66,6 +66,12 @@ const BeepCardPageLoggedInView = () => {
                 (existingBeepCard) => existingBeepCard._id !== beepCard._id
               )
             );
+
+            // Check if the last beep card is deleted and there are less items than the current page
+            if (filteredBeepCards.length <= itemsPerPage) {
+              setCurrentPage(1); // Navigate to the first page
+            }
+
             showCustomToast("success", `Beep Card ${beepCard.UUIC} deleted.`);
           } catch (error) {
             console.error(error);
@@ -87,6 +93,7 @@ const BeepCardPageLoggedInView = () => {
       showCustomToast("danger", "Beep Card is currently active");
     }
   };
+
 
   const showCustomToast = (variant: "success" | "danger", message: string) => {
     setAlertVariant(variant);

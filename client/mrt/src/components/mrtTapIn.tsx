@@ -312,7 +312,7 @@ const MrtTapIn = () => {
                                 UUIC: cardDetails.UUIC,
                                 tapIn: true,
                                 initialBalance: cardDetails.balance,
-                                currStation: stationName,
+                                currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toLocaleLowerCase()),
                                 prevStation: "N/A",
                                 fare: 0,
                                 distance: 0,
@@ -500,6 +500,7 @@ const MrtTapIn = () => {
                                             value={beepCardNumber}
                                             onChange={handleBeepCardNumberChange}
                                             placeholder="Enter Beep Card Number"
+                                            maxLength={15}
                                             className="text-xl lg:text-2xl text-black mb-5 p-2 border rounded"
                                         />
                                         {tapInDetails && (
@@ -509,7 +510,7 @@ const MrtTapIn = () => {
                                                 <p className="text-xl lg:text-2xl text-white mb-1">Current Balance: {tapInDetails.currBalance}</p>
                                             </div>
                                         )}
-                                        {room && socket && isRoomJoined && !!!receivedMessage &&  (
+                                        {room && socket && isRoomJoined && !!!receivedMessage && (
                                             <div className="flex justify-center items-center mt-2 pb-4"> {/* Added pb-4 for bottom padding */}
                                                 <QRCode value={room} fgColor="#333" size={150} style={{ outline: '10px solid white' }} /> {/* Reduced size of QR code */}
                                             </div>

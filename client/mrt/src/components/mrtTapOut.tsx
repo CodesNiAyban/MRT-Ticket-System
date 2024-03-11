@@ -340,8 +340,8 @@ const MrtTapOut = () => {
                     if (cardDetails.balance >= (minimumFare.price + farePerKm)) {
                         // Sufficient balance, proceed with tap-out
                         if (cardDetails.isActive) {
-                            setIsSubmitting(true);
                             if (cardDetails.balance >= farePerKm) { // Check if the balance is sufficient for the fare
+                                setIsSubmitting(true);
                                 const beepCardResponse = await StationApi.tapOutBeepCard(cardDetails.UUIC, farePerKm + minimumFare.price!);
                                 const transactionResponse = await StationApi.getTapInTransactionByUUIC(cardDetails.UUIC);
                                 const tapOutTransaction: TapOutTransactionModel = {
@@ -449,7 +449,7 @@ const MrtTapOut = () => {
             setMessage('');
             setTimeout(() => {
                 setTapOutDetails(null);
-                setBeepCardNumber('637805')
+                setBeepCardNumber('')
                 setReceivedMessage('')
             }, 3000); // 5000 milliseconds = 5 seconds
         }
@@ -694,6 +694,7 @@ const MrtTapOut = () => {
                                             value={beepCardNumber}
                                             onChange={handleBeepCardNumberChange}
                                             placeholder="Enter Beep Card Number"
+                                            maxLength={15}
                                             className="text-xl lg:text-2xl text-black mb-5 p-2 border rounded"
                                         />
                                         {tapOutDetails && (

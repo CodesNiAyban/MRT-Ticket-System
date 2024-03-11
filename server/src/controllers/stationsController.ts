@@ -120,14 +120,9 @@ export const deleteStation: RequestHandler = async (req, res, next) => {
 		const station = await StationModel.findById(stationId).exec();
 
 		if (!station) throw createHttpError(404, "Station not found");
-
-		// Remove the station ID from the connectedTo arrays of other stations
-		const connectedStations = await StationModel.find({ connectedTo: stationId }).exec();
-
-		await Promise.all(connectedStations.map(async (connectedStation) => {
-			connectedStation.connectedTo = connectedStation.connectedTo.filter(id => id !== stationId);
-			await connectedStation.save();
-		}));
+		
+		// Remove the station being deleted from all other station's connectedTo arrays
+		await StationModel.updateMany({}, { $pull: { connectedTo: stationId } });
 
 		// Delete the station
 		await station.deleteOne();
@@ -137,3 +132,4 @@ export const deleteStation: RequestHandler = async (req, res, next) => {
 		next(error);
 	}
 };
+
