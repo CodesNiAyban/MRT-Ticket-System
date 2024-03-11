@@ -142,7 +142,7 @@ const MrtTapOut = () => {
                 try {
                     // Fetch the beep card details based on the received UUIC message
                     const cardDetails = await StationApi.getBeepCard(receivedMessage!);
-                    setBeepCardNumber("")
+                    handleBeepCardNumberChange("637805" as any)
                     setBeepCardNumber(cardDetails?.UUIC!)
                     setIsScanned(true)
                 } catch (error) {
