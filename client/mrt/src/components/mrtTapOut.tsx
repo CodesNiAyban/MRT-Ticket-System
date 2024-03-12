@@ -56,6 +56,7 @@ const MrtTapOut = () => {
     const [isRoomJoined, setIsRoomJoined] = useState(false);
     const [roomJoiner, setRoomJoiner] = useState(false); // State to track whether room is joined
     const tapOutButtonRef = useRef<HTMLButtonElement>(null);
+    const inputRef = createRef<HTMLInputElement>();
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
     const { stationName } = useParams();
@@ -450,7 +451,6 @@ const MrtTapOut = () => {
             setTimeout(() => {
                 setTapOutDetails(null);
                 setBeepCardNumber('')
-                const inputRef = createRef<HTMLInputElement>();
                 if (inputRef.current) {
                     // Simulate a change event on the input element
                     inputRef.current.value = '637805';
@@ -702,6 +702,7 @@ const MrtTapOut = () => {
                                             placeholder="Enter Beep Card Number"
                                             maxLength={15}
                                             className="text-xl lg:text-2xl text-black mb-5 p-2 border rounded"
+                                            ref={inputRef}
                                         />
                                         {tapOutDetails && (
                                             <div className="mb-5">
