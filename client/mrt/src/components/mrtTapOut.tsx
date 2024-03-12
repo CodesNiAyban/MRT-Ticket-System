@@ -142,7 +142,7 @@ const MrtTapOut = () => {
                 try {
                     // Fetch the beep card details based on the received UUIC message
                     const cardDetails = await StationApi.getBeepCard(receivedMessage!);
-                    handleBeepCardNumberChange("637805" as any)
+                    setBeepCardNumber("")
                     setBeepCardNumber(cardDetails?.UUIC!)
                     setIsScanned(true)
                 } catch (error) {
@@ -450,6 +450,7 @@ const MrtTapOut = () => {
             setTimeout(() => {
                 setTapOutDetails(null);
                 setBeepCardNumber('')
+                handleBeepCardNumberChange("637805" as any)
                 setReceivedMessage('')
             }, 3000); // 5000 milliseconds = 5 seconds
         }
