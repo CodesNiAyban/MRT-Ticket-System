@@ -450,7 +450,7 @@ const MrtTapOut = () => {
             setMessage('');
             setTimeout(() => {
                 setTapOutDetails(null);
-                setBeepCardNumber('')
+                setBeepCardNumber('637805')
                 if (inputRef.current) {
                     // Simulate a change event on the input element
                     inputRef.current.value = '637805';
