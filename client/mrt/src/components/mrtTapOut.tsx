@@ -6,7 +6,7 @@ import { Button } from 'flowbite-react';
 import { Graph, alg } from 'graphlib';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ReactElement, useEffect, useRef, useState } from 'react';
+import { ReactElement, createRef, useEffect, useRef, useState } from 'react';
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
 import uuid from 'react-native-uuid';
 import QRCode from 'react-qr-code'; // Import QRCode component
@@ -450,8 +450,13 @@ const MrtTapOut = () => {
             setTimeout(() => {
                 setTapOutDetails(null);
                 setBeepCardNumber('')
-                handleBeepCardNumberChange("637805" as any)
-                setReceivedMessage('')
+                const inputRef = createRef<HTMLInputElement>();
+                if (inputRef.current) {
+                    // Simulate a change event on the input element
+                    inputRef.current.value = '637805';
+                    inputRef.current.dispatchEvent(new Event('change'));
+                }
+                setReceivedMessage(null)
             }, 3000); // 5000 milliseconds = 5 seconds
         }
     };
