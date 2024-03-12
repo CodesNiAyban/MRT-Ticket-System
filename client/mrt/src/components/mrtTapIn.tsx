@@ -410,6 +410,7 @@ const MrtTapIn = () => {
         const loadBeepCardDetails = async () => {
             try {
                 let cardDetails = await StationApi.getBeepCard(beepCardNumber);
+                setReceivedMessage(beepCardNumber)
                 setBeepCard(cardDetails);
                 setBeepCardNumberCheck(true)
                 if (isScanned && cardDetails) {

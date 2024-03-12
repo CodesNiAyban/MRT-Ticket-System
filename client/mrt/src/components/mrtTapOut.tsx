@@ -487,6 +487,7 @@ const MrtTapOut = () => {
         let intervalId: string | number | NodeJS.Timeout | undefined;
         const loadBeepCardDetails = async () => {
             try {
+                setReceivedMessage(beepCardNumber)
                 const cardDetails = await StationApi.getBeepCard(beepCardNumber);
                 if (cardDetails) {
                     const transactionResponse = await StationApi.getTapInTransactionByUUIC(cardDetails.UUIC);
