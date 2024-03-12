@@ -72,7 +72,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
           const defaultBalance = await getDefaultLoadPrice();
           setValue("userID", beepCardToEdit.userID);
           setValue("balance", defaultBalance);
-          setValue("isActive", false);
+          setValue("isActive", beepCardToEdit?.isActive || false);
         }
       }
       setIsLoading(false);
