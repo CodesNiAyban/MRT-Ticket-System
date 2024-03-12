@@ -515,7 +515,6 @@ const MrtTapIn = () => {
                                                 <QRCode value={room} fgColor="#333" size={150} style={{ outline: '10px solid white' }} /> {/* Reduced size of QR code */}
                                             </div>
                                         )}
-                                        {/* {receivedMessage && <p>QR scan detected, trying to tap in...</p>} */}
                                         <Button
                                             className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
                                             disabled={!beepCard?.UUIC || isSubmitting || receivedMessage !== ""} // Disable the button if beepCard is null

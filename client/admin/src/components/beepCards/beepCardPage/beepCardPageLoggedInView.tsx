@@ -80,6 +80,9 @@ const BeepCardPageLoggedInView = () => {
               message: "",
               card: null,
             });
+            if (filteredBeepCards.length - 2 < itemsPerPage) {
+              handlePageChange(1)
+            }
           }
         },
         message: "Are you sure you want to delete this Beep Card?",
@@ -123,9 +126,6 @@ const BeepCardPageLoggedInView = () => {
   };
 
   const renderPaginationButtons = () => {
-    if (!showPagination) {
-      return null;
-    }
 
     const buttons = [];
     const maxButtons = 5;
@@ -368,7 +368,7 @@ const BeepCardPageLoggedInView = () => {
             onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
           />
-          {renderPaginationButtons()}
+          {showPagination && renderPaginationButtons()}
           <Pagination.Next
             onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
             disabled={currentPage === totalPages}
