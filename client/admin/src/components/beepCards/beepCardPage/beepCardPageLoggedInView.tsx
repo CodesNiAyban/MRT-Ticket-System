@@ -69,7 +69,7 @@ const BeepCardPageLoggedInView = () => {
 
             // Check if the last beep card is deleted and there are less items than the current page
             if (!showPagination) {
-              setCurrentPage(1); // Navigate to the first page
+              handlePageChange(1)
             }
 
             showCustomToast("success", `Beep Card ${beepCard.UUIC} deleted.`);
