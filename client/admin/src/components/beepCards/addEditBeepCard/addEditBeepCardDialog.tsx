@@ -40,7 +40,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
       UUIC: beepCardToEdit?.UUIC || generateDefaultNumber(),
       userID: beepCardToEdit?.userID || '', // Set default value for userID
       balance: editMode ? beepCardToEdit?.balance : 0,
-      isActive: editMode ? beepCardToEdit?.isActive : false,
+      isActive: editMode ? beepCardToEdit?.isActive : beepCardToEdit?.isActive || false,
     },
   });
 
@@ -67,12 +67,12 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
         if (editMode) {
           setValue("userID", beepCardToEdit.userID);
           setValue("balance", beepCardToEdit.balance);
-          setisActive(beepCardToEdit?.isActive || false);
+          setisActive(beepCardToEdit?.isActive);
         } else {
           const defaultBalance = await getDefaultLoadPrice();
           setValue("userID", beepCardToEdit.userID);
           setValue("balance", defaultBalance);
-          setValue("isActive", beepCardToEdit?.isActive || false);
+          setValue("isActive", beepCardToEdit?.isActive);
         }
       }
       setIsLoading(false);
