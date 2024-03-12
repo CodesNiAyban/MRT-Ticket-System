@@ -59,6 +59,7 @@ const BeepCardPageLoggedInView = () => {
         show: true,
         action: async () => {
           try {
+            handlePageChange(1);
             setBeepCardsLoading(true);
             await BeepCardApi.deleteBeepCard(beepCard._id);
             setBeepCards(
@@ -79,9 +80,6 @@ const BeepCardPageLoggedInView = () => {
               message: "",
               card: null,
             });
-            if (filteredBeepCards.length - 1 < itemsPerPage) {
-              handlePageChange(1)
-            }
           }
         },
         message: "Are you sure you want to delete this Beep Card?",
