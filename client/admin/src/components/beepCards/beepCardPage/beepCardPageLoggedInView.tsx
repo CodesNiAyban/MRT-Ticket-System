@@ -67,11 +67,6 @@ const BeepCardPageLoggedInView = () => {
               )
             );
 
-            // Check if the last beep card is deleted and there are less items than the current page
-            if (!showPagination) {
-              handlePageChange(1)
-            }
-
             showCustomToast("success", `Beep Card ${beepCard.UUIC} deleted.`);
           } catch (error) {
             console.error(error);
@@ -84,6 +79,9 @@ const BeepCardPageLoggedInView = () => {
               message: "",
               card: null,
             });
+            if (filteredBeepCards.length - 1 < itemsPerPage) {
+              handlePageChange(1)
+            }
           }
         },
         message: "Are you sure you want to delete this Beep Card?",
