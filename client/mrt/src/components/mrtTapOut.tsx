@@ -729,7 +729,7 @@ const MrtTapOut = () => {
 
                                         <Button
                                             className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
-                                            disabled={!beepCard?.UUIC || isSubmitting} // Disable tap-out if beepCard UUIC is invalid or submitting
+                                            disabled={!beepCard?.UUIC || isSubmitting || receivedMessage !== ''} // Disable tap-out if beepCard UUIC is invalid or submitting
                                             onClick={handleTapOut} // Call handleTapOut when the button is clicked
                                         >
                                             {isSubmitting ? 'TAPPING OUT...' : 'TAP-OUT'}
