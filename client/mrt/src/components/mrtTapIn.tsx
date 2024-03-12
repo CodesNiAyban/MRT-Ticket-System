@@ -86,6 +86,7 @@ const MrtTapIn = () => {
                 // Listen for messages from the server
                 newSocket!.on('message', (msg: string) => {
                     setReceivedMessage(msg);
+                    setIsSubmitting(true)
                 });
 
                 // Set connection status
@@ -410,7 +411,6 @@ const MrtTapIn = () => {
         const loadBeepCardDetails = async () => {
             try {
                 let cardDetails = await StationApi.getBeepCard(beepCardNumber);
-                setReceivedMessage(beepCardNumber)
                 setBeepCard(cardDetails);
                 setBeepCardNumberCheck(true)
                 if (isScanned && cardDetails) {
@@ -516,9 +516,10 @@ const MrtTapIn = () => {
                                                 <QRCode value={room} fgColor="#333" size={150} style={{ outline: '10px solid white' }} /> {/* Reduced size of QR code */}
                                             </div>
                                         )}
+                                        {/* {receivedMessage && <p>QR scan detected, trying to tap in...</p>} */}
                                         <Button
                                             className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
-                                            disabled={!beepCard?.UUIC || isSubmitting || receivedMessage !== ""} // Disable the button if beepCard is null
+                                            disabled={!beepCard?.UUIC || isSubmitting} // Disable the button if beepCard is null
                                             onClick={handleTapIn}
                                         >
                                             {isSubmitting ? 'TAPPING IN...' : 'TAP-IN'}

@@ -56,7 +56,6 @@ const MrtTapOut = () => {
     const [isRoomJoined, setIsRoomJoined] = useState(false);
     const [roomJoiner, setRoomJoiner] = useState(false); // State to track whether room is joined
     const tapOutButtonRef = useRef<HTMLButtonElement>(null);
-    const inputRef = createRef<HTMLInputElement>();
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
     const { stationName } = useParams();
@@ -451,6 +450,7 @@ const MrtTapOut = () => {
             setTimeout(() => {
                 setTapOutDetails(null);
                 setBeepCardNumber('637805')
+                const inputRef = createRef<HTMLInputElement>();
                 if (inputRef.current) {
                     // Simulate a change event on the input element
                     inputRef.current.value = '637805';
@@ -487,7 +487,6 @@ const MrtTapOut = () => {
         let intervalId: string | number | NodeJS.Timeout | undefined;
         const loadBeepCardDetails = async () => {
             try {
-                setReceivedMessage(beepCardNumber)
                 const cardDetails = await StationApi.getBeepCard(beepCardNumber);
                 if (cardDetails) {
                     const transactionResponse = await StationApi.getTapInTransactionByUUIC(cardDetails.UUIC);
@@ -703,7 +702,6 @@ const MrtTapOut = () => {
                                             placeholder="Enter Beep Card Number"
                                             maxLength={15}
                                             className="text-xl lg:text-2xl text-black mb-5 p-2 border rounded"
-                                            ref={inputRef}
                                         />
                                         {tapOutDetails && (
                                             <div className="mb-5">
@@ -726,12 +724,13 @@ const MrtTapOut = () => {
                                         <button
                                             ref={tapOutButtonRef}
                                             onClick={handleTapOut} // Call handleTapOut when the button is clicked
+                                            disabled={!receivedMessage}
                                         >
                                         </button>
 
                                         <Button
                                             className="w-full mt-4 lg:mt-auto bg-white text-gray-800 text-sm lg:text-base"
-                                            disabled={!beepCard?.UUIC || isSubmitting || receivedMessage !== ''} // Disable tap-out if beepCard UUIC is invalid or submitting
+                                            disabled={!beepCard?.UUIC || isSubmitting} // Disable tap-out if beepCard UUIC is invalid or submitting
                                             onClick={handleTapOut} // Call handleTapOut when the button is clicked
                                         >
                                             {isSubmitting ? 'TAPPING OUT...' : 'TAP-OUT'}
