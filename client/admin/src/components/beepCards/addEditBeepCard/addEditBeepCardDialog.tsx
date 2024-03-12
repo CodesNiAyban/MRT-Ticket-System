@@ -45,8 +45,6 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isActive, setisActive] = useState<boolean>(false);
 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [previousBalance, setPreviousBalance] = useState<number | null>(null);
@@ -67,7 +65,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
         if (editMode) {
           setValue("userID", beepCardToEdit.userID);
           setValue("balance", beepCardToEdit.balance);
-          setisActive(beepCardToEdit?.isActive);
+          setValue("isActive", beepCardToEdit?.isActive);
         } else {
           const defaultBalance = await getDefaultLoadPrice();
           setValue("userID", beepCardToEdit.userID);
