@@ -268,7 +268,7 @@ const AddEditStationDialog = ({
 					<Form.Group className="mb-3">
 						<Form.Label>Latitude</Form.Label>
 						<Form.Control
-							type="number"
+							type="text"
 							placeholder="Latitude"
 							defaultValue={latitude.toString()}
 							onChange={(latitude) => handleLatitudeChange(latitude.toString())}
@@ -279,7 +279,7 @@ const AddEditStationDialog = ({
 					<Form.Group className="mb-3">
 						<Form.Label>Longitude</Form.Label>
 						<Form.Control
-							type="number"
+							type="text"
 							placeholder="Longitude"
 							defaultValue={longitude.toString()}
 							onChange={(longitude) => handleLongitudeChange(longitude.toString())}
