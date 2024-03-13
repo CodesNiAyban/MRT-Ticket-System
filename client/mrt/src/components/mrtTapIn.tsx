@@ -395,13 +395,13 @@ const MrtTapIn = () => {
             sendMessage("Tap-in failed. Please try again")
         } finally {
             setReceivedMessage('')
-            setIsSubmitting(false);
             setIsScanned(false);
             console.log("natawag" + message)
             setTimeout(() => {
                 setTapInDetails(null);
                 setReceivedMessage("")
                 setBeepCardNumber('637805')
+                setIsSubmitting(false);
             }, 3000); // 5000 milliseconds = 5 seconds
         }
     }; // Empty dependencies array
