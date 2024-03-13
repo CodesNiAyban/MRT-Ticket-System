@@ -45,23 +45,8 @@ const AddEditStationDialog = ({
 	const [showConnectedToModal, setShowConnectedToModal] = useState(false);
 	const [selectedStations, setSelectedStations] = useState<StationsModel[]>([]);
 	const [runOnce, setRunOnce] = useState(true)
+
 	const [polylines, setPolylines] = useState<ReactElement[]>([]);
-	const [latitude, setLatitude] = useState((coordinates?.[0] || stationToEdit?.coords[0] || 0).toString());
-	const [longitude, setLongitude] = useState((coordinates?.[1] || stationToEdit?.coords[1] || 0).toString());
-
-	const handleLatitudeChange = (text: string) => {
-		// Only allow numbers and dots for latitude
-		if (/^\d*\.?\d*$/.test(text)) {
-			setLatitude(text);
-		}
-	};
-
-	const handleLongitudeChange = (text: string) => {
-		// Only allow numbers and dots for longitude
-		if (/^\d*\.?\d*$/.test(text)) {
-			setLongitude(text);
-		}
-	};
 
 	const setDefaultValues = () => {
 		setValue('stationName', stationToEdit?.stationName || '');
@@ -122,6 +107,7 @@ const AddEditStationDialog = ({
 			onStationSaved(stationResponse);
 		} catch (error) {
 			console.error(error);
+			alert(error);
 		}
 	};
 
@@ -270,10 +256,14 @@ const AddEditStationDialog = ({
 						<Form.Control
 							type="text"
 							placeholder="Latitude"
-							defaultValue={latitude.toString()}
-							onChange={(e) => handleLatitudeChange(e.target.value)}
+							isInvalid={!!errors.coords}
+							defaultValue={(coordinates?.[0] || stationToEdit?.coords[0] || 0).toString()}
+							onChange={(e) => setValue('coords.0', parseFloat(e.target.value))}
 							required
 						/>
+						<Form.Control.Feedback type="invalid">
+							{errors.coords?.message}
+						</Form.Control.Feedback>
 					</Form.Group>
 
 					<Form.Group className="mb-3">
@@ -281,11 +271,16 @@ const AddEditStationDialog = ({
 						<Form.Control
 							type="text"
 							placeholder="Longitude"
-							defaultValue={longitude.toString()}
-							onChange={(e) => handleLongitudeChange(e.target.value)}
-							required
+							isInvalid={!!errors.coords}
+							defaultValue={(coordinates?.[1] || stationToEdit?.coords[1] || 0).toString()}
+							onChange={(e) => setValue('coords.1', parseFloat(e.target.value))}
+							required 
 						/>
+						<Form.Control.Feedback type="invalid">
+							{errors.coords?.message}
+						</Form.Control.Feedback>
 					</Form.Group>
+
 
 					<Form.Group className="mb-3">
 						<Form.Label>
