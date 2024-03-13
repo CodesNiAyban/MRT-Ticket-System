@@ -33,28 +33,33 @@ export interface StationInput {
 }
 
 export async function createStation(station: StationInput): Promise<Stations> {
-    const response = await fetchData(`${MRT_API}/api/stations`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-            },
-            body: JSON.stringify(station),
-        });
+    try {
+        const response = await fetchData(`${MRT_API}/api/stations`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                },
+                body: JSON.stringify(station),
+            });
 
-    if (!response.ok) {
-        // Check for authorization failure (e.g., status code 401 or 403)
-        if (response.status === 401 || response.status === 403) {
-            console.error("Authorization failed. Logging out user");
-            await logout();
-        } else {
-            // Handle other errors if needed
-            throw new Error(`Error: ${response.statusText}`);
+        if (!response.ok) {
+            // Check for authorization failure (e.g., status code 401 or 403)
+            if (response.status === 401 || response.status === 403) {
+                console.error("Authorization failed. Logging out user");
+                await logout();
+            } else {
+                // Handle other errors if needed
+                throw new Error(`Error: ${response.statusText}`);
+            }
         }
-    }
 
-    return response.json();
+        return response.json();
+    } catch (error: any) {
+        alert(error);
+        return error
+    }
 }
 
 export async function updateStation(stationId: string, station: Partial<StationInput>): Promise<Stations> {
@@ -92,20 +97,6 @@ export async function updateStations(stations: Stations[]): Promise<Stations[]> 
             body: JSON.stringify({ stations }), // Wrap stations in an object
         });
 
-        if (!response.ok) {
-            // Check for authorization failure (e.g., status code 401 or 403)
-            if (response.status === 401 || response.status === 403) {
-                alert("Authorization failed. Logging out user");
-                console.error("Authorization failed. Logging out user");
-                await logout();
-            } else {
-                // Handle other errors if needed
-                const errorMessage = await response.text(); // Extract error message from response body
-                alert(`Error: ${response.statusText}. ${errorMessage}`);
-                throw new Error(`Error: ${response.statusText}. ${errorMessage}`);
-            }
-        }
-
         return response.json();
     } catch (error) {
         alert(error);
@@ -134,6 +125,7 @@ export async function deleteStation(stationId: string) {
             }
         }
     } catch (error) {
+        alert(error);
         console.error("An error occurred while deleting the station:", error);
         throw error; // Rethrow the error after handling logout
     }
