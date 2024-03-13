@@ -106,15 +106,15 @@ const AddEditStationDialog = ({
 			}
 			onStationSaved(stationResponse);
 		} catch (error: any) {
-				toast.error("An error occurred. Make sure that Station Name and Coords are Unique", {
-					position: "top-right",
-					autoClose: 1500,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					progress: undefined,
-				});
+			toast.error("An error occurred. Make sure that Station Name and Coords are Unique", {
+				position: "top-right",
+				autoClose: 1500,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				progress: undefined,
+			});
 		}
 	};
 
@@ -153,15 +153,16 @@ const AddEditStationDialog = ({
 						]);
 						setSelectedStations([...selectedStations, station]);
 					} else {
-						toast.error("Stations cannot be connected less than 500m", {
-							position: "top-right",
-							autoClose: 1500,
-							hideProgressBar: false,
-							closeOnClick: true,
-							pauseOnHover: true,
-							draggable: true,
-							progress: undefined,
-						});
+						// toast.error("Stations cannot be connected less than 500m", {
+						// 	position: "top-right",
+						// 	autoClose: 1500,
+						// 	hideProgressBar: false,
+						// 	closeOnClick: true,
+						// 	pauseOnHover: true,
+						// 	draggable: true,
+						// 	progress: undefined,
+						// });
+						alert("Stations cannot be connected less than 500m")
 					}
 				} else if (newStation && station._id !== newStation._id) {
 					const distance = L.latLng(newStation.coords[0], newStation.coords[1]).distanceTo(
@@ -230,6 +231,7 @@ const AddEditStationDialog = ({
 
 	const closeConnectedToModal = () => {
 		setShowConnectedToModal(false);
+		setSelectedStations([]);
 	};
 
 	return (
