@@ -271,7 +271,7 @@ const AddEditStationDialog = ({
 							type="number"
 							placeholder="Latitude"
 							defaultValue={latitude.toString()}
-							onChange={(e) => handleLatitudeChange(e.target.value)}
+							onChange={(latitude) => handleLatitudeChange(latitude.toString())}
 							required
 						/>
 					</Form.Group>
@@ -282,7 +282,7 @@ const AddEditStationDialog = ({
 							type="number"
 							placeholder="Longitude"
 							defaultValue={longitude.toString()}
-							onChange={(e) => handleLongitudeChange(e.target.value)}
+							onChange={(longitude) => handleLongitudeChange(longitude.toString())}
 							required
 						/>
 					</Form.Group>
