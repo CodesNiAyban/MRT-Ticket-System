@@ -2,7 +2,7 @@ import { InferSchemaType, Schema, model } from "mongoose";
 
 const stationsSchema = new Schema({
 	stationName: {type: String, required: true, unique: true},
-	coords: {type:Array, required: true},
+	coords: {type:Array, required: true, unique: true},
 	connectedTo:  {type:Array, required: true}
 },{versionKey: false});
 

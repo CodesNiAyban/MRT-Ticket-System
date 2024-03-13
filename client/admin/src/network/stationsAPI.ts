@@ -106,6 +106,7 @@ export async function updateStations(stations: Stations[]): Promise<Stations[]> 
 
         return response.json();
     } catch (error) {
+        alert(error);
         console.error("An error occurred while updating stations:", error);
         throw error; // Rethrow the error after handling logout
     }

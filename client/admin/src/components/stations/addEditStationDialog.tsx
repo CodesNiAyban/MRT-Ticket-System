@@ -45,8 +45,23 @@ const AddEditStationDialog = ({
 	const [showConnectedToModal, setShowConnectedToModal] = useState(false);
 	const [selectedStations, setSelectedStations] = useState<StationsModel[]>([]);
 	const [runOnce, setRunOnce] = useState(true)
-
 	const [polylines, setPolylines] = useState<ReactElement[]>([]);
+	const [latitude, setLatitude] = useState('');
+	const [longitude, setLongitude] = useState('');
+
+	const handleLatitudeChange = (text: string) => {
+		// Only allow numbers and dots for latitude
+		if (/^\d*\.?\d*$/.test(text)) {
+			setLatitude(text);
+		}
+	};
+
+	const handleLongitudeChange = (text: string) => {
+		// Only allow numbers and dots for longitude
+		if (/^\d*\.?\d*$/.test(text)) {
+			setLongitude(text);
+		}
+	};
 
 	const setDefaultValues = () => {
 		setValue('stationName', stationToEdit?.stationName || '');
@@ -107,7 +122,6 @@ const AddEditStationDialog = ({
 			onStationSaved(stationResponse);
 		} catch (error) {
 			console.error(error);
-			alert(error);
 		}
 	};
 
@@ -258,7 +272,7 @@ const AddEditStationDialog = ({
 							placeholder="Latitude"
 							isInvalid={!!errors.coords}
 							defaultValue={(coordinates?.[0] || stationToEdit?.coords[0] || 0).toString()}
-							onChange={(e) => setValue('coords.0', parseFloat(e.target.value))}
+							onChange={(e) => handleLatitudeChange(e.target.value)}
 							required
 						/>
 						<Form.Control.Feedback type="invalid">
@@ -273,8 +287,8 @@ const AddEditStationDialog = ({
 							placeholder="Longitude"
 							isInvalid={!!errors.coords}
 							defaultValue={(coordinates?.[1] || stationToEdit?.coords[1] || 0).toString()}
-							onChange={(e) => setValue('coords.1', parseFloat(e.target.value))}
-							required 
+							onChange={(e) => handleLongitudeChange(e.target.value)}
+							required
 						/>
 						<Form.Control.Feedback type="invalid">
 							{errors.coords?.message}
