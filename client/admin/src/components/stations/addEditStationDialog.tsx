@@ -270,7 +270,6 @@ const AddEditStationDialog = ({
 						<Form.Control
 							type="number"
 							placeholder="Latitude"
-							isInvalid={!!errors.coords}
 							defaultValue={latitude}
 							onChange={() => handleLatitudeChange(latitude)}
 							required
@@ -285,7 +284,6 @@ const AddEditStationDialog = ({
 						<Form.Control
 							type="number"
 							placeholder="Longitude"
-							isInvalid={!!errors.coords}
 							defaultValue={longitude}
 							onChange={() => handleLongitudeChange(longitude)}
 							required
