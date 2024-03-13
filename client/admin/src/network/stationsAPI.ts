@@ -95,11 +95,13 @@ export async function updateStations(stations: Stations[]): Promise<Stations[]> 
         if (!response.ok) {
             // Check for authorization failure (e.g., status code 401 or 403)
             if (response.status === 401 || response.status === 403) {
+                alert("Authorization failed. Logging out user");
                 console.error("Authorization failed. Logging out user");
                 await logout();
             } else {
                 // Handle other errors if needed
                 const errorMessage = await response.text(); // Extract error message from response body
+                alert(`Error: ${response.statusText}. ${errorMessage}`);
                 throw new Error(`Error: ${response.statusText}. ${errorMessage}`);
             }
         }
