@@ -236,7 +236,6 @@ const AddEditStationDialog = ({
 
 	return (
 		<>
-			<ToastContainer />
 			<Modal show onHide={onDismiss} className={`${styles.modalContent} beep-card-modal`} centered>
 				<Modal.Header closeButton className={styles.modalHeader}>
 					<Modal.Title className={`${styles.modalTitle} modal-title`}>{stationToEdit ? 'Edit Station' : 'Add Station'}</Modal.Title>
