@@ -196,8 +196,8 @@ const StationPageLoggedInView = () => {
 					<Popup className={`${styles.customPopup} rounded-lg shadow-lg`} >
 						<h2 className="font-bold">NEW STATION</h2><br />
 						Click to create to coords <br />
-						Latitude: {clickedCoords[1]}<br />
-						Longitude: {clickedCoords[0]}<br />
+						Latitude: {clickedCoords[0]}<br />
+						Longitude: {clickedCoords[1]}<br />
 					</Popup>
 				</Marker>
 			);
@@ -587,8 +587,8 @@ const StationPageLoggedInView = () => {
 													{paginatedStations.map((station) => (
 														<tr key={station._id}>
 															<td>{toTitleCase(station.stationName)}</td>
-															<td>{station.coords[1]}</td>
 															<td>{station.coords[0]}</td>
+															<td>{station.coords[1]}</td>
 															<td>
 																{station.connectedTo.map((connectedStationId, index) => {
 																	const connectedStation = stations.find(

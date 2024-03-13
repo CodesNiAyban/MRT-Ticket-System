@@ -105,9 +105,29 @@ const AddEditStationDialog = ({
 				stationResponse = await StationsApi.createStation(updatedInput);
 			}
 			onStationSaved(stationResponse);
-		} catch (error) {
+		} catch (error: any) {
 			console.error(error);
-			alert(error);
+			if (error.response && error.response.status === 500 && error.response.data === "An unknown error occurred") {
+				toast.error("Station Name and Coordinates must be unique", {
+					position: "top-right",
+					autoClose: 1500,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					progress: undefined,
+				});
+			} else {
+				toast.error(error.message || "An error occurred", {
+					position: "top-right",
+					autoClose: 1500,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					progress: undefined,
+				});
+			}
 		}
 	};
 
@@ -226,120 +246,123 @@ const AddEditStationDialog = ({
 	};
 
 	return (
-		<Modal show onHide={onDismiss} className={`${styles.modalContent} beep-card-modal`} centered>
-			<Modal.Header closeButton className={styles.modalHeader}>
-				<Modal.Title className={`${styles.modalTitle} modal-title`}>{stationToEdit ? 'Edit Station' : 'Add Station'}</Modal.Title>
-			</Modal.Header>
+		<>
+			<ToastContainer />
+			<Modal show onHide={onDismiss} className={`${styles.modalContent} beep-card-modal`} centered>
+				<Modal.Header closeButton className={styles.modalHeader}>
+					<Modal.Title className={`${styles.modalTitle} modal-title`}>{stationToEdit ? 'Edit Station' : 'Add Station'}</Modal.Title>
+				</Modal.Header>
 
-			<Modal.Body className={`${styles.modalBody} modal-body`} style={{ zIndex: "999" }}>
-				<Form id="addEditStationForm" onSubmit={handleSubmit(onSubmit)}>
-					<TextInputField
-						name="stationName"
-						label="Station Name"
-						type="text"
-						placeholder="Title"
-						register={register}
-						registerOptions={{
-							required: 'Required',
-							maxLength: 30, // Limit to 10 characters
-							pattern: {
-								value: /^[a-zA-Z0-9\s]*$/, // Allow only alphanumeric characters and spaces
-								message: 'Invalid input. Only alphanumeric characters and spaces are allowed.',
-							},
-						}}
-						error={errors.stationName}
-						transformInput={(value: string) => value.toLowerCase()} // Transform input to lowercase
+				<Modal.Body className={`${styles.modalBody} modal-body`} style={{ zIndex: "999" }}>
+					<Form id="addEditStationForm" onSubmit={handleSubmit(onSubmit)}>
+						<TextInputField
+							name="stationName"
+							label="Station Name"
+							type="text"
+							placeholder="Title"
+							register={register}
+							registerOptions={{
+								required: 'Required',
+								maxLength: 30, // Limit to 10 characters
+								pattern: {
+									value: /^[a-zA-Z0-9\s]*$/, // Allow only alphanumeric characters and spaces
+									message: 'Invalid input. Only alphanumeric characters and spaces are allowed.',
+								},
+							}}
+							error={errors.stationName}
+							transformInput={(value: string) => value.toLowerCase()} // Transform input to lowercase
+						/>
+
+						<Form.Group className="mb-3">
+							<Form.Label>Latitude</Form.Label>
+							<Form.Control
+								type="text"
+								placeholder="Latitude"
+								isInvalid={!!errors.coords}
+								defaultValue={(coordinates?.[0] || stationToEdit?.coords[0] || 0).toString()}
+								onChange={(e) => setValue('coords.0', parseFloat(e.target.value))}
+								required
+							/>
+							<Form.Control.Feedback type="invalid">
+								{errors.coords?.message}
+							</Form.Control.Feedback>
+						</Form.Group>
+
+						<Form.Group className="mb-3">
+							<Form.Label>Longitude</Form.Label>
+							<Form.Control
+								type="text"
+								placeholder="Longitude"
+								isInvalid={!!errors.coords}
+								defaultValue={(coordinates?.[1] || stationToEdit?.coords[1] || 0).toString()}
+								onChange={(e) => setValue('coords.1', parseFloat(e.target.value))}
+								required
+							/>
+							<Form.Control.Feedback type="invalid">
+								{errors.coords?.message}
+							</Form.Control.Feedback>
+						</Form.Group>
+
+
+						<Form.Group className="mb-3">
+							<Form.Label>
+								{selectedStations.length > 0 ? <>Connected Stations</> : <>No Connecting Stations</>}
+							</Form.Label>
+
+							<div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', margin: '8px' }}>
+								{selectedStations.map((station) => (
+									<span
+										key={`${Math.random()}${station._id}`}
+										className={`${styles.badge} badge badge-pill mr-2`}
+										style={{
+											background: '#4CAF50', // Change the background color
+											color: '#FFFFFF', // Change the text color
+											padding: '10px 20px', // Adjust padding
+											borderRadius: '25px', // Adjust border radius
+											boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Adjust box shadow
+											border: '2px solid #4CAF50', // Adjust border color and width
+											display: 'flex',
+											cursor: 'pointer',
+											alignItems: 'center',
+											justifyContent: 'space-between',
+										}}
+										onClick={() => handleRemoveStationName(station.stationName, station._id)}
+									>
+										<span>{station.stationName}</span>
+									</span>
+								))}
+							</div>
+
+							<div className="mt-3">
+								<Button variant="primary" onClick={openConnectedToModal} className='ms-auto'>
+									{selectedStations.length > 0 ? <>Edit Connecting Stations</> : <>Add Connecting Station/s</>}
+								</Button>
+							</div>
+						</Form.Group>
+					</Form>
+				</Modal.Body>
+				<Modal.Footer className={`${styles.modalFooter} modal-footer`}>
+					<Button type="submit" form="addEditStationForm" disabled={isSubmitting}>
+						Save
+					</Button>
+				</Modal.Footer>
+				{showConnectedToModal && (
+					<StationConnectedToModal
+						show={showConnectedToModal}
+						onHide={closeConnectedToModal}
+						onStationSelection={handleStationSelection}
+						selectedStations={selectedStations}
+						onRemoveStation={handleRemoveStation}
+						onClearSelectedStations={() => setSelectedStations([])}
+						stations={stations}
+						newStation={stationToEdit ? null : newStation}
+						stationToEdit={stationToEdit ? stationToEdit : null}
+						polylines={polylines}
+						setPolylines={handlePolylines}
 					/>
-
-					<Form.Group className="mb-3">
-						<Form.Label>Latitude</Form.Label>
-						<Form.Control
-							type="text"
-							placeholder="Latitude"
-							isInvalid={!!errors.coords}
-							defaultValue={(coordinates?.[0] || stationToEdit?.coords[0] || 0).toString()}
-							onChange={(e) => setValue('coords.0', parseFloat(e.target.value))}
-							required
-						/>
-						<Form.Control.Feedback type="invalid">
-							{errors.coords?.message}
-						</Form.Control.Feedback>
-					</Form.Group>
-
-					<Form.Group className="mb-3">
-						<Form.Label>Longitude</Form.Label>
-						<Form.Control
-							type="text"
-							placeholder="Longitude"
-							isInvalid={!!errors.coords}
-							defaultValue={(coordinates?.[1] || stationToEdit?.coords[1] || 0).toString()}
-							onChange={(e) => setValue('coords.1', parseFloat(e.target.value))}
-							required 
-						/>
-						<Form.Control.Feedback type="invalid">
-							{errors.coords?.message}
-						</Form.Control.Feedback>
-					</Form.Group>
-
-
-					<Form.Group className="mb-3">
-						<Form.Label>
-							{selectedStations.length > 0 ? <>Connected Stations</> : <>No Connecting Stations</>}
-						</Form.Label>
-
-						<div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', margin: '8px' }}>
-							{selectedStations.map((station) => (
-								<span
-									key={`${Math.random()}${station._id}`}
-									className={`${styles.badge} badge badge-pill mr-2`}
-									style={{
-										background: '#4CAF50', // Change the background color
-										color: '#FFFFFF', // Change the text color
-										padding: '10px 20px', // Adjust padding
-										borderRadius: '25px', // Adjust border radius
-										boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Adjust box shadow
-										border: '2px solid #4CAF50', // Adjust border color and width
-										display: 'flex',
-										cursor: 'pointer',
-										alignItems: 'center',
-										justifyContent: 'space-between',
-									}}
-									onClick={() => handleRemoveStationName(station.stationName, station._id)}
-								>
-									<span>{station.stationName}</span>
-								</span>
-							))}
-						</div>
-
-						<div className="mt-3">
-							<Button variant="primary" onClick={openConnectedToModal} className='ms-auto'>
-								{selectedStations.length > 0 ? <>Edit Connecting Stations</> : <>Add Connecting Station/s</>}
-							</Button>
-						</div>
-					</Form.Group>
-				</Form>
-			</Modal.Body>
-			<Modal.Footer className={`${styles.modalFooter} modal-footer`}>
-				<Button type="submit" form="addEditStationForm" disabled={isSubmitting}>
-					Save
-				</Button>
-			</Modal.Footer>
-			{showConnectedToModal && (
-				<StationConnectedToModal
-					show={showConnectedToModal}
-					onHide={closeConnectedToModal}
-					onStationSelection={handleStationSelection}
-					selectedStations={selectedStations}
-					onRemoveStation={handleRemoveStation}
-					onClearSelectedStations={() => setSelectedStations([])}
-					stations={stations}
-					newStation={stationToEdit ? null : newStation}
-					stationToEdit={stationToEdit ? stationToEdit : null}
-					polylines={polylines}
-					setPolylines={handlePolylines}
-				/>
-			)}
-		</Modal >
+				)}
+			</Modal >
+		</>
 	);
 };
 
