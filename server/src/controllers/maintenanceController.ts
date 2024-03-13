@@ -32,7 +32,7 @@ export const updateMaintenance: RequestHandler<unknown, unknown, maintenanceInte
 			const stations = await StationModel.find().exec();
 			const hasDisconnectedStations = stations.some(station => station.connectedTo.length === 0);
 			if (hasDisconnectedStations) {
-				throw createHttpError(400, "Cannot set maintenance to true while there are disconnected stations");
+				throw createHttpError(400, "Cannot deploy MRT Online Tap while there are disconnected stations");
 			}
 		} else { // If maintenance is set to false
 			// Check if any beep card is active
