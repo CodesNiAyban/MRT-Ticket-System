@@ -91,6 +91,7 @@ const AddEditStationDialog = ({
 	}, [selectedStations, setValue]);
 
 	const onSubmit = async (input: StationInput) => {
+		try {
 			const updatedInput = {
 				...input,
 				connectedTo: input.connectedTo,
@@ -104,6 +105,17 @@ const AddEditStationDialog = ({
 				stationResponse = await StationsApi.createStation(updatedInput);
 			}
 			onStationSaved(stationResponse);
+		} catch (error: any) {
+				toast.error("An error occurred. Make sure that Station Name and Coords are Unique", {
+					position: "top-right",
+					autoClose: 1500,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					progress: undefined,
+				});
+		}
 	};
 
 	const handlePolylines = (polylines: any) => {
