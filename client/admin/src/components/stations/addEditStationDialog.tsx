@@ -271,12 +271,9 @@ const AddEditStationDialog = ({
 							type="number"
 							placeholder="Latitude"
 							defaultValue={latitude.toString()}
-							onChange={() => handleLatitudeChange(latitude)}
+							onChange={(e) => handleLatitudeChange(e.target.value)}
 							required
 						/>
-						<Form.Control.Feedback type="invalid">
-							{errors.coords?.message}
-						</Form.Control.Feedback>
 					</Form.Group>
 
 					<Form.Group className="mb-3">
@@ -285,14 +282,10 @@ const AddEditStationDialog = ({
 							type="number"
 							placeholder="Longitude"
 							defaultValue={longitude.toString()}
-							onChange={() => handleLongitudeChange(longitude)}
+							onChange={(e) => handleLongitudeChange(e.target.value)}
 							required
 						/>
-						<Form.Control.Feedback type="invalid">
-							{errors.coords?.message}
-						</Form.Control.Feedback>
 					</Form.Group>
-
 
 					<Form.Group className="mb-3">
 						<Form.Label>
