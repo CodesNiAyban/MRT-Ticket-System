@@ -92,8 +92,7 @@ const BeepCardPageLoggedInView = () => {
       showCustomToast("danger", "Beep Card is currently active");
     }
   };
-
-
+  
   const showCustomToast = (variant: "success" | "danger", message: string) => {
     setAlertVariant(variant);
     setAlertMessage(message);

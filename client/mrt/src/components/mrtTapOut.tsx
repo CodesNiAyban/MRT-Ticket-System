@@ -577,7 +577,6 @@ const MrtTapOut = () => {
                         });
                         return
                     }
-
                 } else {
                     const markers = stations.map((station) => {
                         const isCurrentStation = station.stationName.replace(/[\s-]+/g, '_').toLocaleLowerCase() === stationName;

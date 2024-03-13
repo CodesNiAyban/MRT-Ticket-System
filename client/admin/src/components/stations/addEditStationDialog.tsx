@@ -231,7 +231,7 @@ const AddEditStationDialog = ({
 
 	const closeConnectedToModal = () => {
 		setShowConnectedToModal(false);
-		setSelectedStations([]);
+		// setSelectedStations([]);
 	};
 
 	return (
