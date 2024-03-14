@@ -1,11 +1,9 @@
 import * as L from 'leaflet';
 import { ReactElement, useEffect, useRef, useState } from 'react';
-import { Button, Col, Container, Form, Modal, Pagination, Row, Spinner, Table } from 'react-bootstrap';
+import { Button, Col, Container, Form, Modal, Pagination, Row, Spinner, Table, Toast } from 'react-bootstrap';
 import { BiEdit } from "react-icons/bi";
 import { FaMap, FaPencilAlt, FaPlus, FaTable, FaTrash } from 'react-icons/fa';
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { Stations as StationsModel } from '../../model/stationsModel';
 import * as StationApi from '../../network/stationsAPI';
 import AddEditStationDialog from './addEditStationDialog';
@@ -42,6 +40,10 @@ const StationPageLoggedInView = () => {
 	const [newStation, setNewStation] = useState<StationsModel | null>(null);
 	const [isAddingStation, setIsAddingStation] = useState(false);
 	const mapContainerRef = useRef<HTMLDivElement>(null);
+
+	const [alertMessage, setAlertMessage] = useState<string | null>(null);
+	const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
+	const [showToast, setShowToast] = useState(false);
 
 	const [perPage, setPerPage] = useState(5);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -83,6 +85,16 @@ const StationPageLoggedInView = () => {
 		shadowSize: [40, 40],
 		shadowAnchor: [10, 46],
 	});
+
+	const showCustomToast = (variant: "success" | "danger", message: string) => {
+		setAlertVariant(variant);
+		setAlertMessage(message);
+		setShowToast(true);
+		setTimeout(() => {
+			setShowToast(false);
+			setAlertMessage(null);
+		}, 3000);
+	};
 
 	const handleMarkerDragEnd = async (event: any, station: StationsModel) => {
 		if (!station.connectedTo) {
@@ -131,15 +143,16 @@ const StationPageLoggedInView = () => {
 			station.coords = [lat, lng];
 			// Update the station in the state
 			// If dragging would exceed the limit, show a warning toast
-			toast.info(toTitleCase(station.stationName) + " is moved. Edit to save current coordinate.", {
-				position: "top-right",
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				progress: undefined,
-			});
+			// toast.info(toTitleCase(station.stationName) + " is moved. Edit to save current coordinate.", {
+			// 	position: "top-right",
+			// 	autoClose: 3000,
+			// 	hideProgressBar: false,
+			// 	closeOnClick: true,
+			// 	pauseOnHover: true,
+			// 	draggable: true,
+			// 	progress: undefined,
+			// });
+			showCustomToast("success", toTitleCase(station.stationName) + " is moved. Edit to save current coordinate.");
 			setStations(prevStations => {
 				const updatedStations = prevStations.map(s => {
 					if (s._id === station._id) {
@@ -151,15 +164,16 @@ const StationPageLoggedInView = () => {
 			});
 		} else {
 			// If dragging would exceed the limit, show a warning toast
-			toast.warn(toTitleCase(station.stationName) + " is " + Math.round(distance!) + "m to " + stationConnectedName + ", must be less than 500m from connected stations.", {
-				position: "top-right",
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				progress: undefined,
-			});
+			// toast.warn(toTitleCase(station.stationName) + " is " + Math.round(distance!) + "m to " + stationConnectedName + ", must be less than 500m from connected stations.", {
+			// 	position: "top-right",
+			// 	autoClose: 3000,
+			// 	hideProgressBar: false,
+			// 	closeOnClick: true,
+			// 	pauseOnHover: true,
+			// 	draggable: true,
+			// 	progress: undefined,
+			// });
+			showCustomToast("success", toTitleCase(station.stationName) + " is " + Math.round(distance!) + "m to " + stationConnectedName + ", must be less than 500m from connected stations.");
 			// Reset dragging state and refresh the station marker
 			refresh();
 		}
@@ -208,23 +222,24 @@ const StationPageLoggedInView = () => {
 				coords: [clickedCoords[0], clickedCoords[1]],
 				connectedTo: [],
 			});
+			showCustomToast("success", `New Station created, click it again to save`);
 
-			toast.info(
-				`New Station coords: 
-				lat: ${clickedCoords[1]}
-				lng: ${clickedCoords[0]} 
-				Click it again to save.`,
-				{
-					position: "top-right",
-					autoClose: 1500,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					progress: undefined,
-					style: { whiteSpace: 'pre-line' },
-				}
-			);
+			// toast.info(
+			// 	`New Station coords: 
+			// 	lat: ${clickedCoords[1]}
+			// 	lng: ${clickedCoords[0]} 
+			// 	Click it again to save.`,
+			// 	{
+			// 		position: "top-right",
+			// 		autoClose: 1500,
+			// 		hideProgressBar: false,
+			// 		closeOnClick: true,
+			// 		pauseOnHover: true,
+			// 		draggable: true,
+			// 		progress: undefined,
+			// 		style: { whiteSpace: 'pre-line' },
+			// 	}
+			// );
 
 			setNewMapMarker([newMarker]);
 		}
@@ -377,34 +392,37 @@ const StationPageLoggedInView = () => {
 			setShowConfirmation(false);
 			refresh();
 			await new Promise<void>((resolve: () => void) => {
-				toast.warn(`Station ${toTitleCase(station.stationName)} Deleted.`, {
-					position: "top-right",
-					autoClose: 1500,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					progress: undefined,
-					onClose: () => {
-						// Reset current page to 1 after deletion
-						handlePageChange(1);
-						resolve();
-					},
-				});
+				// toast.warn(`Station ${toTitleCase(station.stationName)} Deleted.`, {
+				// 	position: "top-right",
+				// 	autoClose: 1500,
+				// 	hideProgressBar: false,
+				// 	closeOnClick: true,
+				// 	pauseOnHover: true,
+				// 	draggable: true,
+				// 	progress: undefined,
+				// 	onClose: () => {
+				// 		// Reset current page to 1 after deletion
+				// 		handlePageChange(1);
+				// 		resolve();
+				// 	},
+				// });
+				showCustomToast("success", `Station ${toTitleCase(station.stationName)} Deleted.`);
+
 			});
 
 		} catch (error) {
 			await new Promise<void>((resolve: () => void) => {
-				toast.error("Delete Failed, Please Try Again.", {
-					position: "top-right",
-					autoClose: 1500,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					progress: undefined,
-					onClose: resolve,
-				});
+				// toast.error("Delete Failed, Please Try Again.", {
+				// 	position: "top-right",
+				// 	autoClose: 1500,
+				// 	hideProgressBar: false,
+				// 	closeOnClick: true,
+				// 	pauseOnHover: true,
+				// 	draggable: true,
+				// 	progress: undefined,
+				// 	onClose: resolve,
+				// });
+				showCustomToast("danger", `Delete Failed, Please Try Again.`);
 			});
 			console.error("An error occurred while deleting the station:", error)
 		}
@@ -477,7 +495,29 @@ const StationPageLoggedInView = () => {
 
 	return (
 		<>
-			<ToastContainer limit={3} />
+			<Toast
+				show={showToast}
+				onClose={() => setShowToast(false)}
+				delay={3000}
+				autohide
+				style={{
+					position: 'fixed',
+					top: 16,
+					right: 16,
+					zIndex: 9999,
+					width: '300px', // Set the width as needed
+					background: alertVariant === "success" ? "#28a745" : "#dc3545", // Background color
+					color: "#fff", // Text color
+				}}
+				className={`${styles.customToast}`}
+			>
+				<Toast.Header>
+					<strong className={`me-auto`}>
+						{alertVariant === "success" ? "Success" : "Error"}
+					</strong>
+				</Toast.Header>
+				<Toast.Body>{alertMessage}</Toast.Body>
+			</Toast>
 			<Container>
 				{showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
 				{isMapView && !showStationsLoadingError &&
@@ -691,15 +731,17 @@ const StationPageLoggedInView = () => {
 							setSelectedMarker(null);
 							refresh();
 							setNewMapMarker([]);
-							toast.success(`Station ${newStation.stationName} successfully created.`, {
-								position: "top-right",
-								autoClose: 1500,
-								hideProgressBar: false,
-								closeOnClick: true,
-								pauseOnHover: true,
-								draggable: true,
-								progress: undefined,
-							});
+							// toast.success(`Station ${newStation.stationName} successfully created.`, {
+							// 	position: "top-right",
+							// 	autoClose: 1500,
+							// 	hideProgressBar: false,
+							// 	closeOnClick: true,
+							// 	pauseOnHover: true,
+							// 	draggable: true,
+							// 	progress: undefined,
+							// });
+							showCustomToast("success", `Station ${newStation.stationName} successfully created.`);
+
 						}}
 						newStation={newStation}
 					/>
@@ -728,15 +770,16 @@ const StationPageLoggedInView = () => {
 								)
 							);
 							setStationToEdit(null);
-							toast.success(`Station ${updateStation.stationName} successfully updated.`, {
-								position: "top-right",
-								autoClose: 1500,
-								hideProgressBar: false,
-								closeOnClick: true,
-								pauseOnHover: true,
-								draggable: true,
-								progress: undefined,
-							});
+							// toast.success(`Station ${updateStation.stationName} successfully updated.`, {
+							// 	position: "top-right",
+							// 	autoClose: 1500,
+							// 	hideProgressBar: false,
+							// 	closeOnClick: true,
+							// 	pauseOnHover: true,
+							// 	draggable: true,
+							// 	progress: undefined,
+							// });
+							showCustomToast("success", `Station ${updateStation.stationName} successfully updated.`);
 						}}
 						newStation={null}
 						coordinates={[stationToEdit.coords[0], stationToEdit.coords[1]]}

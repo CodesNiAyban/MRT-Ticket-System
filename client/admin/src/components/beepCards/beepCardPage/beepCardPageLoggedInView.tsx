@@ -32,8 +32,8 @@ const BeepCardPageLoggedInView = () => {
   });
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertVariant, setAlertVariant] = useState<"success" | "danger">("success");
-  const [editMode, setEditMode] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     async function loadBeepCards() {

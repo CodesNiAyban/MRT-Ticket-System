@@ -9,8 +9,6 @@ import { StationInput } from '../../network/stationsAPI';
 import TextInputField from '../form/textInputFields';
 import styles from './station.module.css';
 import StationConnectedToModal from './stationConnectedToModal';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 interface AddEditStationDialogProps {
 	stationToEdit?: Stations;
@@ -106,15 +104,7 @@ const AddEditStationDialog = ({
 			}
 			onStationSaved(stationResponse);
 		} catch (error: any) {
-			toast.error("An error occurred. Make sure that Station Name and Coords are Unique", {
-				position: "top-right",
-				autoClose: 1500,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				progress: undefined,
-			});
+			alert("An error occurred. Make sure that Station Name and Coords are Unique")
 		}
 	};
 
@@ -186,15 +176,7 @@ const AddEditStationDialog = ({
 						]);
 						setSelectedStations([...selectedStations, station]);
 					} else {
-						toast.error("Stations cannot be connected less than 500m", {
-							position: "top-right",
-							autoClose: 1500,
-							hideProgressBar: false,
-							closeOnClick: true,
-							pauseOnHover: true,
-							draggable: true,
-							progress: undefined,
-						});
+						alert("Stations cannot be connected less than 500m")
 					}
 				}
 			}
@@ -231,7 +213,6 @@ const AddEditStationDialog = ({
 
 	const closeConnectedToModal = () => {
 		setShowConnectedToModal(false);
-		// setSelectedStations([]);
 	};
 
 	return (

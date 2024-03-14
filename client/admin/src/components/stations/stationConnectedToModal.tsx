@@ -7,8 +7,6 @@ import { Button, Modal } from 'react-bootstrap';
 import { Stations as StationsModel } from '../../model/stationsModel';
 import Select from "react-select";
 import styles from './station.module.css';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 
 interface StationConnectedToModalProps {
@@ -264,7 +262,6 @@ const StationConnectedToModal: React.FC<StationConnectedToModalProps> = ({
 
 	return (
 		<>
-			<ToastContainer limit={3} style={{ zIndex: 9999 }} />
 			<Modal show={show} className={`${styles.modalContent} beep-card-modal`} centered onHide={onHide} size="lg">
 				<Modal.Header closeButton className={styles.modalHeader}>
 					<Modal.Title className={`${styles.modalTitle} modal-title`}>Connect Stations</Modal.Title>
