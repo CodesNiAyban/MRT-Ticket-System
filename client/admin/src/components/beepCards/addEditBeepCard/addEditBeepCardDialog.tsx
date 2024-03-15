@@ -214,7 +214,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
           progress: undefined,
         });
       } else {
-        toast.error("Error saving Beep Card. Please try again. Make sure that input ID's are unique or maintenance is active", {
+        toast.error("Error saving Beep Card. Please try again. Make sure that input ID's are unique", {
           position: "top-center",
           autoClose: 5000,
           hideProgressBar: false,
