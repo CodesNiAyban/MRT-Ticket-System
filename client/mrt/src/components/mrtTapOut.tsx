@@ -340,7 +340,7 @@ const MrtTapOut = () => {
                     if (cardDetails.balance >= (minimumFare.price + farePerKm)) {
                         // Sufficient balance, proceed with tap-out
                         if (cardDetails.isActive) {
-                            if (cardDetails.balance >= farePerKm) { // Check if the balance is sufficient for the fare
+                            if (cardDetails.balance >= farePerKm + minimumFare.price) { // Check if the balance is sufficient for the fare
                                 setIsSubmitting(true);
                                 const beepCardResponse = await StationApi.tapOutBeepCard(cardDetails.UUIC, farePerKm + minimumFare.price!);
                                 const transactionResponse = await StationApi.getTapInTransactionByUUIC(cardDetails.UUIC);
