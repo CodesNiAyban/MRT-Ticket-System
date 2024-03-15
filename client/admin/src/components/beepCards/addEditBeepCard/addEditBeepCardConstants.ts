@@ -15,7 +15,7 @@ export const generateDefaultNumber = () => {
 
 export const getDefaultLoadPrice = async () => {
   try {
-    const fares = await FareApi.fetchFare();
+    const fares = await FareApi.fetchFares();
     const defaultLoadFare = fares.find(
       (fare) => fare.fareType === "DEFAULT LOAD"
     );
