@@ -339,9 +339,9 @@ const MrtTapOut = () => {
                 if (cardDetails?.balance !== undefined && minimumFare?.price !== undefined) {
                     // Sufficient balance, proceed with tap-out
                     if (cardDetails.isActive) {
-                        if (cardDetails.balance >= farePerKm + minimumFare.price!) { // Check if the balance is sufficient for the fare
+                        if (cardDetails.balance >= (farePerKm + minimumFare.price!)) { // Check if the balance is sufficient for the fare
                             setIsSubmitting(true);
-                            const beepCardResponse = await StationApi.tapOutBeepCard(cardDetails.UUIC, farePerKm + minimumFare.price!);
+                            const beepCardResponse = await StationApi.tapOutBeepCard(cardDetails.UUIC, (farePerKm + minimumFare.price!));
                             const transactionResponse = await StationApi.getTapInTransactionByUUIC(cardDetails.UUIC);
                             const tapOutTransaction: TapOutTransactionModel = {
                                 UUIC: cardDetails.UUIC,
@@ -349,7 +349,7 @@ const MrtTapOut = () => {
                                 initialBalance: cardDetails.balance,
                                 prevStation: toTitleCase(transactionResponse?.currStation),
                                 currStation: stationName?.replace(/[\s_]+/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase()),
-                                fare: farePerKm + minimumFare.price, // Adding farePerMeters
+                                fare: (farePerKm + minimumFare.price!), // Adding farePerMeters
                                 distance: Number((pathDistance / 1000).toFixed(2)), // Using kilometers for distance
                                 currBalance: beepCardResponse.balance! - (farePerKm + minimumFare.price!), // Updating currBalance with updated balance
                                 createdAt: new Date().toISOString(),
@@ -396,9 +396,7 @@ const MrtTapOut = () => {
                             draggable: true,
                         });
                         sendMessage('Beep Card Already Tapped Out.')
-
                     }
-
                 } else {
                     // Handle case where balance or price is undefined
                     console.error('Beep card balance or minimum fare price is undefined');
