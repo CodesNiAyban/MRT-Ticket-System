@@ -52,10 +52,10 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
             if (!!!maintenance.maintenance) {
                 navigateToCardsPage(); // Navigate to Cards page when activating maintenance
             }
-        } catch (error: any) {
+        } catch (error) {
             setMaintenanceMode(!maintenanceMode);
-            alert(error.message)
-            console.error(error.message);
+            alert(error)
+            console.error(error);
         }
     };
 
