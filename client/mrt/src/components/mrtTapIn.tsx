@@ -303,9 +303,9 @@ const MrtTapIn = () => {
             const cardDetails = await StationApi.getBeepCard(beepCardNumber);
             if (cardDetails?.UUIC) {
                 if (cardDetails?.balance !== undefined && minimumFare?.price !== undefined) {
-                    if (cardDetails.balance >= minimumFare.price) {
-                        // Sufficient balance, proceed with tap-in
-                        if (!cardDetails.isActive) {
+                    // Sufficient balance, proceed with tap-in
+                    if (!cardDetails.isActive) {
+                        if (cardDetails.balance >= minimumFare.price) {
                             // Construct tap-in transaction object
                             const beepCardResponse = await StationApi.tapInBeepCard(cardDetails.UUIC);
 
@@ -341,8 +341,8 @@ const MrtTapIn = () => {
                             });
                             sendMessage("Tap-in successful. Enjoy your trip!")
                         } else {
-                            // Beep card is already tapped in
-                            toast.warn('Beep Card Already Tapped In', {
+                            // Insufficient balance
+                            toast.error('Insufficient balance. Please top up your beep card', {
                                 position: 'top-right',
                                 autoClose: 2000,
                                 hideProgressBar: false,
@@ -350,11 +350,11 @@ const MrtTapIn = () => {
                                 pauseOnHover: true,
                                 draggable: true,
                             });
-                            sendMessage("Beep Card Already Tapped In")
+                            sendMessage("Insufficient balance. Please top up your beep card")
                         }
                     } else {
-                        // Insufficient balance
-                        toast.error('Insufficient balance. Please top up your beep card', {
+                        // Beep card is already tapped in
+                        toast.warn('Beep Card Already Tapped In', {
                             position: 'top-right',
                             autoClose: 2000,
                             hideProgressBar: false,
@@ -362,7 +362,7 @@ const MrtTapIn = () => {
                             pauseOnHover: true,
                             draggable: true,
                         });
-                        sendMessage("Insufficient balance. Please top up your beep card")
+                        sendMessage("Beep Card Already Tapped In")
                     }
                 } else {
                     // Handle case where balance or price is undefined

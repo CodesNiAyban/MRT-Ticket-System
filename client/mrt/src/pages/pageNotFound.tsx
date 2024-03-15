@@ -6,16 +6,6 @@ const pageNotFound = () => {
                     WELCOME TO MRT!
                 </h1>
             </div>
-            {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-            <img
-                src="./singapore-lrt-mrt-train.jpg"  // Replace with the actual path or URL of your image
-                alt="Login Image"
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',  // Cover the entire container
-                }}
-            />
         </div>
     );
 }

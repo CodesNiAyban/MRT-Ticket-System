@@ -38,7 +38,7 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
   } = useForm<BeepCardInput>({
     defaultValues: {
       UUIC: beepCardToEdit?.UUIC || generateDefaultNumber(),
-      userID: beepCardToEdit?.userID || '', // Set default value for userID
+      userID: beepCardToEdit ? beepCardToEdit.userID : '',
       balance: editMode ? beepCardToEdit?.balance : 0,
       isActive: editMode ? beepCardToEdit?.isActive : beepCardToEdit?.isActive || false,
     },
@@ -61,10 +61,10 @@ const AddEditBeepCardDialog: React.FC<AddEditBeepCardDialogProps> = ({
     setIsLoading(true);
     const setDefaultValues = async () => {
       setValue("UUIC", beepCardToEdit?.UUIC || generateDefaultNumber());
-      if (beepCardToEdit?.balance !== undefined) {
+      if (beepCardToEdit) {
         if (editMode) {
           setValue("userID", beepCardToEdit.userID);
-          setValue("balance", beepCardToEdit.balance);
+          setValue("balance", beepCardToEdit.balance!);
           setValue("isActive", beepCardToEdit?.isActive);
         } else {
           const defaultBalance = await getDefaultLoadPrice();
