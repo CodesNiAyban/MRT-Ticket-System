@@ -1,7 +1,7 @@
 import * as FareApi from "../../../network/fareAPI";
 
 export const DEFAULT_UUIC_PREFIX = "637805";
-export const DEFAULT_LOAD_MIN = 10;
+export const DEFAULT_LOAD_MIN = 250;
 export const DEFAULT_LOAD_MAX = 5000;
 
 export const generateDefaultNumber = () => {
