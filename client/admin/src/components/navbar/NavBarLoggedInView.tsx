@@ -55,7 +55,7 @@ const NavBarLoggedInView: React.FC<NavBarLoggedInViewProps> = ({
         } catch (error: any) {
             setMaintenanceMode(!maintenanceMode);
             // Extract the error message and display it
-            const errorMessage = error.response ? error.response.data.message : error.message;
+            const errorMessage = error.message.split('message: ')[1];
             alert(errorMessage);
             console.error(error);
         }
