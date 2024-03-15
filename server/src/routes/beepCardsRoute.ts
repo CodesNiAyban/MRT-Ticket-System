@@ -8,7 +8,7 @@ router.get("/", BeepCardsController.getBeepCards);
 
 router.get("/:beepCardId", BeepCardsController.getBeepCard);
 
-router.post("/", maintenanceAdmin, BeepCardsController.createBeepCard);
+router.post("/", BeepCardsController.createBeepCard);
 
 router.patch("/:beepCardId", BeepCardsController.updateBeepCard);
 
