@@ -4,6 +4,33 @@ import { fetchData } from "./fetcher";
 
 const MRT_API = process.env.REACT_APP_API_URL;
 
+export async function fetchFare(): Promise<Fare[]> {
+    try {
+        const response = await fetchData(`${MRT_API}/api/fare`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+            },
+        });
+
+        if (!response.ok) {
+            // Check for authorization failure (e.g., status code 401 or 403)
+            if (response.status === 401 || response.status === 403) {
+                console.error("Authorization failed. Logging out user");
+                await logout();
+            }
+
+            // Handle other errors if needed
+            throw new Error(`Error: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error("Error fetching fare:", error);
+        throw error; // Propagate the error up
+    }
+}
+
 export async function fetchFares(): Promise<Fare[]> {
     const response = await fetchData(`${MRT_API}/api/mrt/fares/getAllFares`, {
         method: "GET",

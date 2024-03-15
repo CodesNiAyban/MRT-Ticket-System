@@ -36,7 +36,7 @@ const FarePageLoggedInView = () => {
     async function loadFares() {
       try {
         setFaresLoading(true);
-        const fetchedFares = await FareApi.fetchFares();
+        const fetchedFares = await FareApi.fetchFare();
         setFares(fetchedFares);
       } catch (error) {
         console.error(error);
@@ -86,7 +86,7 @@ const FarePageLoggedInView = () => {
   const handleFareUpdate = async (updatedFare: FaresModel) => {
     try {
       // Reload fares after a successful update
-      const updatedFares = await FareApi.fetchFares();
+      const updatedFares = await FareApi.fetchFare();
       setFares(updatedFares);
       setFareToEdit(null);
       setUpdateText("");
