@@ -32,22 +32,28 @@ const BeepCard: React.FC<BeepCardProps> = ({
   return (
     <Card className={`${styles.beepCard} ${className}`} onClick={() => onBeepCardClicked(beepCard)}>
       <Card.Body className={styles.cardBody}>
-        <Card.Title className={`${styles.flexCenter} ${styles.cardTitle}`}>
-          CARD: {UUIC}
+        <div className={styles.cardHeader}>
+          <div className={styles.flexRow}>
+            <div className={isActive ? styles.greenCircle : styles.redCircle} />
+            <Card.Title className={`${styles.cardTitle}`}>
+              CARD: {UUIC}
+            </Card.Title>
+          </div>
           <RiDeleteBin6Line
-            className={`text-muted ms-auto ${styles.deleteIcon}`}
+            className={`text-muted ${styles.deleteIcon}`}
             onClick={(e) => {
               onDeleteBeepCardClicked(beepCard);
               e.stopPropagation();
             }}
           />
-        </Card.Title>
+        </div>
         <Card.Text className={styles.cardText}>
-          USER: {userID}<br/>
-          BALANCE: {balance}<br/>
-          TAPPED IN: {isActive ? "Yes" : "No"}
+          {userID && <>USER: {userID}<br/></>}
+          BALANCE: ₱{balance}<br/>
+          <div className={isActive ? styles.flexRowActive : styles.flexRowInactive}>
+            {isActive ? 'OnBoarded' : 'Not Onboarded'}
+          </div>
         </Card.Text>
-  
       </Card.Body>
       <Card.Footer className={`text-muted ${styles.cardFooter}`}>
         {createdUpdatedText}

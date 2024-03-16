@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 app.use(morgan("dev"));
 // Set the origin based on deployment
 
-const allowedOrigins = ["https://mrtonlinetap.onrender.com", "https://mrtonline.onrender.com"];
+const allowedOrigins = ["https://mrtonlinetap.onrender.com", "https://mrtonline.onrender.com","http://localhost:3000","http://localhost:3001"];
 
 const corsOptions = {
 	origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
