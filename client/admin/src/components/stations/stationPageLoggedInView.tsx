@@ -523,7 +523,7 @@ const StationPageLoggedInView = () => {
 				{isMapView && !showStationsLoadingError &&
 					<>
 						<OverlayTrigger
-							placement="top"
+							placement="bottom"
 							overlay={<Tooltip id="toggle-view-tooltip">Switch to Table View</Tooltip>}
 						>
 							<Button
@@ -537,7 +537,7 @@ const StationPageLoggedInView = () => {
 							</Button>
 						</OverlayTrigger>
 						<OverlayTrigger
-							placement="top"
+							placement="bottom"
 							overlay={
 								<Tooltip id="toggle-add-station-tooltip">
 									{isAddingStation ? "Disable Add Station" : "Toggle Add Station (Click map to add station to coordinates)"}
@@ -595,7 +595,7 @@ const StationPageLoggedInView = () => {
 								<Container>
 									<div className='d-flex' style={{ paddingBottom: '10px', paddingTop: '10px' }}>
 										<OverlayTrigger
-											placement="top"
+											placement="bottom"
 											overlay={<Tooltip id="toggle-view-tooltip">Switch to Map View</Tooltip>}
 										>
 											<Button

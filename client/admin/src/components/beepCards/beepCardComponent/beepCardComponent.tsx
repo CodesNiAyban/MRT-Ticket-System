@@ -39,7 +39,7 @@ const BeepCard: React.FC<BeepCardProps> = ({
             </Card.Title>
           </div>
           <RiDeleteBin6Line
-            className={`text-muted ${styles.deleteIcon}`}
+            className={`${styles.deleteIcon} ${styles.lightRedIcon}`}
             onClick={(e) => {
               onDeleteBeepCardClicked(beepCard);
               e.stopPropagation();

@@ -183,3 +183,7 @@
 .redCircle {
   background-color: red;
 }
+
+.lightRedIcon {
+  color: lightcoral; /* Change to your desired light red color */
+}
