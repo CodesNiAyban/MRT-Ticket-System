@@ -43,13 +43,18 @@ const BeepCard: React.FC<BeepCardProps> = ({
                   CARD: {UUIC}
                 </Card.Title>
               </div>
-              <RiDeleteBin6Line
-                className={`${styles.deleteIcon} ${styles.lightRedIcon}`}
-                onClick={(e) => {
-                  onDeleteBeepCardClicked(beepCard);
-                  e.stopPropagation();
-                }}
-              />
+              <OverlayTrigger
+                placement="top"
+                overlay={<Tooltip id="delete-icon-tooltip">Delete Card</Tooltip>}
+              >
+                <RiDeleteBin6Line
+                  className={`${styles.deleteIcon} ${styles.lightRedIcon}`}
+                  onClick={(e) => {
+                    onDeleteBeepCardClicked(beepCard);
+                    e.stopPropagation();
+                  }}
+                />
+              </OverlayTrigger>
             </div>
             <Card.Text className={styles.cardText}>
               {userID && <>USER: {userID}<br /></>}

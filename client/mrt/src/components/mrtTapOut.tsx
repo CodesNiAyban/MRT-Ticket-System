@@ -56,6 +56,7 @@ const MrtTapOut = () => {
     const [isRoomJoined, setIsRoomJoined] = useState(false);
     const [roomJoiner, setRoomJoiner] = useState(false); // State to track whether room is joined
     const tapOutButtonRef = useRef<HTMLButtonElement>(null);
+    const inputRef = createRef<HTMLInputElement>();
 
     const minimumFare = fares.find(fare => fare.fareType === 'MINIMUM FARE');
     const { stationName } = useParams();
@@ -290,9 +291,9 @@ const MrtTapOut = () => {
         loadStationsAndMarkers();
     }, [resetBeepCard]);
 
-    const handleBeepCardNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleBeepCardNumberChange = (event: React.RefObject<HTMLInputElement>) => {
         // Limit input to numbers only
-        const newValue = event.target.value.replace(/\D/g, '').startsWith('637805') ? event.target.value.replace(/\D/g, '') : '637805';
+        const newValue = inputRef.current?.value.startsWith('637805') ? inputRef.current?.value.replace(/\D/g, '') : '637805';
         setBeepCardNumber(newValue);
         // Limit input to maximum of 15 characters
         const maxLength = 15;
@@ -435,11 +436,12 @@ const MrtTapOut = () => {
             setTimeout(() => {
                 setTapOutDetails(null);
                 const inputRef = createRef<HTMLInputElement>();
+                setBeepCardNumber('637805')
                 if (inputRef.current) {
                     // Simulate a change event on the input element
-                    setBeepCardNumber('637805')
                     inputRef.current.value = '637805';
                     inputRef.current.dispatchEvent(new Event('change'));
+                    handleBeepCardNumberChange(inputRef);
                 }
                 setReceivedMessage(null)
             }, 3000); // 5000 milliseconds = 5 seconds
@@ -685,6 +687,7 @@ const MrtTapOut = () => {
                                             onChange={handleBeepCardNumberChange}
                                             placeholder="Enter Beep Card Number"
                                             maxLength={15}
+                                            ref={inputRef}
                                             className="text-xl lg:text-2xl text-black mb-5 p-2 border rounded"
                                         />
                                         {tapOutDetails && (
