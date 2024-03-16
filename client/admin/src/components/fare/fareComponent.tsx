@@ -36,10 +36,11 @@ const Fare = ({ fares, onFareClicked, className }: FareProps) => {
             onClick={() => onFareClicked(fares)}>
             <Card.Body className={styles.cardBody}>
                 <Card.Title className={styles.flexCenter}>
-                    {fareTypeDescriptions[fareType] || fareType}
+                {fareType === "MINIMUM FARE"? "MINIMUM FARE/FARE PER KM" : fareType}
                 </Card.Title>
                 <Card.Text className={styles.cardText}>
                     Value: ₱{price}
+                    Description: {fareTypeDescriptions[fareType] || fareType}
                 </Card.Text>
             </Card.Body>
             <Card.Footer className="text-muted">

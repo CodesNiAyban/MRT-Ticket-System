@@ -1,6 +1,6 @@
 import * as L from 'leaflet';
 import { ReactElement, useEffect, useRef, useState } from 'react';
-import { Button, Col, Container, Form, Modal, Pagination, Row, Spinner, Table, Toast } from 'react-bootstrap';
+import { Button, Col, Container, Form, Modal, Pagination, Row, Spinner, Table, Toast, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { BiEdit } from "react-icons/bi";
 import { FaMap, FaPencilAlt, FaPlus, FaTable, FaTrash } from 'react-icons/fa';
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
@@ -522,27 +522,44 @@ const StationPageLoggedInView = () => {
 				{showStationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
 				{isMapView && !showStationsLoadingError &&
 					<>
-						<Button
-							variant="primary"
-							onClick={toggleView}
-							className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"} button2`}
-							style={{ zIndex: 999, position: "absolute" }}
+						<OverlayTrigger
+							placement="top"
+							overlay={<Tooltip id="toggle-view-tooltip">Switch to Table View</Tooltip>}
 						>
-							{isMapView ? <FaTable /> : <FaMap />}
-						</Button>
-						<Button
-							variant="primary"
-							onClick={toggleAddStationMode}
-							className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isAddingStation ? "btn-primary" : "btn-secondary"} button2`}
-							style={{ zIndex: 999, position: "absolute", marginLeft: 99 }} // Adjust position as needed
+							<Button
+								variant="primary"
+								onClick={toggleView}
+								className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"
+									} button2`}
+								style={{ zIndex: 999, position: "absolute" }}
+							>
+								{isMapView ? <FaTable /> : <FaMap />}
+							</Button>
+						</OverlayTrigger>
+						<OverlayTrigger
+							placement="top"
+							overlay={
+								<Tooltip id="toggle-add-station-tooltip">
+									{isAddingStation ? "Disable Add Station" : "Toggle Add Station (Click map to add station to coordinates)"}
+								</Tooltip>
+							}
 						>
-							{isAddingStation ? <FaPlus className="me-1" /> : (
-								<>
-									<FaPlus className="me-1 text-muted" />
-								</>
-							)}
-						</Button>
-
+							<Button
+								variant="primary"
+								onClick={toggleAddStationMode}
+								className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isAddingStation ? "btn-primary" : "btn-secondary"
+									} button2`}
+								style={{ zIndex: 999, position: "absolute", marginLeft: 99 }} // Adjust position as needed
+							>
+								{isAddingStation ? (
+									<FaPlus className="me-1" />
+								) : (
+									<>
+										<FaPlus className="me-1 text-muted" />
+									</>
+								)}
+							</Button>
+						</OverlayTrigger>
 					</>
 				}
 				{isMapView ? (
@@ -577,13 +594,20 @@ const StationPageLoggedInView = () => {
 							<>
 								<Container>
 									<div className='d-flex' style={{ paddingBottom: '10px', paddingTop: '10px' }}>
-										<Button
-											variant="primary"
-											onClick={toggleView}
-											className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} btn-success button2`}
+										<OverlayTrigger
+											placement="top"
+											overlay={<Tooltip id="toggle-view-tooltip">Switch to Map View</Tooltip>}
 										>
-											{isMapView ? <FaTable /> : <FaMap />}
-										</Button>
+											<Button
+												variant="primary"
+												onClick={toggleView}
+												className={`me-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${isMapView ? "btn-warning" : "btn-success"
+													} button2`}
+												style={{ zIndex: 999, position: "absolute" }}
+											>
+												{isMapView ? <FaTable /> : <FaMap />}
+											</Button>
+										</OverlayTrigger>
 										<Form style={{ paddingBlock: "15px" }} className="d-flex col-md-4 row-md-10 ms-auto">
 											<div className="d-flex align-items-center">
 												<Form.Select

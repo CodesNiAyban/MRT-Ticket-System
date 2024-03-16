@@ -40,7 +40,7 @@ const Buttons: React.FC<ButtonsProps> = ({
 
         <OverlayTrigger
           placement="bottom"
-          overlay={<Tooltip id="edit-tooltip">Switch to {editMode ? "load mode" : "edit mode"}</Tooltip>}
+          overlay={<Tooltip id="edit-tooltip">Switch to {editMode ? "load mode (Edit mode is Active for Editing Beep Cards)" : "edit mode (Load mode is Active for Loading Beep Cards)"}</Tooltip>}
         >
           <Button
             className={`ms-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${editMode ? "btn-warning" : "btn-success"} button2`}
