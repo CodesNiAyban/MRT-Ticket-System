@@ -291,7 +291,7 @@ const MrtTapOut = () => {
         loadStationsAndMarkers();
     }, [resetBeepCard]);
 
-    const handleBeepCardNumberChange = (event: React.RefObject<HTMLInputElement>) => {
+    const handleBeepCardNumberChange = (event: any) => {
         // Limit input to numbers only
         const newValue = inputRef.current?.value.startsWith('637805') ? inputRef.current?.value.replace(/\D/g, '') : '637805';
         setBeepCardNumber(newValue);
