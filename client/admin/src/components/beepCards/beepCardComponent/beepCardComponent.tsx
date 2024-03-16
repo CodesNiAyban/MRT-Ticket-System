@@ -34,7 +34,6 @@ const BeepCard: React.FC<BeepCardProps> = ({
       <Card.Body className={styles.cardBody}>
         <div className={styles.cardHeader}>
           <div className={styles.flexRow}>
-            <div className={isActive ? styles.greenCircle : styles.redCircle} />
             <Card.Title className={`${styles.cardTitle}`}>
               CARD: {UUIC}
             </Card.Title>
@@ -48,9 +47,10 @@ const BeepCard: React.FC<BeepCardProps> = ({
           />
         </div>
         <Card.Text className={styles.cardText}>
-          {userID && <>USER: {userID}<br/></>}
-          BALANCE: ₱{balance}<br/>
+          {userID && <>USER: {userID}<br /></>}
+          BALANCE: ₱{balance}<br />
           <div className={isActive ? styles.flexRowActive : styles.flexRowInactive}>
+            <div className={isActive ? styles.greenCircle : styles.redCircle} />
             {isActive ? 'OnBoarded' : 'Not Onboarded'}
           </div>
         </Card.Text>

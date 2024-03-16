@@ -24,23 +24,23 @@
   align-items: center;
   justify-content: space-between;
   font-size: 18px;
-  color: #333333;
+  color: #fff;
 }
 
 .deleteIcon {
   font-size: 24px;
-  color: #888888;
+  color: #ff9b9b;
   cursor: pointer;
 }
 
 .cardText {
   font-size: 16px;
-  color: #555555;
+  color: #c1c1c1;
 }
 
 .cardFooter {
   font-size: 14px;
-  color: #999999;
+  color: #ebebeb;
 }
 
 /* Add the following styles to your global styles or App.css */
