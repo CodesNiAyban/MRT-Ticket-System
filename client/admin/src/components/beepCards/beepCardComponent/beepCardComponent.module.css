@@ -159,13 +159,13 @@
 .flexRowActive {
   display: flex;
   align-items: center;
-  color: #ffffff;
+  color: green;
 }
 
 .flexRowInactive {
   display: flex;
   align-items: center;
-  color: #ffffff;
+  color: #ca3b3b;
 }
 
 .greenCircle,
@@ -185,5 +185,5 @@
 }
 
 .lightRedIcon {
-  color: lightcoral; /* Change to your desired light red color */
+  color: rgb(245, 82, 82); /* Change to your desired light red color */
 }

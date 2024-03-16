@@ -1,5 +1,5 @@
 import React from "react";
-import { Card } from "react-bootstrap";
+import { Card, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { BeepCard as BeepCardModel } from "../../../model/beepCardModel";
 import { formatDate } from "../../../utils/formatDate";
 import styles from "././beepCardComponent.module.css";
@@ -30,35 +30,42 @@ const BeepCard: React.FC<BeepCardProps> = ({
   }
 
   return (
-    <Card className={`${styles.beepCard} ${className}`} onClick={() => onBeepCardClicked(beepCard)}>
-      <Card.Body className={styles.cardBody}>
-        <div className={styles.cardHeader}>
-          <div className={styles.flexRow}>
-            <Card.Title className={`${styles.cardTitle}`}>
-              CARD: {UUIC}
-            </Card.Title>
-          </div>
-          <RiDeleteBin6Line
-            className={`${styles.deleteIcon} ${styles.lightRedIcon}`}
-            onClick={(e) => {
-              onDeleteBeepCardClicked(beepCard);
-              e.stopPropagation();
-            }}
-          />
-        </div>
-        <Card.Text className={styles.cardText}>
-          {userID && <>USER: {userID}<br /></>}
-          BALANCE: ₱{balance}<br />
-          <div className={isActive ? styles.flexRowActive : styles.flexRowInactive}>
-            <div className={isActive ? styles.greenCircle : styles.redCircle} />
-            {isActive ? 'OnBoarded' : 'Not Onboarded'}
-          </div>
-        </Card.Text>
-      </Card.Body>
-      <Card.Footer className={`text-white ${styles.cardFooter}`}>
-        {createdUpdatedText}
-      </Card.Footer>
-    </Card>
+    <>
+      <OverlayTrigger
+        placement="bottom"
+        overlay={<Tooltip id="toggle-view-tooltip">{editMode ? "Click to Edit Card" : "Click to Load Card"}</Tooltip>}
+      >
+        <Card className={`${styles.beepCard} ${className}`} onClick={() => onBeepCardClicked(beepCard)}>
+          <Card.Body className={styles.cardBody}>
+            <div className={styles.cardHeader}>
+              <div className={styles.flexRow}>
+                <Card.Title className={`${styles.cardTitle}`}>
+                  CARD: {UUIC}
+                </Card.Title>
+              </div>
+              <RiDeleteBin6Line
+                className={`${styles.deleteIcon} ${styles.lightRedIcon}`}
+                onClick={(e) => {
+                  onDeleteBeepCardClicked(beepCard);
+                  e.stopPropagation();
+                }}
+              />
+            </div>
+            <Card.Text className={styles.cardText}>
+              {userID && <>USER: {userID}<br /></>}
+              BALANCE: ₱{balance}<br />
+              <div className={isActive ? styles.flexRowActive : styles.flexRowInactive}>
+                <div className={isActive ? styles.greenCircle : styles.redCircle} />
+                {isActive ? 'OnBoarded' : 'Not Onboarded'}
+              </div>
+            </Card.Text>
+          </Card.Body>
+          <Card.Footer className={`text-white ${styles.cardFooter}`}>
+            {createdUpdatedText}
+          </Card.Footer>
+        </Card>
+      </OverlayTrigger>
+    </>
   );
 }
 
