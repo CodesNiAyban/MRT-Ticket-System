@@ -15,7 +15,7 @@
     padding: 10px;
     transition: transform 0.3s ease-in-out;
     cursor: pointer;
-    min-height: 210px;
+    min-height: 250px;
     height: 10%;
 }
 
@@ -24,7 +24,7 @@
 }
 
 .cardBody {
-    /* mask-image: linear-gradient(180deg, #000 60%, transparent); */
+    mask-image: linear-gradient(180deg, #000 60%, transparent);
 }
 
 .cardTitle {
