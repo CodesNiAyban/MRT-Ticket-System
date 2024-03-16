@@ -159,13 +159,13 @@
 .flexRowActive {
   display: flex;
   align-items: center;
-  color: green;
+  color: rgb(134, 255, 134);
 }
 
 .flexRowInactive {
   display: flex;
   align-items: center;
-  color: #ca3b3b;
+  color: #ff7e7e;
 }
 
 .greenCircle,
@@ -177,13 +177,13 @@
 }
 
 .greenCircle {
-  background-color: green;
+  background-color: rgb(134, 255, 134);
 }
 
 .redCircle {
-  background-color: red;
+  background-color: #ff7e7e;
 }
 
 .lightRedIcon {
-  color: rgb(245, 82, 82); /* Change to your desired light red color */
+  color: rgb(255, 132, 132); /* Change to your desired light red color */
 }
