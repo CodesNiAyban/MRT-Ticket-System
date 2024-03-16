@@ -55,7 +55,7 @@ const BeepCard: React.FC<BeepCardProps> = ({
           </div>
         </Card.Text>
       </Card.Body>
-      <Card.Footer className={`text-muted ${styles.cardFooter}`}>
+      <Card.Footer className={`text-white ${styles.cardFooter}`}>
         {createdUpdatedText}
       </Card.Footer>
     </Card>

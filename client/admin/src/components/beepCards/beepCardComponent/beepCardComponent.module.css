@@ -1,7 +1,7 @@
 /* BeepCardComponent.module.css */
 
 .beepCard {
-  background-color: #30395d;
+  background-color: #434b6e;
   border: 2px solid #e0e0e0;
   border-radius: 20px;
   transition: transform 0.3s ease-in-out;
@@ -35,7 +35,7 @@
 
 .cardText {
   font-size: 16px;
-  color: #c1c1c1;
+  color: #ffffff;
 }
 
 .cardFooter {
@@ -159,13 +159,13 @@
 .flexRowActive {
   display: flex;
   align-items: center;
-  color: green;
+  color: #ffffff;
 }
 
 .flexRowInactive {
   display: flex;
   align-items: center;
-  color: red;
+  color: #ffffff;
 }
 
 .greenCircle,

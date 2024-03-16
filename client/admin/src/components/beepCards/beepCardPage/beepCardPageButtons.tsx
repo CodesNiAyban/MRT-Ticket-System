@@ -1,11 +1,9 @@
-// Buttons.tsx
-
 import React from "react";
-import { Button, Col, Row } from "react-bootstrap";
-import { BiEdit, BiPlus } from "react-icons/bi";
+import { Button, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { BiEdit } from "react-icons/bi";
+import { FaPlus } from "react-icons/fa";
 import { TbCurrencyPeso } from "react-icons/tb";
 import styles from "././beepCardPageLoggedInView.module.css";
-import { FaPlus } from "react-icons/fa";
 
 interface ButtonsProps {
   editMode: boolean;
@@ -28,27 +26,37 @@ const Buttons: React.FC<ButtonsProps> = ({
         lg={8}
         className={`${styles.blockStart} d-flex align-items-center`}
       >
-        <Button
-          className={`me-1 ${styles.blockStart} ${styles.customButton} ${styles.flexCenter} button1`}
-          onClick={() => setShowAddBeepCardDialog(true)}
+        <OverlayTrigger
+          placement="bottom"
+          overlay={<Tooltip id="add-tooltip">Add a new beep card with default load and minimum fare</Tooltip>}
         >
-          <FaPlus />
-        </Button>
+          <Button
+            className={`me-1 ${styles.blockStart} ${styles.customButton} ${styles.flexCenter} button1`}
+            onClick={() => setShowAddBeepCardDialog(true)}
+          >
+            <FaPlus />
+          </Button>
+        </OverlayTrigger>
 
-        <Button
-          className={`ms-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${editMode ? "btn-warning" : "btn-success"} button2`}
-          onClick={() => setEditMode(!editMode)}
+        <OverlayTrigger
+          placement="bottom"
+          overlay={<Tooltip id="edit-tooltip">Switch to {editMode ? "load mode" : "edit mode"}</Tooltip>}
         >
-          {editMode ? (
-            <>
-              <BiEdit />
-            </>
-          ) : (
-            <>
-              <TbCurrencyPeso />
-            </>
-          )}
-        </Button>
+          <Button
+            className={`ms-1 ${styles.blockStart} ${styles.flexCenter} ${styles.customButton} ${editMode ? "btn-warning" : "btn-success"} button2`}
+            onClick={() => setEditMode(!editMode)}
+          >
+            {editMode ? (
+              <>
+                <BiEdit />
+              </>
+            ) : (
+              <>
+                <TbCurrencyPeso />
+              </>
+            )}
+          </Button>
+        </OverlayTrigger>
       </Col>
       <Col
         xs={12}

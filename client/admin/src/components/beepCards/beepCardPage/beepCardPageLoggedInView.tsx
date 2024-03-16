@@ -112,7 +112,7 @@ const BeepCardPageLoggedInView = () => {
       formatDate(beepCard.updatedAt).toLowerCase().includes(searchQuery.toLowerCase()) ||
       beepCard.createdAt.toLowerCase().includes(searchQuery.toLowerCase()) ||
       beepCard.updatedAt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (beepCard.isActive ? "Yes" : "No").toLowerCase().includes(searchQuery.toLowerCase()) // Change isActive to "Yes" or "No"
+      (beepCard.isActive ? "OnBorded" : "Not OnBorded").toLowerCase().includes(searchQuery.toLowerCase()) // Change isActive to "Yes" or "No"
   );
 
   const itemsPerPage = 9;
