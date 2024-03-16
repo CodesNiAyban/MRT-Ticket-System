@@ -10,9 +10,9 @@ interface FareProps {
 }
 
 const fareTypeDescriptions: Record<string, string> = {
-    "MINIMUM FARE": "This is the minimum fare and the fare per kilometer",
-    "DEFAULT LOAD": "This is the price of the beep cards, everytime a new beep card is created this is the default value plus the minimum fare",
-    "PENALTY FEE": "If the passenger have a penalty this would be charged but this is still in development"
+    "MINIMUM FARE": "Minimum fare and fare per km.",
+    "DEFAULT LOAD": "Price of beep cards, added to the minimum fare for new cards.",
+    "PENALTY FEE": "Charge for passenger penalties (in development)."
 };
 
 const Fare = ({ fares, onFareClicked, className }: FareProps) => {
