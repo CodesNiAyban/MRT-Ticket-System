@@ -61,7 +61,7 @@ const BeepCard: React.FC<BeepCardProps> = ({
               BALANCE: ₱{balance}<br />
               <div className={isActive ? styles.flexRowActive : styles.flexRowInactive}>
                 <div className={isActive ? styles.greenCircle : styles.redCircle} />
-                {isActive ? 'OnBoarded' : 'Not Onboarded'}
+                {isActive ? 'OnBoarded' : 'Inactive'}
               </div>
             </Card.Text>
           </Card.Body>
