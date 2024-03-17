@@ -554,7 +554,7 @@ const MrtTapOut = () => {
                             setResetBeepCard(true)
                         }
                     } else {
-                        toast.warn('There was a detected problem on your beep card, please go to the nearest teller.', {
+                        toast.warn('No previous tapped detected, please go to the nearest teller.', {
                             position: 'top-right',
                             autoClose: 5000,
                             hideProgressBar: false,
