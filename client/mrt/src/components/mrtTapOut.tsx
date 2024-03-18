@@ -444,6 +444,7 @@ const MrtTapOut = () => {
                     handleBeepCardNumberChange(inputRef);
                 }
                 setReceivedMessage(null)
+                setResetBeepCard(true)
             }, 3000); // 5000 milliseconds = 5 seconds
         }
     };
