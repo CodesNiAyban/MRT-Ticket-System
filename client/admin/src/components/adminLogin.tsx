@@ -51,7 +51,6 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
                     draggable: true,
                     progress: undefined,
                 });
-                throw new Error("New Test Error");
             }
             console.error(error);
         }
